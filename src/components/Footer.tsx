@@ -52,9 +52,6 @@ export function Footer() {
             Source
           </a>
         </div>
-        <p className="text-[13px] text-text-tertiary">
-          Not affiliated with GitHub.
-        </p>
       </div>
     </footer>
   );
