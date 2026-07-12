@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     q: "Can I delete my card or revoke access?",
-    a: "Yes, on two fronts. To revoke DevMon's future access to your GitHub data, go to GitHub Settings → Applications and remove DevMon. To delete your stored card data and remove your leaderboard entry, email us at [support@email.com] with your GitHub username. We process deletion requests within 30 days.",
+    a: "Yes, on two fronts. To revoke DevMon's future access to your GitHub data, go to GitHub Settings → Applications and remove DevMon. To delete your stored card data and remove your leaderboard entry, email us at shravandeb@gmail.com with your GitHub username. We process deletion requests within 30 days.",
   },
   {
     q: "Can I regenerate my card with a different flavor tone?",
@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: "How do I report a bug or contact support?",
-    a: "You can reach us at [support@email.com] or open an issue on our GitHub repository at github.com/ShravanDeb/DevMon/issues. We'll get back to you as soon as we can.",
+    a: "You can reach us at shravandeb@gmail.com or open an issue on our GitHub repository at github.com/ShravanDeb/DevMon/issues. We'll get back to you as soon as we can.",
   },
 ];
 

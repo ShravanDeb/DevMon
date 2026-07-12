@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
+import { LegalToc, SectionHeading, Paragraph, BulletList } from "@/components/legal/LegalPageKit";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -14,63 +15,18 @@ const sections = [
   { id: "third-parties", title: "Third-Party Services" },
   { id: "data-retention", title: "Data Retention" },
   { id: "your-rights", title: "Your Rights" },
+  { id: "additional-rights", title: "Additional Rights (EEA, UK & California)" },
   { id: "children", title: "Children's Privacy" },
   { id: "changes", title: "Changes to This Policy" },
   { id: "contact", title: "Contact" },
 ];
-
-function TOC() {
-  return (
-    <nav className="hidden lg:block sticky top-24 w-56 shrink-0">
-      <p className="text-[11px] font-mono uppercase tracking-[0.1em] text-text-tertiary mb-4">
-        On this page
-      </p>
-      <ul className="space-y-1">
-        {sections.map((s) => (
-          <li key={s.id}>
-            <a
-              href={`#${s.id}`}
-              className="block text-[13px] text-text-tertiary hover:text-text-secondary transition-colors py-1"
-            >
-              {s.title}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-}
-
-function H2({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="font-display text-[20px] font-[600] text-text-primary mt-12 mb-4">
-      {children}
-    </h2>
-  );
-}
-
-function P({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[15px] leading-[1.8] text-text-secondary mb-4">
-      {children}
-    </p>
-  );
-}
-
-function UList({ children }: { children: React.ReactNode }) {
-  return (
-    <ul className="list-disc list-inside text-[15px] leading-[1.8] text-text-secondary mb-4 space-y-1 ml-4">
-      {children}
-    </ul>
-  );
-}
 
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen flex flex-col">
       <div className="flex-1 max-w-5xl mx-auto px-6 py-24 w-full">
         <div className="flex gap-16">
-          <TOC />
+          <LegalToc sections={sections} />
 
           <article className="flex-1 min-w-0">
             <div className="rounded-[14px] neu-raised-lg p-8 md:p-12">
@@ -78,16 +34,16 @@ export default function PrivacyPage() {
                 Privacy Policy
               </h1>
               <p className="text-[13px] font-mono text-text-tertiary mb-8">
-                Last updated: [Date]
+                Last updated: July 13, 2026
               </p>
 
-              <section id="data-collected">
-                <H2>Data We Collect</H2>
-                <P>
+              <section id="data-collected" className="scroll-mt-24">
+                <SectionHeading>Data We Collect</SectionHeading>
+                <Paragraph>
                   When you sign in with GitHub OAuth, DevMon accesses the
                   following information from your public GitHub profile:
-                </P>
-                <UList>
+                </Paragraph>
+                <BulletList>
                   <li>
                     <strong className="text-text-primary">Identity data:</strong>{" "}
                     GitHub username, display name, avatar URL, bio, and
@@ -111,21 +67,21 @@ export default function PrivacyPage() {
                     Merged pull requests, closed issues, repositories
                     contributed to, and organizations.
                   </li>
-                </UList>
-                <P>
+                </BulletList>
+                <Paragraph>
                   We do not access private repositories, email addresses,
                   or any data beyond what the GitHub OAuth scope provides.
-                </P>
+                </Paragraph>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="how-we-use">
-                <H2>How We Use Your Data</H2>
-                <P>
+              <section id="how-we-use" className="scroll-mt-24">
+                <SectionHeading>How We Use Your Data</SectionHeading>
+                <Paragraph>
                   Your GitHub data is used solely to:
-                </P>
-                <UList>
+                </Paragraph>
+                <BulletList>
                   <li>
                     Compute the five stat categories (Merge Force, Code
                     Velocity, Problem Solving, Open Source, Consistency)
@@ -142,24 +98,24 @@ export default function PrivacyPage() {
                     Display your entry on the public leaderboard (if you
                     choose to submit it).
                   </li>
-                </UList>
-                <P>
+                </BulletList>
+                <Paragraph>
                   We do not sell, rent, or share your GitHub data with any
                   third parties for advertising or analytics purposes.
-                </P>
+                </Paragraph>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="card-storage">
-                <H2>Card Data &amp; Public Verification</H2>
-                <P>
+              <section id="card-storage" className="scroll-mt-24">
+                <SectionHeading>Card Data &amp; Public Verification</SectionHeading>
+                <Paragraph>
                   When you generate a card, the resulting card data is
                   stored in our database and associated with a unique card
                   ID (e.g., DM-XXXXXX). This card ID forms the URL of your
                   public verification page (/verify/DM-XXXXXX).
-                </P>
-                <P>
+                </Paragraph>
+                <Paragraph>
                   <strong className="text-text-primary">
                     Verification pages are public.
                   </strong>{" "}
@@ -167,23 +123,23 @@ export default function PrivacyPage() {
                   stats — no login required. This is by design, as
                   verification links exist so you can prove your card is
                   authentic.
-                </P>
-                <P>
+                </Paragraph>
+                <Paragraph>
                   The stored card data includes your GitHub username,
                   display name, avatar, computed stats, rarity, class,
                   flavor text, and a cryptographic signature. It does not
                   include your GitHub access token.
-                </P>
+                </Paragraph>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="cookies">
-                <H2>Cookies &amp; Local Storage</H2>
-                <P>
+              <section id="cookies" className="scroll-mt-24">
+                <SectionHeading>Cookies &amp; Local Storage</SectionHeading>
+                <Paragraph>
                   DevMon uses the following cookies and local storage:
-                </P>
-                <UList>
+                </Paragraph>
+                <BulletList>
                   <li>
                     <strong className="text-text-primary">
                       Authentication cookies:
@@ -201,21 +157,21 @@ export default function PrivacyPage() {
                     browser&apos;s localStorage. This never leaves your device
                     and is not sent to any server.
                   </li>
-                </UList>
-                <P>
+                </BulletList>
+                <Paragraph>
                   DevMon does not use Google Analytics, advertising
                   cookies, or any third-party tracking scripts. If we add
                   analytics in the future, this policy will be updated
                   accordingly.
-                </P>
+                </Paragraph>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="third-parties">
-                <H2>Third-Party Services</H2>
-                <P>DevMon uses the following third-party services:</P>
-                <UList>
+              <section id="third-parties" className="scroll-mt-24">
+                <SectionHeading>Third-Party Services</SectionHeading>
+                <Paragraph>DevMon uses the following third-party services:</Paragraph>
+                <BulletList>
                   <li>
                     <strong className="text-text-primary">GitHub:</strong>{" "}
                     Used for OAuth authentication and fetching your public
@@ -232,34 +188,37 @@ export default function PrivacyPage() {
                     standard server logs (IP addresses, request times) for
                     operational purposes.
                   </li>
-                </UList>
-                <P>
+                </BulletList>
+                <Paragraph>
                   We do not sell or share your personal data with any other
-                  third parties.
-                </P>
+                  third parties. Our infrastructure providers (Supabase,
+                  Vercel) may process and store data in regions outside your
+                  own country, including the United States. By using DevMon,
+                  you consent to this transfer.
+                </Paragraph>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="data-retention">
-                <H2>Data Retention</H2>
-                <P>
+              <section id="data-retention" className="scroll-mt-24">
+                <SectionHeading>Data Retention</SectionHeading>
+                <Paragraph>
                   Your card data is retained indefinitely unless you request
                   deletion. GitHub OAuth tokens are session-based and are
                   not stored after you sign out.
-                </P>
-                <P>
+                </Paragraph>
+                <Paragraph>
                   If DevMon is discontinued, all stored card data will be
                   deleted within 30 days of the shutdown announcement.
-                </P>
+                </Paragraph>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="your-rights">
-                <H2>Your Rights</H2>
-                <P>You have the right to:</P>
-                <UList>
+              <section id="your-rights" className="scroll-mt-24">
+                <SectionHeading>Your Rights</SectionHeading>
+                <Paragraph>You have the right to:</Paragraph>
+                <BulletList>
                   <li>
                     <strong className="text-text-primary">
                       Revoke OAuth access:
@@ -284,56 +243,81 @@ export default function PrivacyPage() {
                     To delete your card data and remove your leaderboard
                     entry, contact us at{" "}
                     <a
-                      href="mailto:[support@email.com]"
+                      href="mailto:shravandeb@gmail.com"
                       className="text-accent hover:underline"
                     >
-                      [support@email.com]
+                      shravandeb@gmail.com
                     </a>{" "}
                     with your GitHub username. We will process deletion
                     requests within 30 days.
                   </li>
-                </UList>
+                </BulletList>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="children">
-                <H2>Children&apos;s Privacy</H2>
-                <P>
+              <section id="additional-rights" className="scroll-mt-24">
+                <SectionHeading>Additional Rights (EEA, UK &amp; California)</SectionHeading>
+                <Paragraph>
+                  If you are located in the European Economic Area, the
+                  United Kingdom, or California, you may have additional rights
+                  regarding your personal data, including the right to access
+                  or export the data we hold about you, the right to request
+                  correction of inaccurate data, the right to object to or
+                  restrict certain processing, and the right to lodge a
+                  complaint with your local data protection authority.
+                  California residents are additionally entitled to know that
+                  DevMon does not sell personal data to third parties. To
+                  exercise any of these rights, contact us at{" "}
+                  <a
+                    href="mailto:shravandeb@gmail.com"
+                    className="text-accent hover:underline"
+                  >
+                    shravandeb@gmail.com
+                  </a>
+                  .
+                </Paragraph>
+              </section>
+
+              <div className="neu-divider my-8" />
+
+              <section id="children" className="scroll-mt-24">
+                <SectionHeading>Children&apos;s Privacy</SectionHeading>
+                <Paragraph>
                   DevMon is not directed at children under 13 (or the
                   applicable age of digital consent in your jurisdiction).
                   We do not knowingly collect personal information from
                   children.
-                </P>
+                </Paragraph>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="changes">
-                <H2>Changes to This Policy</H2>
-                <P>
+              <section id="changes" className="scroll-mt-24">
+                <SectionHeading>Changes to This Policy</SectionHeading>
+                <Paragraph>
                   We may update this Privacy Policy from time to time. When
                   we do, we will update the &ldquo;Last updated&rdquo; date at the top
                   of this page. Significant changes will be communicated
                   through a notice on the DevMon website.
-                </P>
+                </Paragraph>
               </section>
 
               <div className="neu-divider my-8" />
 
-              <section id="contact">
-                <H2>Contact</H2>
-                <P>
+              <section id="contact" className="scroll-mt-24">
+                <SectionHeading>Contact</SectionHeading>
+                <Paragraph>
                   Questions about this policy or want to request data
                   deletion? Reach out at{" "}
                   <a
-                    href="mailto:[support@email.com]"
+                    href="mailto:shravandeb@gmail.com"
                     className="text-accent hover:underline"
                   >
-                    [support@email.com]
+                    shravandeb@gmail.com
                   </a>
                   .
-                </P>
+                </Paragraph>
               </section>
             </div>
           </article>
