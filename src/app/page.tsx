@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, useInView, useScroll, useTransform, useMotionValue } from "motion/react";
 import { MagneticButton } from "@/components/MagneticButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Footer } from "@/components/Footer";
 import { variants } from "@/lib/motion";
 import { RARITY_COLORS } from "@/types";
 import type { ClassName, Rarity } from "@/types";
@@ -653,22 +654,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════ FOOTER ═══════ */}
-      <footer className="mt-auto py-12 border-t border-border-hairline">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <span className="font-display text-[16px] font-[600] text-text-primary">DevMon</span>
-            <span className="text-[13px] font-mono text-text-tertiary">v0.1</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <a href="#" className="text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors">GitHub</a>
-            <a href="#" className="text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors">Twitter</a>
-          </div>
-          <p className="text-[13px] text-text-tertiary">
-            Not affiliated with GitHub.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

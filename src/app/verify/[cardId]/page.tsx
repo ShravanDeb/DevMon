@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { RARITY_COLORS, CLASS_SUBTITLES, STAT_LABELS } from "@/types";
 import type { CardData } from "@/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Footer } from "@/components/Footer";
 
 interface VerifyResponse {
   verified: boolean;
@@ -371,6 +372,8 @@ export default function VerifyPage() {
           </p>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

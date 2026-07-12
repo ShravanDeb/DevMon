@@ -9,6 +9,7 @@ import { RARITY_COLORS, CLASS_SUBTITLES } from "@/types";
 import { CardFace } from "@/components/CardFace";
 import { DownloadButton } from "@/components/DownloadButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Footer } from "@/components/Footer";
 
 function CardSkeleton() {
   return (
@@ -344,6 +345,8 @@ function CardContent() {
           </motion.div>
         </motion.div>
       </div>
+
+      <Footer />
     </main>
   );
 }

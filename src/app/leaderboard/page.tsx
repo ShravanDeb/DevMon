@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import type { LeaderboardEntry, Rarity } from "@/types";
 import { SectionHeader } from "@/components/SectionHeader";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Footer } from "@/components/Footer";
 
 const rarityOrder: Record<Rarity, number> = {
   Common: 0,
@@ -204,6 +205,8 @@ export default function LeaderboardPage() {
           </a>
         </div>
       </div>
+
+      <Footer />
     </main>
   );
 }
