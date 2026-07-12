@@ -29,7 +29,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ entries: data || [], total: data?.length || 0 });
+  const entries = (data || []).map((row) => ({
+    username: row.username,
+    displayName: row.display_name,
+    avatarUrl: row.avatar_url,
+    rarity: row.rarity,
+    rarityScore: row.rarity_score,
+    primaryClass: row.primary_class,
+    stats: row.stats,
+    company: row.company,
+    primaryLanguage: row.primary_language,
+    generatedAt: row.generated_at,
+  }));
+
+  return NextResponse.json({ entries, total: entries.length });
 }
 
 export async function POST(req: NextRequest) {
