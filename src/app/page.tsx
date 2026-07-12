@@ -686,80 +686,75 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ STAR ON GITHUB ═══════ */}
-      <section className="py-32 md:py-24 px-6">
-        <div className="max-w-3xl mx-auto">
-          <div className="relative rounded-[18px] p-[1px] bg-gradient-to-br from-[var(--overlay-8)] via-[var(--overlay-3)] to-[var(--overlay-8)]">
-            <div className="relative rounded-[17px] neu-raised-lg px-10 py-16 md:px-16 md:py-20 overflow-hidden">
-              {/* Corner ornaments */}
-              <div className="absolute top-5 left-5 w-6 h-6 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-[var(--overlay-8)] to-transparent" />
-                <div className="absolute top-0 left-0 h-full w-px bg-gradient-to-b from-[var(--overlay-8)] to-transparent" />
-              </div>
-              <div className="absolute top-5 right-5 w-6 h-6 pointer-events-none">
-                <div className="absolute top-0 right-0 w-full h-px bg-gradient-to-l from-[var(--overlay-8)] to-transparent" />
-                <div className="absolute top-0 right-0 h-full w-px bg-gradient-to-b from-[var(--overlay-8)] to-transparent" />
-              </div>
-              <div className="absolute bottom-5 left-5 w-6 h-6 pointer-events-none">
-                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-[var(--overlay-8)] to-transparent" />
-                <div className="absolute bottom-0 left-0 h-full w-px bg-gradient-to-t from-[var(--overlay-8)] to-transparent" />
-              </div>
-              <div className="absolute bottom-5 right-5 w-6 h-6 pointer-events-none">
-                <div className="absolute bottom-0 right-0 w-full h-px bg-gradient-to-l from-[var(--overlay-8)] to-transparent" />
-                <div className="absolute bottom-0 right-0 h-full w-px bg-gradient-to-t from-[var(--overlay-8)] to-transparent" />
-              </div>
+      <section className="py-24 md:py-16 px-6 relative overflow-hidden">
+        {/* Subtle radial glow behind text */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-[600px] h-[300px] rounded-full bg-gradient-to-b from-[var(--overlay-4)] to-transparent blur-3xl opacity-60" />
+        </div>
 
-              {/* Content */}
-              <div className="relative text-center space-y-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <span className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-text-tertiary">
-                    Open Source
-                  </span>
-                </motion.div>
-                <motion.h2
-                  className="font-display text-[32px] md:text-[40px] leading-[1.15] font-[600] tracking-[-0.02em] text-text-primary"
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.7, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  Like DevMon?<br />Give us a star.
-                </motion.h2>
-                <motion.p
-                  className="text-[16px] text-text-secondary leading-[1.7] max-w-md mx-auto"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  Every star helps another developer find this project. It&apos;s the
-                  smallest thing you can do that makes the biggest difference.
-                </motion.p>
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <a
-                    href="https://github.com/ShravanDeb/DevMon"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2.5 rounded-[6px] px-6 py-3 text-[13px] leading-none font-medium border border-border-primary bg-[#1B1B1F] text-text-primary hover:border-border-secondary transition-colors"
-                  >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-                    </svg>
-                    Star on GitHub
-                  </a>
-                </motion.div>
-              </div>
-            </div>
-          </div>
+        <div className="relative max-w-3xl mx-auto text-center space-y-10">
+          {/* Decorative line */}
+          <motion.div
+            className="mx-auto w-12 h-px bg-gradient-to-r from-transparent via-[var(--overlay-12)] to-transparent"
+            initial={{ scaleX: 0, opacity: 0 }}
+            whileInView={{ scaleX: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          />
+
+          {/* Headline */}
+          <motion.h2
+            className="font-display text-[40px] md:text-[52px] leading-[1.05] font-[640] tracking-[-0.03em] text-text-primary"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Like DevMon?
+          </motion.h2>
+
+          {/* Subtitle */}
+          <motion.p
+            className="text-[17px] text-text-secondary leading-[1.7] max-w-md mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+          >
+            A star on GitHub is the highest compliment.<br />
+            It tells other developers this project is worth their time.
+          </motion.p>
+
+          {/* Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <a
+              href="https://github.com/ShravanDeb/DevMon"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2.5 rounded-[6px] px-6 py-3 text-[13px] leading-none font-medium border border-border-primary bg-[#1B1B1F] text-text-primary hover:border-border-secondary transition-colors"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+              </svg>
+              Star on GitHub
+            </a>
+          </motion.div>
+
+          {/* Counter line */}
+          <motion.p
+            className="text-[13px] font-mono text-text-tertiary"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            open source · free forever · made with judgment
+          </motion.p>
         </div>
       </section>
 
