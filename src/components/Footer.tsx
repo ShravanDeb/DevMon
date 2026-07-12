@@ -18,10 +18,8 @@ export function Footer() {
       <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <span className="font-display text-[16px] font-[600] text-text-primary">DevMon</span>
-          <span className="text-[13px] font-mono text-text-tertiary">v0.1</span>
           <span className="text-[13px] font-mono text-text-tertiary">·</span>
-          <span className="text-[13px] font-mono text-text-tertiary">by</span>
-          <span className="text-[13px] font-mono text-text-secondary">Shravan Deb</span>
+          <span className="text-[13px] font-mono text-text-secondary">by Shravan Deb</span>
           <span className="text-[13px] font-mono text-text-tertiary">·</span>
           {authorLinks.map((link) => (
             <a
