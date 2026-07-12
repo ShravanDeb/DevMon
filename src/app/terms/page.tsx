@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Footer } from "@/components/Footer";
 import { LegalToc, SectionHeading, Paragraph, BulletList } from "@/components/legal/LegalPageKit";
 
@@ -33,6 +34,9 @@ export default function TermsPage() {
           <LegalToc sections={sections} />
 
           <article className="flex-1 min-w-0">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors mb-6">
+              <span className="text-[16px] leading-none">&larr;</span> Home
+            </Link>
             <div className="rounded-[14px] neu-raised-lg p-8 md:p-12">
               <h1 className="font-display text-[32px] font-[600] text-text-primary mb-2">
                 Terms of Service

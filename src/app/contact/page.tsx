@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Footer } from "@/components/Footer";
 import { ContactForm } from "@/components/legal/ContactForm";
 
@@ -11,6 +12,9 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen flex flex-col">
       <div className="flex-1 max-w-3xl mx-auto px-6 py-24 w-full">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors mb-6">
+          <span className="text-[16px] leading-none">&larr;</span> Home
+        </Link>
         <h1 className="font-display text-[32px] font-[600] text-text-primary mb-2">
           Contact
         </h1>
