@@ -122,28 +122,59 @@ function RarityShowcase() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const rarities: Rarity[] = ["Common", "Rare", "Epic", "Legendary", "Mythic"];
+  const percentages = ["68%", "22%", "7%", "2.5%", "0.5%"];
+  const descriptions = [
+    "The backbone",
+    "Doing something right",
+    "Top 10% energy",
+    "Statistically improbable",
+    "Go outside",
+  ];
 
   return (
-    <div ref={ref} className="grid grid-cols-5 gap-4 max-w-2xl mx-auto">
+    <div ref={ref} className="flex gap-3 max-w-lg mx-auto">
       {rarities.map((r, i) => (
         <motion.div
           key={r}
-          className="flex flex-col items-center gap-3"
-          initial={{ opacity: 0, y: 20 }}
+          className="flex-1 min-w-0"
+          initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.1 * i, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.5, delay: 0.08 * i, ease: [0.16, 1, 0.3, 1] }}
         >
           <div
-            className="w-12 h-12 rounded-[10px] border"
+            className="relative rounded-[10px] border overflow-hidden"
             style={{
-              background: `linear-gradient(135deg, ${RARITY_COLORS[r].hex}18 0%, ${RARITY_COLORS[r].hex}08 100%)`,
-              borderColor: `${RARITY_COLORS[r].hex}40`,
-              boxShadow: `0 0 20px ${RARITY_COLORS[r].hex}15`,
+              background: `linear-gradient(180deg, ${RARITY_COLORS[r].hex}12 0%, ${RARITY_COLORS[r].hex}04 100%)`,
+              borderColor: `${RARITY_COLORS[r].hex}30`,
+              boxShadow: `0 0 24px ${RARITY_COLORS[r].hex}10, inset 0 1px 0 ${RARITY_COLORS[r].hex}15`,
             }}
-          />
-          <span className="text-[12px] font-mono font-medium uppercase tracking-[0.06em]" style={{ color: RARITY_COLORS[r].hex }}>
-            {r}
-          </span>
+          >
+            <div className="px-2 pt-5 pb-4 text-center space-y-3">
+              {/* Percentage */}
+              <span
+                className="block font-display text-[22px] font-[700] tracking-[-0.02em] leading-none"
+                style={{ color: RARITY_COLORS[r].hex }}
+              >
+                {percentages[i]}
+              </span>
+              {/* Name */}
+              <span
+                className="block text-[10px] font-mono font-medium uppercase tracking-[0.08em]"
+                style={{ color: RARITY_COLORS[r].hex, opacity: 0.8 }}
+              >
+                {r}
+              </span>
+              {/* Description */}
+              <span className="block text-[10px] font-mono text-text-tertiary leading-tight">
+                {descriptions[i]}
+              </span>
+            </div>
+            {/* Bottom accent bar */}
+            <div
+              className="h-[2px] w-full"
+              style={{ background: `linear-gradient(90deg, transparent, ${RARITY_COLORS[r].hex}50, transparent)` }}
+            />
+          </div>
         </motion.div>
       ))}
     </div>
