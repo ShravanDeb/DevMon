@@ -33,7 +33,6 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
     try {
       await document.fonts.ready;
 
-      // Wait for any pending image loads
       const imgs = cardRef.current.querySelectorAll("img");
       await Promise.all(
         Array.from(imgs).map(
@@ -46,7 +45,6 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         )
       );
 
-      // Convert all images to inline data URLs to avoid CORS issues
       for (const img of Array.from(imgs)) {
         try {
           const dataUrl = await imageToDataUrl(img);
@@ -57,47 +55,43 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         }
       }
 
-      // Wait for data URL images to render
       await new Promise((r) => setTimeout(r, 200));
 
-      // Flatten all animated transforms and 3D perspective
       const card = cardRef.current;
+      const allEls = [card, ...Array.from(card.querySelectorAll<HTMLElement>("*"))];
 
-      // Reset every animated/3D-transformed element
-      const allEls = card.querySelectorAll<HTMLElement>("*");
-      for (const el of Array.from(allEls)) {
+      for (const el of allEls) {
         const computed = window.getComputedStyle(el);
-        if (
-          computed.transform !== "none" ||
-          computed.perspective !== "none"
-        ) {
+        if (computed.transform !== "none" || computed.perspective !== "none") {
           savedStyles.push({ el, cssText: el.style.cssText });
           el.style.transform = "none";
           el.style.perspective = "none";
         }
+        if (computed.overflow === "hidden") {
+          if (!savedStyles.some((s) => s.el === el)) {
+            savedStyles.push({ el, cssText: el.style.cssText });
+          }
+          el.style.overflow = "visible";
+        }
       }
-      // Also reset the card wrapper itself
+
       if (card.parentElement) {
         savedStyles.push({ el: card.parentElement, cssText: card.parentElement.style.cssText });
         card.parentElement.style.transform = "none";
       }
 
       document.documentElement.setAttribute("data-exporting", "");
-
-      // Small pause for DOM to settle
       await new Promise((r) => setTimeout(r, 100));
 
       let dataUrl: string;
       try {
         dataUrl = await toPng(cardRef.current, {
           quality: 1,
-          pixelRatio: 2,
+          pixelRatio: 4,
           cacheBust: true,
-          skipAutoScale: true,
         });
       } finally {
         document.documentElement.removeAttribute("data-exporting");
-        // Restore all styles
         for (const { el, cssText } of savedStyles) {
           el.style.cssText = cssText;
         }
