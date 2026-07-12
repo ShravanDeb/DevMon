@@ -1,0 +1,245 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevMon Card Rarity Showcase</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #08080A; color: #F2F1EE; font-family: 'Geist', sans-serif; -webkit-font-smoothing: antialiased; padding: 40px 20px; }
+  h1 { text-align: center; font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.16em; color: #5E5C58; margin-bottom: 40px; }
+  .showcase { display: flex; gap: 28px; justify-content: center; flex-wrap: wrap; }
+  .card-wrapper { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .card-label { font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; }
+  .card-frame { position: relative; border-radius: 20px; padding: 1px; width: 320px; height: 500px; }
+  .card-body { position: relative; width: 100%; height: 100%; border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; padding: 20px 18px 16px; }
+
+  .card-carbon-texture { position: absolute; inset: 0; pointer-events: none; opacity: 0.25;
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%), linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%);
+    background-size: 4px 4px; background-position: 0 0, 2px 2px; }
+  .card-brushed-metal { position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255,255,255,0.015) 1px, rgba(255,255,255,0.015) 2px); background-size: 100% 4px; }
+
+  .surface-common { position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(92deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 3px); }
+  .surface-rare { position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(92deg, transparent, transparent 2px, rgba(100,140,200,0.06) 2px, rgba(100,140,200,0.06) 3px),
+      repeating-linear-gradient(88deg, transparent, transparent 4px, rgba(120,160,220,0.03) 4px, rgba(120,160,220,0.03) 5px); }
+  .surface-epic { position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(125deg, transparent 0%, transparent 30%, rgba(140,100,200,0.08) 42%, rgba(160,120,220,0.12) 50%, rgba(140,100,200,0.08) 58%, transparent 70%, transparent 100%); }
+  .surface-legendary { position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(87deg, transparent, transparent 1px, rgba(200,170,80,0.04) 1px, rgba(200,170,80,0.04) 2px, transparent 2px, transparent 5px),
+      repeating-linear-gradient(160deg, transparent, transparent 20px, rgba(210,180,90,0.05) 20px, rgba(210,180,90,0.05) 24px, transparent 24px, transparent 38px),
+      linear-gradient(135deg, rgba(180,150,60,0.03) 0%, rgba(210,180,90,0.06) 35%, rgba(180,150,60,0.02) 50%, rgba(210,180,90,0.06) 65%, rgba(180,150,60,0.03) 100%); }
+  .surface-mythic { position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(165deg, rgba(176,64,80,0.06) 0%, rgba(140,60,70,0.02) 15%, rgba(176,70,80,0.05) 28%, rgba(130,55,50,0.02) 38%, rgba(150,90,60,0.08) 48%, rgba(140,75,50,0.06) 55%, rgba(176,64,80,0.05) 65%, rgba(130,50,45,0.02) 75%, rgba(150,85,55,0.07) 85%, rgba(130,60,50,0.03) 100%); }
+
+  .accent-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 20; border-radius: 18px 18px 0 0; }
+  .foil-border { position: absolute; inset: 0; border-radius: 18px; pointer-events: none; }
+  .foil-legendary { box-shadow: inset 0 0 0 1px rgba(224,168,48,0.2), inset 0 1px 0 rgba(224,168,48,0.15); }
+  .foil-mythic { box-shadow: inset 0 0 0 1px rgba(216,64,96,0.18), inset 0 0 0 2px rgba(216,64,96,0.08), inset 0 1px 0 rgba(216,64,96,0.12); }
+
+  .ornament { position: absolute; pointer-events: none; z-index: 5; width: 18px; height: 18px; }
+  .ornament::before, .ornament::after { content: ""; position: absolute; background: rgba(255,255,255,0.08); }
+  .ornament::before { width: 18px; height: 1px; }
+  .ornament::after { width: 1px; height: 18px; }
+  .ornament-tl { top: 12px; left: 12px; } .ornament-tl::before { top: 0; left: 0; } .ornament-tl::after { top: 0; left: 0; }
+  .ornament-tr { top: 12px; right: 12px; } .ornament-tr::before { top: 0; right: 0; } .ornament-tr::after { top: 0; right: 0; }
+  .ornament-bl { bottom: 12px; left: 12px; } .ornament-bl::before { bottom: 0; left: 0; } .ornament-bl::after { bottom: 0; left: 0; }
+  .ornament-br { bottom: 12px; right: 12px; } .ornament-br::before { bottom: 0; right: 0; } .ornament-br::after { bottom: 0; right: 0; }
+  .ornament-accent::before, .ornament-accent::after { background: var(--orn-color, rgba(255,255,255,0.12)); }
+
+  .embossed { text-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 -1px 0 rgba(0,0,0,0.3); }
+
+  .hero { display: flex; align-items: start; gap: 10px; margin-bottom: 12px; }
+  .avatar-wrap { position: relative; flex-shrink: 0; }
+  .avatar-ring { position: absolute; inset: -3px; border-radius: 50%; border: 2px solid; pointer-events: none; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: block; }
+  .rarity-badge { font-family: 'Geist Mono', monospace; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; padding: 2px 8px; border-radius: 3px; display: inline-block; margin-bottom: 3px; }
+  .username { font-family: 'Geist Mono', monospace; font-size: 11px; color: #9A9895; margin-left: 6px; }
+  .class-name { font-family: 'Fraunces', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; line-height: 1.15; color: #F2F1EE; }
+  .subtitle { font-size: 11px; color: #9A9895; font-style: italic; margin-top: 2px; }
+
+  .hero-stat { padding: 12px 14px 10px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; }
+  .hero-stat-value { font-family: 'Fraunces', sans-serif; font-size: 48px; font-weight: 800; line-height: 1.0; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+  .hero-stat-label { font-family: 'Geist Mono', monospace; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; color: #5E5C58; margin-top: 2px; }
+
+  .stat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .stat-label { font-family: 'Geist Mono', monospace; font-size: 10px; color: #9A9895; width: 72px; flex-shrink: 0; }
+  .stat-track { flex: 1; height: 10px; border-radius: 5px; background: rgba(255,255,255,0.04); overflow: hidden; }
+  .stat-fill { height: 100%; border-radius: 5px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2); }
+  .stat-fill-hero { height: 100%; border-radius: 5px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2), 0 0 16px var(--bar-glow, transparent); }
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 500; color: #9A9895; width: 22px; text-align: right; }
+
+  .sig-move { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: #1C1C20; border: 1px solid #28282C; border-left-width: 3px; margin-bottom: 12px; }
+  .sig-icon { width: 32px; height: 32px; border-radius: 6px; background: #26262A; border: 1px solid #32323A; display: flex; align-items: center; justify-content: center; font-size: 14px; font-family: 'Geist Mono', monospace; font-weight: 600; flex-shrink: 0; }
+  .sig-label { font-family: 'Geist Mono', monospace; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: #5E5C58; }
+  .sig-name { font-size: 13px; font-weight: 600; color: #F2F1EE; }
+  .sig-desc { font-size: 11px; color: #9A9895; margin-top: 1px; line-height: 1.4; }
+
+  .achievements { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 5px; font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 500; }
+  .badge-accent { border: 1px solid; }
+  .badge-icon { font-size: 11px; opacity: 0.7; }
+  .badge-accent .badge-icon { opacity: 0.9; }
+  .badge-value { font-weight: 600; color: #F2F1EE; }
+  .badge-label { color: #9A9895; font-weight: 400; font-size: 9px; }
+
+  .divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.08) 80%, transparent 100%); margin-bottom: 10px; }
+
+  .flavor { padding: 6px 10px; border-radius: 6px; background: #1C1C20; border: 1px solid #26262A; position: relative; margin-bottom: 12px; }
+  .flavor-bar { position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; border-radius: 1px; }
+  .flavor-text { font-size: 10px; color: #9A9895; font-style: italic; line-height: 1.7; padding-left: 8px; }
+
+  .footer { margin-top: auto; display: flex; align-items: end; justify-content: space-between; gap: 10px; }
+  .footer-meta { display: flex; flex-direction: column; gap: 2px; }
+  .footer-row { display: flex; align-items: center; gap: 5px; }
+  .footer-key { font-family: 'Geist Mono', monospace; font-size: 7px; color: #5E5C58; text-transform: uppercase; letter-spacing: 0.1em; }
+  .footer-val { font-family: 'Geist Mono', monospace; font-size: 8px; font-weight: 600; color: #9A9895; }
+  .footer-brand { display: flex; flex-direction: column; align-items: center; }
+  .footer-brand-text { font-family: 'Geist Mono', monospace; font-size: 7px; color: #5E5C58; text-transform: uppercase; letter-spacing: 0.14em; margin-top: 2px; }
+  .footer-qr { width: 40px; height: 40px; background: white; border-radius: 3px; padding: 2px; display: flex; align-items: center; justify-content: center; }
+  .footer-qr-inner { width: 100%; height: 100%; background: #F2F1EE; border-radius: 2px; }
+  .footer-verified { font-family: 'Geist Mono', monospace; font-size: 7px; color: #5E5C58; margin-top: 1px; }
+</style>
+</head>
+<body>
+<h1>DevMon Card Rarity Showcase</h1>
+<div class="showcase" id="showcase"></div>
+<script>
+const rarities = [
+  { name: "Common", hex: "#8B8FA0", surface: "surface-common", accent: false, foil: "",
+    gradientDark: ["#1A1A1E","#18181C","#1C1C20","#161618","#1A1A1C"],
+    barStart: "#3A3A40", barEnd: "#4A4A50", heroBarStart: "#3A3A40", heroBarEnd: "#4A4A50", heroBarGlow: "transparent" },
+  { name: "Rare", hex: "#5B9AE0", surface: "surface-rare", accent: true, foil: "",
+    gradientDark: ["#0E1A30","#0C1628","#101E34","#0A1224","#0E1A2E"],
+    barStart: "#3A3A40", barEnd: "#4A4A50", heroBarStart: "#1A3A6A", heroBarEnd: "#2A5A9A", heroBarGlow: "rgba(91,154,224,0.3)" },
+  { name: "Epic", hex: "#9B72D8", surface: "surface-epic", accent: true, foil: "",
+    gradientDark: ["#1A1040","#180E3C","#1E1448","#160C38","#1A1040"],
+    barStart: "#3A3A40", barEnd: "#4A4A50", heroBarStart: "#2A1A5A", heroBarEnd: "#4A2A8A", heroBarGlow: "rgba(155,114,216,0.3)" },
+  { name: "Legendary", hex: "#E0A830", surface: "surface-legendary", accent: true, foil: "foil-legendary",
+    gradientDark: ["#2A2008","#261C06","#2E240C","#221804","#281E08"],
+    barStart: "#3A3A40", barEnd: "#4A4A50", heroBarStart: "#5A4A10", heroBarEnd: "#8A6A1A", heroBarGlow: "rgba(224,168,48,0.3)" },
+  { name: "Mythic", hex: "#D84060", surface: "surface-mythic", accent: true, foil: "foil-mythic",
+    gradientDark: ["#2C0C18","#280A14","#30101C","#240810","#2A0C16"],
+    barStart: "#3A3A40", barEnd: "#4A4A50", heroBarStart: "#5A1A2A", heroBarEnd: "#8A2A3A", heroBarGlow: "rgba(216,64,96,0.35)" },
+];
+
+const stats = [
+  { label: "Merge Force", value: 87 },
+  { label: "Code Velocity", value: 72 },
+  { label: "Problem Solving", value: 91 },
+  { label: "Open Source", value: 65 },
+  { label: "Consistency", value: 83 },
+];
+
+const achievements = [
+  { icon: "\u2B50", value: "2.4k", label: "Stars" },
+  { icon: "\u2197", value: "847", label: "Contributions" },
+  { icon: "\u26A1", value: "42", label: "Day Streak" },
+];
+
+function buildGradient(stops) {
+  return `linear-gradient(170deg, ${stops[0]} 0%, ${stops[1]} 25%, ${stops[2]} 50%, ${stops[3]} 75%, ${stops[4]} 100%)`;
+}
+
+rarities.forEach(r => {
+  const wrapper = document.createElement("div");
+  wrapper.className = "card-wrapper";
+
+  const label = document.createElement("div");
+  label.className = "card-label";
+  label.style.color = r.hex;
+  label.textContent = r.name;
+  wrapper.appendChild(label);
+
+  const frame = document.createElement("div");
+  frame.className = "card-frame";
+  frame.style.background = `linear-gradient(160deg, ${r.hex}18 0%, ${r.hex}08 50%, ${r.hex}18 100%)`;
+
+  const body = document.createElement("div");
+  body.className = "card-body";
+  body.style.background = buildGradient(r.gradientDark);
+
+  body.innerHTML = `
+    <div class="card-carbon-texture"></div>
+    <div class="card-brushed-metal"></div>
+    <div class="${r.surface}"></div>
+    <div class="accent-bar" style="background: ${r.hex}; box-shadow: 0 0 12px ${r.hex}40;"></div>
+    ${r.foil ? `<div class="foil-border ${r.foil}"></div>` : ""}
+    <div class="ornament ornament-tl ${r.accent ? 'ornament-accent' : ''}" style="--orn-color: ${r.hex}30"></div>
+    <div class="ornament ornament-tr ${r.accent ? 'ornament-accent' : ''}" style="--orn-color: ${r.hex}30"></div>
+    <div class="ornament ornament-bl ${r.accent ? 'ornament-accent' : ''}" style="--orn-color: ${r.hex}30"></div>
+    <div class="ornament ornament-br ${r.accent ? 'ornament-accent' : ''}" style="--orn-color: ${r.hex}30"></div>
+    <div style="position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; flex: 1; min-height: 0;">
+      <div class="hero">
+        <div class="avatar-wrap">
+          <div class="avatar-ring" style="border-color: ${r.hex}; box-shadow: 0 0 12px ${r.hex}30;"></div>
+          <img class="avatar" src="https://avatars.githubusercontent.com/u/583231?v=4" alt="avatar" />
+        </div>
+        <div>
+          <span class="rarity-badge" style="color: ${r.hex}; background: ${r.hex}12; border: 1px solid ${r.hex}1A;">${r.name}</span>
+          <span class="username">@torvalds</span>
+          <div class="class-name embossed">Merge Griffin</div>
+          <div class="subtitle">The Pull Request Architect</div>
+        </div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value" style="background: linear-gradient(135deg, #F2F1EE 15%, ${r.hex} 75%, ${r.hex}CC 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">2,847</div>
+        <div class="hero-stat-label">Contributions</div>
+      </div>
+      <div style="margin-bottom: 10px;">
+        ${stats.map((s, i) => `
+          <div class="stat-row">
+            <span class="stat-label">${s.label}</span>
+            <div class="stat-track">
+              <div class="${i === 3 ? 'stat-fill-hero' : 'stat-fill'}" style="width: ${s.value}%; background: ${i === 3 ? `linear-gradient(90deg, ${r.heroBarStart}, ${r.heroBarEnd})` : `linear-gradient(90deg, ${r.barStart}, ${r.barEnd})`}; ${i === 3 ? `box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2), 0 0 16px ${r.heroBarGlow}` : ''}"></div>
+            </div>
+            <span class="stat-value">${s.value}</span>
+          </div>
+        `).join("")}
+      </div>
+      <div class="sig-move" style="border-left-color: ${r.hex};">
+        <div class="sig-icon" style="color: ${r.hex};">M</div>
+        <div>
+          <div class="sig-label">Signature Move</div>
+          <div class="sig-name">Merge Master</div>
+          <div class="sig-desc">Effortless conflict resolution</div>
+        </div>
+      </div>
+      <div class="achievements">
+        ${achievements.map(a => `
+          <span class="badge badge-accent" style="background: ${r.hex}10; border-color: ${r.hex}1A; --badge-icon-color: ${r.hex};">
+            <span class="badge-icon" style="color: ${r.hex};">${a.icon}</span>
+            <span class="badge-value">${a.value}</span>
+            <span class="badge-label">${a.label}</span>
+          </span>
+        `).join("")}
+      </div>
+      <div class="divider"></div>
+      <div class="flavor">
+        <div class="flavor-bar" style="background: ${r.hex}30;"></div>
+        <div class="flavor-text">&ldquo;Talk is cheap. Show me the code.&rdquo;</div>
+      </div>
+      <div class="footer">
+        <div class="footer-meta">
+          <div class="footer-row"><span class="footer-key">Edition</span><span class="footer-val">#0001</span></div>
+          <div class="footer-row"><span class="footer-key">Generated</span><span class="footer-val">12 Jul 2026</span></div>
+        </div>
+        <div class="footer-brand">
+          <div class="footer-qr"><div class="footer-qr-inner"></div></div>
+          <span class="footer-brand-text">DevMon</span>
+          <span class="footer-verified">Verified Credential</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  frame.appendChild(body);
+  wrapper.appendChild(frame);
+  document.getElementById("showcase").appendChild(wrapper);
+});
+</script>
+</body>
+</html>

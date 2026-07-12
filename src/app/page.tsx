@@ -1,0 +1,674 @@
+"use client";
+
+import { useEffect, useState, useRef, useMemo } from "react";
+import { motion, useInView, useScroll, useTransform, useMotionValue } from "motion/react";
+import { MagneticButton } from "@/components/MagneticButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { variants } from "@/lib/motion";
+import { RARITY_COLORS } from "@/types";
+import type { ClassName, Rarity } from "@/types";
+
+// ─── AnimatedCounter ───────────────────────────────────────
+function AnimatedCounter({ value, label }: { value: string | number; label: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [displayValue, setDisplayValue] = useState(0);
+  const numericValue = typeof value === "string" ? parseInt(value) || 0 : value;
+
+  useEffect(() => {
+    if (!isInView || numericValue === 0) return;
+    const duration = 1400;
+    const steps = 50;
+    const increment = numericValue / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= numericValue) {
+        setDisplayValue(numericValue);
+        clearInterval(timer);
+      } else {
+        setDisplayValue(Math.round(current));
+      }
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [isInView, numericValue]);
+
+  return (
+    <div ref={ref} className="text-center">
+      <div className="text-[48px] font-display font-[600] tracking-[-0.02em] text-text-primary tabular-nums leading-none">
+        {numericValue > 0 && isInView ? displayValue.toLocaleString() : value}
+      </div>
+      <div className="text-[13px] font-mono font-medium uppercase tracking-[0.08em] text-text-tertiary mt-3">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+// ─── WordReveal ────────────────────────────────────────────
+function RevealWord({ progress, start, end, word }: { progress: ReturnType<typeof useScroll>["scrollYProgress"]; start: number; end: number; word: string }) {
+  const opacity = useTransform(progress, [start, end], [0.08, 1]);
+  return (
+    <motion.span style={{ opacity }} className="mr-[0.3em]">
+      {word}
+    </motion.span>
+  );
+}
+
+function WordReveal({ text, className = "" }: { text: string; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 0.85", "start 0.3"],
+  });
+  const words = text.split(" ");
+
+  return (
+    <div ref={ref} className={`flex flex-wrap ${className}`}>
+      {words.map((word, i) => {
+        const start = i / words.length;
+        const end = start + 1 / words.length;
+        return (
+          <RevealWord key={i} progress={scrollYProgress} start={start} end={end} word={word} />
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── HorizontalMarquee ─────────────────────────────────────
+function HorizontalMarquee() {
+  const classes: ClassName[] = [
+    "Merge Griffin", "Fork Warden", "Night Owl", "Bug Hunter", "Stack Guardian", "Commit Phantom",
+    "Open Source Sentinel", "Polyglot Artisan", "Code Archivist", "Green Sprout", "PR Titan", "Zen Coder",
+  ];
+  const rarities: Rarity[] = ["Common", "Rare", "Epic", "Legendary", "Mythic"];
+
+  const items = useMemo(() => {
+    const merged: string[] = [];
+    classes.forEach((c) => merged.push(c));
+    rarities.forEach((r) => merged.push(r));
+    return merged;
+  }, []);
+
+  const doubled = [...items, ...items, ...items];
+
+  return (
+    <div className="relative overflow-hidden py-8 border-y border-border-hairline">
+      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-surface-0 to-transparent z-10" />
+      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-surface-0 to-transparent z-10" />
+      <motion.div
+        className="flex gap-14 whitespace-nowrap"
+        animate={{ x: ["0%", "-33.333%"] }}
+        transition={{ duration: 40, ease: "linear", repeat: Infinity }}
+      >
+        {doubled.map((text, i) => (
+          <span
+            key={i}
+            className="font-display text-[18px] font-[700] tracking-[0.06em] uppercase shrink-0 marquee-holo"
+            style={{ "--shimmer-delay": `${(i % items.length) * 0.18}s` } as React.CSSProperties}
+          >
+            {text}
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── RarityShowcase ────────────────────────────────────────
+function RarityShowcase() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const rarities: Rarity[] = ["Common", "Rare", "Epic", "Legendary", "Mythic"];
+
+  return (
+    <div ref={ref} className="grid grid-cols-5 gap-4 max-w-2xl mx-auto">
+      {rarities.map((r, i) => (
+        <motion.div
+          key={r}
+          className="flex flex-col items-center gap-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.1 * i, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div
+            className="w-12 h-12 rounded-[10px] border"
+            style={{
+              background: `linear-gradient(135deg, ${RARITY_COLORS[r].hex}18 0%, ${RARITY_COLORS[r].hex}08 100%)`,
+              borderColor: `${RARITY_COLORS[r].hex}40`,
+              boxShadow: `0 0 20px ${RARITY_COLORS[r].hex}15`,
+            }}
+          />
+          <span className="text-[12px] font-mono font-medium uppercase tracking-[0.06em]" style={{ color: RARITY_COLORS[r].hex }}>
+            {r}
+          </span>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// ─── QuoteStrip ────────────────────────────────────────────
+const quotes = [
+  { text: "\"I have never felt more accurately judged by a website.\"", author: "– Every developer ever" },
+  { text: "\"My card said Common. I've never been more motivated to contribute to open source.\"", author: "– Anonymized DevMon user" },
+  { text: "\"The flavor text called me a 'weekend warrior' and honestly? Fair.\"", author: "– DevMon alpha tester" },
+  { text: "\"I showed my card to my PM. He said 'that tracks.'\"", author: "– DevMon beta user" },
+];
+
+function QuoteStrip() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <div ref={ref} className="max-w-2xl mx-auto space-y-8">
+      {quotes.map((q, i) => (
+        <motion.div
+          key={i}
+          className="relative pl-6 border-l border-border-subtle"
+          initial={{ opacity: 0, x: -20 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.15 * i, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p className="text-[18px] text-text-primary font-display font-[400] leading-[1.5]">
+            {q.text}
+          </p>
+          <p className="text-[13px] font-mono text-text-tertiary mt-2">{q.author}</p>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// ─── FeatureSplit ──────────────────────────────────────────
+function FeatureSplit({
+  eyebrow,
+  headline,
+  description,
+  bullets,
+  visual,
+  reverse = false,
+}: {
+  eyebrow: string;
+  headline: string;
+  description: string;
+  bullets: string[];
+  visual: React.ReactNode;
+  reverse?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <div
+      ref={ref}
+      className={`grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center ${reverse ? "md:direction-rtl" : ""}`}
+    >
+      <motion.div
+        className="space-y-6"
+        initial={{ opacity: 0, x: reverse ? 40 : -40 }}
+        animate={isInView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <span className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+          {eyebrow}
+        </span>
+        <h2 className="font-display text-[36px] md:text-[40px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary">
+          {headline}
+        </h2>
+        <p className="text-[16px] text-text-secondary leading-[1.7]">
+          {description}
+        </p>
+        <ul className="space-y-3 pt-2">
+          {bullets.map((b, i) => (
+            <motion.li
+              key={i}
+              className="flex items-start gap-3 text-[15px] text-text-secondary"
+              initial={{ opacity: 0, x: -12 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.4, delay: 0.3 + 0.08 * i, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <span className="mt-1 w-1 h-1 rounded-full bg-text-tertiary shrink-0" />
+              {b}
+            </motion.li>
+          ))}
+        </ul>
+      </motion.div>
+
+      <motion.div
+        className="relative"
+        initial={{ opacity: 0, x: reverse ? -40 : 40 }}
+        animate={isInView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {visual}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── MiniStatBars ──────────────────────────────────────────
+function MiniStatBars() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
+  const stats = [
+    { label: "MERGE FORCE", value: 82, color: "var(--text-primary)" },
+    { label: "CODE VEL", value: 67, color: "var(--text-primary)" },
+    { label: "PROBLEM SOLV", value: 91, color: "var(--text-primary)" },
+    { label: "OPEN SOURCE", value: 45, color: "var(--text-primary)" },
+    { label: "CONSISTENCY", value: 58, color: "var(--text-primary)" },
+  ];
+
+  return (
+    <div ref={ref} className="w-full max-w-xs space-y-3">
+      {stats.map((s, i) => (
+        <div key={s.label} className="flex items-center gap-3">
+          <span className="w-16 text-[11px] font-mono font-medium uppercase tracking-[0.06em] text-text-tertiary text-right shrink-0">
+            {s.label}
+          </span>
+          <div className="flex-1 h-1.5 rounded-full neu-bar-track overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: s.color }}
+              initial={{ width: 0 }}
+              animate={isInView ? { width: `${s.value}%` } : {}}
+              transition={{ duration: 0.8, delay: 0.2 + 0.08 * i, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </div>
+          <span className="w-8 text-[11px] font-mono text-text-tertiary tabular-nums shrink-0">
+            {s.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── HowItWorksStep ────────────────────────────────────────
+function HowItWorksStep({
+  number,
+  title,
+  description,
+  index,
+}: {
+  number: string;
+  title: string;
+  description: string;
+  index: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      className="relative flex gap-6"
+      initial={{ opacity: 0, y: 24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: 0.12 * index, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="shrink-0 w-10 h-10 rounded-[8px] neu-raised flex items-center justify-center">
+        <span className="font-mono text-[13px] font-medium text-text-tertiary">{number}</span>
+      </div>
+      <div>
+        <h3 className="font-display text-[20px] font-[600] tracking-[-0.01em] text-text-primary mb-1">
+          {title}
+        </h3>
+        <p className="text-[15px] text-text-secondary leading-[1.6]">{description}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── MAIN PAGE ─────────────────────────────────────────────
+export default function LandingPage() {
+  const [cardCount, setCardCount] = useState<number | null>(null);
+  const [heroLoaded, setHeroLoaded] = useState(false);
+
+  const heroRef = useRef<HTMLHeadingElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const { scrollYProgress } = useScroll();
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.96]);
+  const heroY = useTransform(scrollYProgress, [0, 0.15], [0, 60]);
+
+  useEffect(() => {
+    setTimeout(() => setHeroLoaded(true), 50);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/count")
+      .then((r) => r.json())
+      .then((d) => setCardCount(d.count))
+      .catch(() => setCardCount(0));
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mql.matches || !heroRef.current) return;
+
+    let cleanup: (() => void) | undefined;
+    const init = async () => {
+      const gsap = (await import("gsap")).default;
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+      gsap.registerPlugin(ScrollTrigger);
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.5,
+        },
+      });
+      tl.fromTo(
+        heroRef.current,
+        { fontWeight: 640, letterSpacing: "-0.02em" },
+        { fontWeight: 700, letterSpacing: "-0.04em", duration: 1 }
+      );
+
+      cleanup = () => {
+        tl.scrollTrigger?.kill();
+        tl.kill();
+      };
+    };
+    init();
+    return () => { cleanup?.(); };
+  }, []);
+
+  const handleSignIn = async () => {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback`,
+      },
+    });
+  };
+
+  return (
+    <main ref={containerRef} className="min-h-screen flex flex-col">
+      {/* ═══════ THEME TOGGLE ═══════ */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
+      {/* ═══════ HERO ═══════ */}
+      <motion.section
+        className="relative min-h-screen flex flex-col items-center justify-center px-6 grid-bg overflow-hidden"
+        style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+      >
+        {/* Mouse-tracking gradient orb */}
+        <motion.div
+          className="absolute pointer-events-none"
+          style={{
+            x: mouseX,
+            y: mouseY,
+            translateX: "-50%",
+            translateY: "-50%",
+            width: 600,
+            height: 600,
+            background: "radial-gradient(circle, var(--overlay-3) 0%, transparent 70%)",
+          }}
+        />
+
+        {/* Corner accent lines */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+          <div className="absolute top-[15%] left-[10%] w-px h-24 bg-gradient-to-b from-transparent via-[var(--overlay-5)] to-transparent" />
+          <div className="absolute top-[25%] right-[12%] w-px h-16 bg-gradient-to-b from-transparent via-[var(--overlay-3)] to-transparent" />
+          <div className="absolute bottom-[20%] left-[20%] w-px h-20 bg-gradient-to-b from-transparent via-[var(--overlay-4)] to-transparent" />
+        </div>
+
+        <motion.div
+          className="relative z-10 flex flex-col items-center text-center max-w-4xl"
+          initial="hidden"
+          animate={heroLoaded ? "visible" : "hidden"}
+          variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } } }}
+        >
+          {/* Badge */}
+          <motion.div
+            variants={variants.fadeUp}
+            className="mb-10 inline-flex items-center gap-2.5 px-4 py-2 rounded-full neu-badge"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-text-primary opacity-40 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-text-primary" />
+            </span>
+            <span className="font-mono text-[13px] font-medium tracking-[0.04em] text-text-secondary">
+              v0.1 — painfully accurate
+            </span>
+          </motion.div>
+
+          {/* Massive title — word-by-word reveal */}
+          <motion.div variants={variants.fadeUp} className="overflow-hidden">
+            <h1
+              ref={heroRef}
+              className="font-display leading-[0.88] font-[640] tracking-[-0.02em] text-text-primary"
+              style={{ fontSize: "clamp(4rem, 10vw, 9rem)" }}
+            >
+              DevMon
+            </h1>
+          </motion.div>
+
+          {/* Subline with stagger */}
+          <motion.p
+            variants={variants.fadeUp}
+            className="mt-8 text-[17px] text-text-secondary max-w-xl leading-[1.7]"
+          >
+            We analyze your repos, commits, PRs, and questionable life choices
+            to generate a completely unscientific but deeply satisfying scorecard.
+          </motion.p>
+
+          {/* CTA */}
+          <motion.div variants={variants.fadeUp} className="mt-12">
+            <MagneticButton onClick={handleSignIn}>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              Sign in with GitHub
+            </MagneticButton>
+          </motion.div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+          initial={{ opacity: 0 }}
+          animate={heroLoaded ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 1.4 }}
+        >
+          <span className="text-[11px] font-mono text-text-tertiary uppercase tracking-[0.12em]">Scroll</span>
+          <div className="w-px h-10 bg-gradient-to-b from-text-tertiary to-transparent animate-scroll-hint" />
+        </motion.div>
+      </motion.section>
+
+      {/* ═══════ MARQUEE ═══════ */}
+      <HorizontalMarquee />
+
+      {/* ═══════ MANIFESTO ═══════ */}
+      <section className="py-32 md:py-24 px-6">
+        <div className="max-w-4xl mx-auto">
+          <WordReveal
+            text="Your GitHub profile is a story. Every commit, every PR, every abandoned side project — it all adds up to something. We just gave it a name, a class, and a rarity tier."
+            className="font-display text-[28px] md:text-[36px] leading-[1.3] font-[500] tracking-[-0.01em] text-text-primary"
+          />
+        </div>
+      </section>
+
+      {/* ═══════ STATS ═══════ */}
+      <section className="py-24 md:py-16 px-6">
+        <div className="max-w-3xl mx-auto flex items-center justify-center gap-20 md:gap-12">
+          <AnimatedCounter value={cardCount !== null ? cardCount : 0} label="Cards Generated" />
+          <div className="w-px h-16 bg-neu-dark" />
+          <AnimatedCounter value={5} label="Rarity Tiers" />
+          <div className="w-px h-16 bg-neu-dark" />
+          <AnimatedCounter value={12} label="DevMon Classes" />
+        </div>
+      </section>
+
+      {/* ═══════ HOW IT WORKS ═══════ */}
+      <section className="py-32 md:py-24 px-6">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-start">
+          <div>
+            <span className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+              How it works
+            </span>
+            <h2 className="font-display text-[36px] md:text-[42px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary mt-3">
+              Three steps.<br />One devastating card.
+            </h2>
+            <p className="text-[16px] text-text-secondary leading-[1.7] mt-6 max-w-md">
+              No accounts to manage, no complicated setup. Just sign in and let the algorithm judge you.
+            </p>
+          </div>
+          <div className="space-y-10">
+            <HowItWorksStep number="01" title="Sign in with GitHub" description="One click. We request read-only access to your public profile and repos. Nothing scary." index={0} />
+            <HowItWorksStep number="02" title="Get scored" description="We analyze your commits, PRs, streaks, languages, and community activity through our developer-focused scoring engine." index={1} />
+            <HowItWorksStep number="03" title="Share" description="Download your credential, share it on LinkedIn or X, and let your profile speak for itself." index={2} />
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════ FEATURES — split layouts ═══════ */}
+      <section className="py-32 md:py-24 px-6 space-y-32 md:space-y-24">
+        {/* Feature 1 — Stats Engine */}
+        <FeatureSplit
+          eyebrow="The Engine"
+          headline="Five attributes. One honest assessment."
+          description="Merge Force, Code Velocity, Problem Solving, Open Source, Consistency — derived from your real GitHub activity. Meaningful developer metrics, not RPG filler."
+          bullets={[
+            "PR merges and issue closures measure Merge Force",
+            "Commits and streaks drive Code Velocity",
+            "Close rates and volume build Problem Solving",
+            "Contributions and community presence define Open Source",
+            "Longevity and regularity prove Consistency",
+          ]}
+          visual={<MiniStatBars />}
+        />
+
+        {/* Feature 2 — Rarity */}
+        <FeatureSplit
+          eyebrow="Rarity"
+          headline="Most of us are Common."
+          description="Five tiers from Common to Mythic. The algorithm is ruthless. The vast majority of developers land in Common. That's not a bug — it's a feature."
+          bullets={[
+            "Common — the backbone of open source",
+            "Rare — you're doing something right",
+            "Epic — top 10% energy",
+            "Legendary — statistically improbable",
+            "Mythic — go outside",
+          ]}
+          visual={<RarityShowcase />}
+          reverse
+        />
+
+        {/* Feature 3 — Flavor Text */}
+        <FeatureSplit
+          eyebrow="Flavor Text"
+          headline="Auto-generated roasts."
+          description="Every credential gets a unique flavor text based on your actual repo behavior. No LLM costs — just pattern matching and brutal honesty."
+          bullets={[
+            "Zero-star repos get called out by name",
+            "Commit streaks generate praise (or pity)",
+            "PR ratios determine your merge personality",
+            "Each class gets its own character",
+          ]}
+          visual={
+            <div className="rounded-[10px] neu-raised-lg p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono font-medium uppercase tracking-[0.06em] text-text-tertiary">Rare · Polyglot Artisan</span>
+              </div>
+              <p className="text-[15px] text-text-secondary leading-[1.6] italic">
+                &ldquo;Your 14 languages are like a box of crayons where half are the same shade of gray.&rdquo;
+              </p>
+              <div className="flex items-center gap-2 pt-2 border-t border-border-hairline">
+                <span className="text-[12px] font-mono text-text-tertiary">Roast · Auto-generated</span>
+              </div>
+            </div>
+          }
+        />
+      </section>
+
+      {/* ═══════ QUOTES ═══════ */}
+      <section className="py-32 md:py-24 px-6">
+        <div className="max-w-2xl mx-auto mb-16 text-center">
+          <span className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+            What people are saying
+          </span>
+          <h2 className="font-display text-[36px] md:text-[42px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary mt-3">
+            Painfully accurate.
+          </h2>
+        </div>
+        <QuoteStrip />
+      </section>
+
+      {/* ═══════ FINAL CTA ═══════ */}
+      <section className="py-40 md:py-32 px-6">
+        <div className="max-w-3xl mx-auto text-center space-y-8">
+          <motion.h2
+            className="font-display text-[48px] md:text-[64px] leading-[0.95] font-[640] tracking-[-0.03em] text-text-primary"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Ready to be judged?
+          </motion.h2>
+          <motion.p
+            className="text-[17px] text-text-secondary max-w-md mx-auto leading-[1.7]"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Your credential is waiting. It won&apos;t be kind, but it will be honest.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <MagneticButton onClick={handleSignIn}>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              Sign in with GitHub
+            </MagneticButton>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══════ FOOTER ═══════ */}
+      <footer className="mt-auto py-12 border-t border-border-hairline">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <span className="font-display text-[16px] font-[600] text-text-primary">DevMon</span>
+            <span className="text-[13px] font-mono text-text-tertiary">v0.1</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors">GitHub</a>
+            <a href="#" className="text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors">Twitter</a>
+          </div>
+          <p className="text-[13px] text-text-tertiary">
+            Not affiliated with GitHub.
+          </p>
+        </div>
+      </footer>
+    </main>
+  );
+}
