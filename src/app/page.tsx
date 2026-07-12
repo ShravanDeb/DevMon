@@ -655,16 +655,10 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ STAR ON GITHUB ═══════ */}
-      <section className="py-20 px-6">
-        <motion.div
-          className="max-w-xl mx-auto text-center rounded-[14px] neu-raised-lg p-10"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <p className="text-[17px] text-text-secondary leading-[1.7] mb-6">
-            If you enjoy DevMon, consider giving the repo a star. It means a lot.
+      <section className="py-20 md:py-16 px-6">
+        <div className="max-w-2xl mx-auto text-center space-y-6">
+          <p className="text-[17px] text-text-secondary leading-[1.7]">
+            If you enjoy DevMon, consider giving the repo a star.<br />It means a lot.
           </p>
           <a
             href="https://github.com/ShravanDeb/DevMon"
@@ -677,7 +671,7 @@ export default function LandingPage() {
             </svg>
             Star on GitHub
           </a>
-        </motion.div>
+        </div>
       </section>
 
       <Footer />
