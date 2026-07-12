@@ -21,6 +21,8 @@ export function Footer() {
           <span className="text-[13px] font-mono text-text-tertiary">v0.1</span>
           <span className="text-[13px] font-mono text-text-tertiary">·</span>
           <span className="text-[13px] font-mono text-text-tertiary">by</span>
+          <span className="text-[13px] font-mono text-text-secondary">Shravan Deb</span>
+          <span className="text-[13px] font-mono text-text-tertiary">·</span>
           {authorLinks.map((link) => (
             <a
               key={link.href}
