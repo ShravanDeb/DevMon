@@ -9,15 +9,31 @@ interface DownloadButtonProps {
   filename?: string;
 }
 
+async function imageToDataUrl(img: HTMLImageElement): Promise<string> {
+  const res = await fetch(img.src);
+  const blob = await res.blob();
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadButtonProps) {
   const [state, setState] = useState<"idle" | "loading" | "done">("idle");
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
     setState("loading");
+
+    const savedStyles: { el: HTMLElement; cssText: string }[] = [];
+    const savedSrcs: { img: HTMLImageElement; src: string }[] = [];
+
     try {
       await document.fonts.ready;
 
+      // Wait for any pending image loads
       const imgs = cardRef.current.querySelectorAll("img");
       await Promise.all(
         Array.from(imgs).map(
@@ -30,21 +46,64 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         )
       );
 
+      // Convert all images to inline data URLs to avoid CORS issues
+      for (const img of Array.from(imgs)) {
+        try {
+          const dataUrl = await imageToDataUrl(img);
+          savedSrcs.push({ img, src: img.src });
+          img.src = dataUrl;
+        } catch {
+          // leave as-is
+        }
+      }
+
+      // Wait for data URL images to render
+      await new Promise((r) => setTimeout(r, 200));
+
+      // Flatten all animated transforms and 3D perspective
+      const card = cardRef.current;
+
+      // Reset every animated/3D-transformed element
+      const allEls = card.querySelectorAll<HTMLElement>("*");
+      for (const el of Array.from(allEls)) {
+        const computed = window.getComputedStyle(el);
+        if (
+          computed.transform !== "none" ||
+          computed.perspective !== "none"
+        ) {
+          savedStyles.push({ el, cssText: el.style.cssText });
+          el.style.transform = "none";
+          el.style.perspective = "none";
+        }
+      }
+      // Also reset the card wrapper itself
+      if (card.parentElement) {
+        savedStyles.push({ el: card.parentElement, cssText: card.parentElement.style.cssText });
+        card.parentElement.style.transform = "none";
+      }
+
       document.documentElement.setAttribute("data-exporting", "");
+
+      // Small pause for DOM to settle
+      await new Promise((r) => setTimeout(r, 100));
 
       let dataUrl: string;
       try {
         dataUrl = await toPng(cardRef.current, {
           quality: 1,
-          pixelRatio: 4,
-          cacheBust: false,
-          skipAutoScale: false,
-          style: {
-            transform: "none",
-          },
+          pixelRatio: 2,
+          cacheBust: true,
+          skipAutoScale: true,
         });
       } finally {
         document.documentElement.removeAttribute("data-exporting");
+        // Restore all styles
+        for (const { el, cssText } of savedStyles) {
+          el.style.cssText = cssText;
+        }
+        for (const { img, src } of savedSrcs) {
+          img.src = src;
+        }
       }
 
       const link = document.createElement("a");
@@ -53,9 +112,15 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       link.click();
       setState("done");
       setTimeout(() => setState("idle"), 2000);
-    } catch {
-      // Download failed — state is reset below
+    } catch (err) {
+      console.error("DevMon download failed:", err);
       document.documentElement.removeAttribute("data-exporting");
+      for (const { el, cssText } of savedStyles) {
+        el.style.cssText = cssText;
+      }
+      for (const { img, src } of savedSrcs) {
+        img.src = src;
+      }
       setState("idle");
     }
   };
