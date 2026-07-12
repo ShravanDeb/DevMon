@@ -12,7 +12,8 @@ const fraunces = Fraunces({
   axes: ["SOFT", "WONK", "opsz"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://devmon.dev";
+const rawUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://devmon.dev";
+const siteUrl = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
