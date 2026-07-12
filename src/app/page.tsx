@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { variants } from "@/lib/motion";
 import { RARITY_COLORS } from "@/types";
-import type { ClassName, Rarity } from "@/types";
+import type { ClassName, Rarity, LeaderboardEntry } from "@/types";
 
 // ─── AnimatedCounter ───────────────────────────────────────
 function AnimatedCounter({ value, label }: { value: string | number; label: string }) {
@@ -178,6 +178,172 @@ function RarityShowcase() {
         </motion.div>
       ))}
     </div>
+  );
+}
+
+// ─── LeaderboardPreview ────────────────────────────────────
+function LeaderboardPreview() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+
+  useEffect(() => {
+    fetch("/api/leaderboard?limit=3")
+      .then((r) => r.json())
+      .then((d) => setEntries(d.entries || []))
+      .catch(() => {});
+  }, []);
+
+  if (entries.length === 0) return null;
+
+  const sorted = [...entries].sort((a, b) => b.rarityScore - a.rarityScore);
+  const display = sorted.slice(0, 3);
+
+  return (
+    <section ref={ref} className="py-32 md:py-24 px-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <motion.span
+            className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary"
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Leaderboard
+          </motion.span>
+          <motion.h2
+            className="font-display text-[36px] md:text-[42px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary mt-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Top developers.
+          </motion.h2>
+        </div>
+
+        {/* Podium */}
+        <div className="flex items-end justify-center gap-4 mb-12">
+          {/* 2nd place */}
+          {display[1] && (
+            <motion.div
+              className="flex flex-col items-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div
+                className="relative rounded-[12px] border p-5 text-center space-y-3 mb-3"
+                style={{
+                  background: `linear-gradient(180deg, ${RARITY_COLORS[display[1].rarity].hex}10 0%, ${RARITY_COLORS[display[1].rarity].hex}04 100%)`,
+                  borderColor: `${RARITY_COLORS[display[1].rarity].hex}25`,
+                  boxShadow: `0 0 30px ${RARITY_COLORS[display[1].rarity].hex}08`,
+                }}
+              >
+                <div className="w-14 h-14 rounded-full overflow-hidden mx-auto border-2" style={{ borderColor: `${RARITY_COLORS[display[1].rarity].hex}40` }}>
+                  <img src={display[1].avatarUrl} alt={display[1].displayName} className="w-full h-full object-cover" />
+                </div>
+                <p className="text-[13px] font-medium text-text-primary truncate max-w-[100px]">{display[1].displayName}</p>
+                <p className="text-[11px] font-mono text-text-tertiary truncate max-w-[100px]">{display[1].primaryClass}</p>
+                <p className="font-display text-[20px] font-[700] tracking-[-0.01em]" style={{ color: RARITY_COLORS[display[1].rarity].hex }}>
+                  {display[1].rarityScore}
+                </p>
+              </div>
+              {/* Podium base */}
+              <div className="w-[100px] h-[60px] rounded-t-[8px] flex items-center justify-center" style={{ background: `linear-gradient(180deg, ${RARITY_COLORS[display[1].rarity].hex}12 0%, ${RARITY_COLORS[display[1].rarity].hex}06 100%)`, borderTop: `1px solid ${RARITY_COLORS[display[1].rarity].hex}20` }}>
+                <span className="text-[11px] font-mono font-medium uppercase tracking-[0.06em]" style={{ color: RARITY_COLORS[display[1].rarity].hex }}>2nd</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* 1st place */}
+          {display[0] && (
+            <motion.div
+              className="flex flex-col items-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div
+                className="relative rounded-[12px] border p-6 text-center space-y-3 mb-3"
+                style={{
+                  background: `linear-gradient(180deg, ${RARITY_COLORS[display[0].rarity].hex}12 0%, ${RARITY_COLORS[display[0].rarity].hex}04 100%)`,
+                  borderColor: `${RARITY_COLORS[display[0].rarity].hex}30`,
+                  boxShadow: `0 0 40px ${RARITY_COLORS[display[0].rarity].hex}12, inset 0 1px 0 ${RARITY_COLORS[display[0].rarity].hex}15`,
+                }}
+              >
+                {/* Crown */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full flex items-center justify-center text-[12px]" style={{ background: RARITY_COLORS[display[0].rarity].hex, color: '#08080A' }}>
+                  &#9733;
+                </div>
+                <div className="w-16 h-16 rounded-full overflow-hidden mx-auto border-2" style={{ borderColor: RARITY_COLORS[display[0].rarity].hex }}>
+                  <img src={display[0].avatarUrl} alt={display[0].displayName} className="w-full h-full object-cover" />
+                </div>
+                <p className="text-[14px] font-medium text-text-primary truncate max-w-[120px]">{display[0].displayName}</p>
+                <p className="text-[11px] font-mono text-text-tertiary truncate max-w-[120px]">{display[0].primaryClass}</p>
+                <p className="font-display text-[24px] font-[700] tracking-[-0.01em]" style={{ color: RARITY_COLORS[display[0].rarity].hex }}>
+                  {display[0].rarityScore}
+                </p>
+              </div>
+              {/* Podium base */}
+              <div className="w-[120px] h-[80px] rounded-t-[8px] flex items-center justify-center" style={{ background: `linear-gradient(180deg, ${RARITY_COLORS[display[0].rarity].hex}14 0%, ${RARITY_COLORS[display[0].rarity].hex}06 100%)`, borderTop: `1px solid ${RARITY_COLORS[display[0].rarity].hex}25` }}>
+                <span className="text-[12px] font-mono font-medium uppercase tracking-[0.06em]" style={{ color: RARITY_COLORS[display[0].rarity].hex }}>1st</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* 3rd place */}
+          {display[2] && (
+            <motion.div
+              className="flex flex-col items-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div
+                className="relative rounded-[12px] border p-5 text-center space-y-3 mb-3"
+                style={{
+                  background: `linear-gradient(180deg, ${RARITY_COLORS[display[2].rarity].hex}10 0%, ${RARITY_COLORS[display[2].rarity].hex}04 100%)`,
+                  borderColor: `${RARITY_COLORS[display[2].rarity].hex}25`,
+                  boxShadow: `0 0 30px ${RARITY_COLORS[display[2].rarity].hex}08`,
+                }}
+              >
+                <div className="w-14 h-14 rounded-full overflow-hidden mx-auto border-2" style={{ borderColor: `${RARITY_COLORS[display[2].rarity].hex}40` }}>
+                  <img src={display[2].avatarUrl} alt={display[2].displayName} className="w-full h-full object-cover" />
+                </div>
+                <p className="text-[13px] font-medium text-text-primary truncate max-w-[100px]">{display[2].displayName}</p>
+                <p className="text-[11px] font-mono text-text-tertiary truncate max-w-[100px]">{display[2].primaryClass}</p>
+                <p className="font-display text-[20px] font-[700] tracking-[-0.01em]" style={{ color: RARITY_COLORS[display[2].rarity].hex }}>
+                  {display[2].rarityScore}
+                </p>
+              </div>
+              {/* Podium base */}
+              <div className="w-[100px] h-[50px] rounded-t-[8px] flex items-center justify-center" style={{ background: `linear-gradient(180deg, ${RARITY_COLORS[display[2].rarity].hex}10 0%, ${RARITY_COLORS[display[2].rarity].hex}05 100%)`, borderTop: `1px solid ${RARITY_COLORS[display[2].rarity].hex}18` }}>
+                <span className="text-[11px] font-mono font-medium uppercase tracking-[0.06em]" style={{ color: RARITY_COLORS[display[2].rarity].hex }}>3rd</span>
+              </div>
+            </motion.div>
+          )}
+        </div>
+
+        {/* View Leaderboard button */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <a
+            href="/leaderboard"
+            className="inline-flex items-center gap-2 rounded-[6px] px-5 py-2.5 text-[13px] leading-none font-medium neu-btn text-text-primary hover:opacity-90 transition-opacity"
+          >
+            View Full Leaderboard
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 3l5 5-5 5" />
+            </svg>
+          </a>
+        </motion.div>
+      </div>
+    </section>
   );
 }
 
@@ -508,7 +674,7 @@ export default function LandingPage() {
 
           {/* CTA */}
           <motion.div variants={variants.fadeUp} className="mt-12">
-            <MagneticButton onClick={handleSignIn} variant="secondary" className="bg-[#1B1B1F] border border-border-primary hover:border-border-secondary !text-text-primary">
+            <MagneticButton onClick={handleSignIn} variant="secondary" className="!text-text-primary">
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
@@ -635,6 +801,9 @@ export default function LandingPage() {
         />
       </section>
 
+      {/* ═══════ LEADERBOARD PREVIEW ═══════ */}
+      <LeaderboardPreview />
+
       {/* ═══════ QUOTES ═══════ */}
       <section className="py-32 md:py-24 px-6">
         <div className="max-w-2xl mx-auto mb-16 text-center">
@@ -675,7 +844,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <MagneticButton onClick={handleSignIn} variant="secondary" className="bg-[#1B1B1F] border border-border-primary hover:border-border-secondary !text-text-primary">
+            <MagneticButton onClick={handleSignIn} variant="secondary" className="!text-text-primary">
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
@@ -736,7 +905,7 @@ export default function LandingPage() {
               href="https://github.com/ShravanDeb/DevMon"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 rounded-[6px] px-6 py-3 text-[13px] leading-none font-medium border border-border-primary bg-[#1B1B1F] text-text-primary hover:border-border-secondary transition-colors"
+              className="inline-flex items-center justify-center gap-2.5 rounded-[6px] px-6 py-3 text-[13px] leading-none font-medium neu-btn text-text-primary hover:opacity-90 transition-opacity"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
