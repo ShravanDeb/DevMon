@@ -10,82 +10,79 @@ async function main() {
   };
 
   const projectRef = 'sqnycndqbbychopyzntw';
-  const serviceKey = getVar('SUPABASE_SERVICE_ROLE_KEY');
-
-  // Supabase pooler connection (Transaction mode)
-  // Format: postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
-  // Or direct: postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
-  //
-  // We need the DATABASE PASSWORD from Supabase Dashboard → Settings → Database
-  const dbPassword = getVar('SUPABASE_DB_PASSWORD') || getVar('DATABASE_PASSWORD');
+  const dbPassword = getVar('SUPABASE_DB_PASSWORD');
 
   if (!dbPassword) {
-    console.log('');
-    console.log('Need your database password.');
-    console.log('');
-    console.log('Get it from:');
-    console.log('  1. Go to https://supabase.com/dashboard/project/' + projectRef + '/settings/database');
-    console.log('  2. Copy the password under "Connection string" → "URI"');
-    console.log('');
-    console.log('Then add this to your .env file:');
-    console.log('  SUPABASE_DB_PASSWORD=your_password_here');
-    console.log('');
+    console.error('SUPABASE_DB_PASSWORD not found in .env');
+    console.error('Add it from: Supabase Dashboard → Settings → Database → Connection string');
     process.exit(1);
   }
 
-  const connectionString = `postgresql://postgres.${projectRef}:${dbPassword}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`;
+  const urls = [
+    `postgresql://postgres:${dbPassword}@db.${projectRef}.supabase.co:5432/postgres`,
+    `postgresql://postgres.${projectRef}:${dbPassword}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`,
+  ];
+
+  let client = null;
+
+  for (const url of urls) {
+    const c = new Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
+    try {
+      await c.connect();
+      console.log(`Connected to ${url.substring(0, 60)}...`);
+      client = c;
+      break;
+    } catch (err) {
+      console.log(`  Failed: ${err.message}`);
+    }
+  }
+
+  if (!client) {
+    console.error('\nCould not connect. Reset your database password at:');
+    console.error('https://supabase.com/dashboard/project/' + projectRef + '/settings/database');
+    process.exit(1);
+  }
 
   const sql = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'full_migration.sql'), 'utf8');
-  console.log(`Running migration (${sql.length} chars)...`);
+  console.log(`\nRunning migration (${sql.length} chars)...\n`);
 
-  const client = new Client({ connectionString, ssl: { rejectUnauthorized: false } });
+  const statements = [];
+  let current = '';
+  let inDollar = false;
 
-  try {
-    await client.connect();
-    console.log('Connected to database');
+  for (const line of sql.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('--') && !trimmed.includes('$$')) continue;
 
-    // Split into statements, handling $$ function bodies
-    const statements = [];
-    let current = '';
-    let dollarCount = 0;
+    const dollCount = (trimmed.match(/\$\$/g) || []).length;
+    if (dollCount % 2 === 1) inDollar = !inDollar;
 
-    for (const line of sql.split('\n')) {
-      const stripped = line.trim();
-      if (stripped.startsWith('--') && !stripped.includes('$$')) {
-        continue; // skip comments
-      }
-      const dollarMatches = (stripped.match(/\$\$/g) || []).length;
-      dollarCount += dollarMatches;
-      current += line + '\n';
-      if (stripped.endsWith(';') && dollarCount % 2 === 0) {
-        statements.push(current.trim());
-        current = '';
-        dollarCount = 0;
-      }
+    current += line + '\n';
+
+    if (trimmed.endsWith(';') && !inDollar) {
+      statements.push(current.trim());
+      current = '';
     }
-    if (current.trim()) statements.push(current.trim());
-
-    for (const stmt of statements) {
-      const firstLine = stmt.split('\n')[0].substring(0, 70);
-      try {
-        await client.query(stmt);
-        console.log(`  OK  ${firstLine}`);
-      } catch (err) {
-        if (err.message.includes('already exists')) {
-          console.log(`  SKIP ${firstLine}`);
-        } else {
-          console.error(`  ERR ${firstLine}`);
-          console.error(`       ${err.message}`);
-        }
-      }
-    }
-
-    console.log('\nDone!');
-  } catch (err) {
-    console.error('Connection failed:', err.message);
-  } finally {
-    await client.end();
   }
+  if (current.trim()) statements.push(current.trim());
+
+  for (const stmt of statements) {
+    const label = stmt.split('\n')[0].substring(0, 70);
+    try {
+      await client.query(stmt);
+      console.log(`  OK   ${label}`);
+    } catch (err) {
+      if (err.message.includes('already exists')) {
+        console.log(`  SKIP ${label}`);
+      } else {
+        console.error(`  ERR  ${label}`);
+        console.error(`       ${err.message}`);
+      }
+    }
+  }
+
+  await client.end();
+  console.log('\nMigration complete!');
 }
 
 main();
