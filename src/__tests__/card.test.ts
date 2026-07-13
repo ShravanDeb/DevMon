@@ -70,11 +70,9 @@ function makeRequest(body?: Record<string, unknown>) {
 
 function mockAdmin(overrides?: { upsertResult?: unknown; upsertError?: unknown }) {
   const upsertFn = vi.fn().mockResolvedValue({
-    data: overrides?.upsertResult ?? {
-      card_id: "DM-ABC123",
-      edition: 1,
-      was_inserted: true,
-    },
+    data: overrides?.upsertResult ?? [
+      { card_id: "DM-ABC123", edition: 1, was_inserted: true },
+    ],
     error: overrides?.upsertError ?? null,
   });
 
@@ -123,7 +121,7 @@ describe("POST /api/card", () => {
     mockFetchGitHubStats.mockResolvedValue(mockRaw);
 
     const admin = mockAdmin({
-      upsertResult: { card_id: "DM-ABC123", edition: 1, was_inserted: true },
+      upsertResult: [{ card_id: "DM-ABC123", edition: 1, was_inserted: true }],
     });
     mockGetSupabaseAdmin.mockReturnValue(admin as never);
 
@@ -148,7 +146,7 @@ describe("POST /api/card", () => {
     mockFetchGitHubStats.mockResolvedValue(mockRaw);
 
     const admin = mockAdmin({
-      upsertResult: { card_id: "DM-ABC123", edition: 1, was_inserted: false },
+      upsertResult: [{ card_id: "DM-ABC123", edition: 1, was_inserted: false }],
     });
     mockGetSupabaseAdmin.mockReturnValue(admin as never);
 

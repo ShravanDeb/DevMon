@@ -85,8 +85,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // upsertResult is the full row; extract what we need
-    const row = upsertResult as Record<string, unknown>;
+    // upsertResult is an array from .rpc(); extract first row
+    const row = (Array.isArray(upsertResult) ? upsertResult[0] : upsertResult) as Record<string, unknown> | undefined;
+    if (!row?.card_id) {
+      console.error("upsert_card returned no row:", JSON.stringify(upsertResult));
+      return NextResponse.json({ error: "Failed to generate card: upsert returned no data" }, { status: 500 });
+    }
     const finalCardId = row.card_id as string;
     const finalEdition = row.edition as number;
     const wasInserted = row.was_inserted as boolean;
