@@ -76,8 +76,6 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       if (heroNum) {
         savedStyles.push({ el: heroNum, cssText: heroNum.style.cssText });
         heroNum.style.fontKerning = "none";
-        heroNum.style.display = "inline-block";
-        heroNum.style.paddingRight = "8px";
       }
 
       const heroStat = card.querySelector<HTMLElement>(".card-hero-stat");
