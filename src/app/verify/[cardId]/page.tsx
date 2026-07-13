@@ -15,6 +15,17 @@ interface VerifyResponse {
   };
 }
 
+interface VerifyError {
+  error: string;
+  message: string;
+}
+
+const VERIFY_MESSAGES = [
+  "Verifying credential",
+  "Checking signature",
+  "Validating integrity",
+];
+
 function VerifiedBadge() {
   return (
     <div className="inline-flex items-center gap-2.5 mb-8">
@@ -71,11 +82,11 @@ function StatBar({
   );
 }
 
-function DetailRow({ label, value, mono = true }: { label: string; value: string; mono?: boolean }) {
+function DetailRow({ label, value, mono = true, wrap = false }: { label: string; value: string; mono?: boolean; wrap?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2 border-b border-border-hairline last:border-0">
+    <div className={`flex items-center justify-between gap-4 py-2 border-b border-border-hairline last:border-0 ${wrap ? "flex-col sm:flex-row" : ""}`}>
       <span className="text-[12px] text-text-tertiary shrink-0">{label}</span>
-      <span className={`text-[12px] text-text-primary text-right ${mono ? "font-mono" : ""}`}>
+      <span className={`text-[12px] text-text-primary text-right min-w-0 ${mono ? "font-mono break-all" : ""} ${wrap ? "w-full sm:w-auto sm:text-right" : ""}`}>
         {value}
       </span>
     </div>
@@ -87,9 +98,10 @@ export default function VerifyPage() {
   const cardId = params.cardId as string;
   const [data, setData] = useState<VerifyResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [verifyError, setVerifyError] = useState<VerifyError | null>(null);
   const [copied, setCopied] = useState(false);
   const [linkedinCopied, setLinkedinCopied] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState(VERIFY_MESSAGES[0]);
 
   const copyUrl = useCallback(() => {
     navigator.clipboard.writeText(window.location.href);
@@ -98,17 +110,35 @@ export default function VerifyPage() {
   }, []);
 
   useEffect(() => {
+    let msgIdx = 0;
+    const msgInterval = setInterval(() => {
+      msgIdx++;
+      if (msgIdx < VERIFY_MESSAGES.length) {
+        setLoadingMsg(VERIFY_MESSAGES[msgIdx]);
+      }
+    }, 500);
+
     fetch(`/api/verify/${cardId}`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.error) setError(json.error);
-        else setData(json);
+      .then((r) => r.json().then((json) => ({ status: r.status, json })))
+      .then(({ status, json }) => {
+        clearInterval(msgInterval);
+        if (status === 200 && json.verified) {
+          setData(json);
+        } else {
+          setVerifyError({
+            error: json.error || "unknown",
+            message: json.message || "This credential could not be verified.",
+          });
+        }
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
+        clearInterval(msgInterval);
+        setVerifyError({ error: "network_error", message: err.message });
         setLoading(false);
       });
+
+    return () => clearInterval(msgInterval);
   }, [cardId]);
 
   if (loading) {
@@ -117,13 +147,14 @@ export default function VerifyPage() {
         <div className="fixed top-4 right-4 z-40"><ThemeToggle /></div>
         <div className="flex flex-col items-center gap-4">
           <div className="w-5 h-5 rounded-full border-2 border-text-tertiary border-t-transparent animate-spin" />
-          <p className="text-[13px] text-text-tertiary">Verifying...</p>
+          <p className="text-[13px] text-text-tertiary font-mono">{loadingMsg}...</p>
         </div>
       </div>
     );
   }
 
-  if (error || !data) {
+  if (verifyError || !data) {
+    const errorMessage = verifyError?.message || "This credential could not be verified.";
     return (
       <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4">
         <div className="fixed top-4 right-4 z-40"><ThemeToggle /></div>
@@ -143,8 +174,12 @@ export default function VerifyPage() {
               />
             </svg>
           </div>
-          <h2 className="text-[24px] font-semibold text-text-primary mb-2">Not Found</h2>
-          <p className="text-[14px] text-text-secondary">{error || "This credential could not be verified."}</p>
+          <h2 className="text-[24px] font-semibold text-text-primary mb-2">
+            {verifyError?.error === "not_found" ? "Not Found" :
+             verifyError?.error === "invalid_format" ? "Invalid Card ID" :
+             "Verification Failed"}
+          </h2>
+          <p className="text-[14px] text-text-secondary">{errorMessage}</p>
           <p className="text-[12px] text-text-tertiary font-mono mt-4">{cardId}</p>
         </div>
       </div>
@@ -320,8 +355,8 @@ export default function VerifyPage() {
                   year: "numeric",
                 })}
               />
-              <DetailRow label="SHA-256" value={card.verification.sha256Hash} />
-              <DetailRow label="Signature" value={card.verification.digitalSignature} />
+              <DetailRow label="SHA-256" value={card.verification.sha256Hash} wrap />
+              <DetailRow label="Signature" value={card.verification.digitalSignature} wrap />
             </div>
           </div>
         </motion.div>

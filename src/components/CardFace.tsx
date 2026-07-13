@@ -125,6 +125,37 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
   const barColors = getRarityBarColors(rarity, isDark);
 
   const heroStat = card.heroStat;
+  const heroStatValueRef = useRef<HTMLSpanElement>(null);
+  const [heroFontSize, setHeroFontSize] = useState(66);
+
+  // §6.2: Fluid hero stat sizing — measure and shrink until it fits
+  useEffect(() => {
+    const el = heroStatValueRef.current;
+    if (!el) return;
+
+    const container = el.parentElement;
+    if (!container) return;
+
+    const measure = () => {
+      const containerWidth = container.clientWidth;
+      if (containerWidth === 0) return;
+
+      // Start at max size and shrink until it fits
+      for (let size = 72; size >= 28; size -= 2) {
+        el.style.fontSize = `${size}px`;
+        if (el.scrollWidth <= containerWidth) {
+          setHeroFontSize(size);
+          return;
+        }
+      }
+      setHeroFontSize(28);
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, [heroStat.value]);
 
   const stats: { key: keyof CardStats; label: string }[] = useMemo(() => [
     { key: "mergeForce", label: STAT_LABELS.mergeForce },
@@ -346,7 +377,12 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
                 transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div className="relative flex items-baseline gap-1 w-full min-w-0">
-                  <span className="card-hero-stat-value card-hero-stat-gradient text-text-primary" data-hero-number style={{ maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <span
+                    ref={heroStatValueRef}
+                    className="card-hero-stat-value card-hero-stat-gradient text-text-primary"
+                    data-hero-number
+                    style={{ fontSize: `${heroFontSize}px`, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" }}
+                  >
                     {heroStat.value}
                   </span>
                   {heroStat.unit && (

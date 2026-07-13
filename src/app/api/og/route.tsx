@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { fetchGitHubStatsForUser } from "@/lib/graphql";
+import { fetchGitHubStats } from "@/lib/github";
 import { generateCard } from "@/lib/scoring";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
@@ -19,20 +19,25 @@ export async function GET(req: Request) {
 
     let card;
     try {
-      const raw = await fetchGitHubStatsForUser(token, username);
+      const raw = await fetchGitHubStats(token, { username });
       card = generateCard(raw);
     } catch {
-      // Try reading from Supabase cache
+      // Try reading from Supabase cache (cards table)
       const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data } = await admin
-          .from("profiles")
-          .select("card")
-          .eq("username", username)
-          .single();
-        if (data?.card) {
-          card = data.card;
-        }
+      const { data } = await admin
+        .from("cards")
+        .select("stats, rarity, rarity_score, primary_class, display_name, avatar_url")
+        .eq("github_username", username)
+        .maybeSingle();
+      if (data) {
+        card = {
+          stats: data.stats,
+          rarity: data.rarity,
+          rarityScore: data.rarity_score,
+          primaryClass: data.primary_class,
+          displayName: data.display_name,
+          avatarUrl: data.avatar_url,
+        };
       }
     }
 

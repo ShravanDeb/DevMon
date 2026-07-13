@@ -12,78 +12,70 @@ export async function GET(
 
   const parsed = CardIdSchema.safeParse(cardId);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid card ID format" }, { status: 400 });
-  }
-
-  const admin = getSupabaseAdmin();
-  if (!admin) {
-    return NextResponse.json({ error: "Database not configured" }, { status: 500 });
-  }
-
-  // Fetch all profiles, find by verification.cardId in JS
-  const { data: allProfiles, error: queryError } = await admin
-    .from("profiles")
-    .select("id, username, display_name, avatar_url, card, updated_at");
-
-  if (queryError) {
-    return NextResponse.json({ error: "Query failed", detail: queryError.message }, { status: 500 });
-  }
-
-  const match = (allProfiles ?? []).find(
-    (p) => {
-      const c = p.card as Record<string, unknown> | null;
-      if (!c?.verification) return false;
-      return (c.verification as Record<string, unknown>).cardId === cardId;
-    }
-  );
-
-  if (!match) {
     return NextResponse.json(
-      {
-        error: "Card not found",
-        debug: {
-          searchedCardId: cardId,
-          totalProfiles: allProfiles?.length ?? 0,
-          profilesWithCard: (allProfiles ?? []).filter((p) => p.card != null).length,
-          sampleTypes: (allProfiles ?? []).slice(0, 1).map((p) => {
-            const c = p.card;
-            const type = typeof c;
-            const isString = typeof c === "string";
-            let parsed: Record<string, unknown> | null = null;
-            if (isString) { try { parsed = JSON.parse(c as string); } catch {} }
-            else if (c && typeof c === "object") { parsed = c as Record<string, unknown>; }
-            const verification = parsed?.verification;
-            return {
-              cardType: type,
-              cardIsNull: c == null,
-              verificationType: typeof verification,
-              verificationCardId: (verification as Record<string, unknown>)?.cardId,
-            };
-          }),
-        },
-      },
-      { status: 404, headers: { "Cache-Control": "no-store" } }
+      { error: "invalid_format", message: "This doesn't look like a valid card ID." },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
     );
   }
 
-  const card = match.card as Record<string, unknown>;
-  const verification = card.verification as Record<string, unknown>;
-  return NextResponse.json({
-    verified: true,
-    card: {
-      username: match.username,
-      displayName: match.display_name,
-      avatarUrl: match.avatar_url,
-      rarity: card.rarity,
-      rarityScore: card.rarityScore,
-      primaryClass: card.primaryClass,
-      secondaryClass: card.secondaryClass,
-      stats: card.stats,
-      signatureMove: card.signatureMove,
-      flavorText: card.flavorText,
-      heroStat: card.heroStat,
-      verification,
-      generatedAt: match.updated_at,
-    },
-  }, { headers: { "Cache-Control": "no-store" } });
+  try {
+    const admin = getSupabaseAdmin();
+    const { data: card, error: queryError } = await admin
+      .from("cards")
+      .select("*")
+      .eq("card_id", cardId)
+      .maybeSingle();
+
+    if (queryError) {
+      console.error("verify query error:", queryError.message);
+      return NextResponse.json(
+        { error: "database_error", message: "Something went wrong verifying this credential. Try again shortly." },
+        { status: 500, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+
+    if (!card) {
+      return NextResponse.json(
+        { error: "not_found", message: "No credential exists with this ID." },
+        { status: 404, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        verified: true,
+        card: {
+          username: card.github_username,
+          displayName: card.display_name,
+          avatarUrl: card.avatar_url,
+          rarity: card.rarity,
+          rarityScore: card.rarity_score,
+          primaryClass: card.primary_class,
+          secondaryClass: card.secondary_class,
+          stats: card.stats,
+          signatureMove: card.signature_move,
+          flavorText: card.flavor_text,
+          heroStat: card.hero_stat,
+          achievements: card.achievements,
+          verification: {
+            cardId: card.card_id,
+            edition: card.edition,
+            generatedAt: card.created_at,
+            version: card.verification_version,
+            digitalSignature: card.digital_signature,
+            sha256Hash: card.sha256_hash,
+          },
+          generatedAt: card.updated_at,
+        },
+      },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("verify error:", message);
+    return NextResponse.json(
+      { error: "database_error", message: "Something went wrong verifying this credential. Try again shortly." },
+      { status: 500, headers: { "Cache-Control": "no-store" } }
+    );
+  }
 }

@@ -544,7 +544,7 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/count")
+    fetch("/api/card")
       .then((r) => r.json())
       .then((d) => setCardCount(d.count))
       .catch(() => setCardCount(0));

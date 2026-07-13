@@ -102,7 +102,9 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       const heroVal = card.querySelector<HTMLElement>(".card-hero-stat-value");
       if (heroVal) {
         savedStyles.push({ el: heroVal, cssText: heroVal.style.cssText });
-        heroVal.style.fontSize = "66px";
+        // §6.2: Read the live font size instead of hardcoding
+        const computedSize = window.getComputedStyle(heroVal).fontSize;
+        heroVal.style.fontSize = computedSize;
       }
 
       document.documentElement.setAttribute("data-exporting", "");

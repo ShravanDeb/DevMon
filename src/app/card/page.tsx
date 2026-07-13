@@ -11,6 +11,14 @@ import { DownloadButton } from "@/components/DownloadButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 
+const LOADING_MESSAGES = [
+  "Fetching GitHub data",
+  "Calculating developer stats",
+  "Generating card",
+  "Signing credential",
+  "Saving card",
+];
+
 function CardSkeleton() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface-0">
@@ -55,38 +63,90 @@ function CardContent() {
   const [linkedinCopied, setLinkedinCopied] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // §5: Race condition prevention
+  const abortRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
+  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
+  const loadingMsgRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startLoadingMessages = useCallback(() => {
+    let idx = 0;
+    setLoadingMessage(LOADING_MESSAGES[0]);
+    loadingMsgRef.current = setInterval(() => {
+      idx++;
+      if (idx < LOADING_MESSAGES.length) {
+        setLoadingMessage(LOADING_MESSAGES[idx]);
+      } else {
+        if (loadingMsgRef.current) clearInterval(loadingMsgRef.current);
+      }
+    }, 600);
+  }, []);
+
+  const stopLoadingMessages = useCallback(() => {
+    if (loadingMsgRef.current) {
+      clearInterval(loadingMsgRef.current);
+      loadingMsgRef.current = null;
+    }
+  }, []);
+
   const regenerateWithTone = useCallback(async (tone: FlavorTone, rarity?: Rarity) => {
     if (!rawStats) return;
     setFlavorTone(tone);
     if (rarity !== undefined) setRarityOverride(rarity);
     const activeRarity = rarity !== undefined ? rarity : rarityOverride;
+
+    // §5: Abort previous in-flight request
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const reqId = ++requestIdRef.current;
+
     setLoading(true);
+    startLoadingMessages();
+
     try {
       const res = await fetch("/api/card", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tone, rarity: activeRarity }),
+        signal: controller.signal,
       });
       if (res.status === 401) {
         router.push("/");
         return;
       }
       const data = await res.json();
+      // §5: Only apply if this is still the latest request
+      if (reqId !== requestIdRef.current) return;
       if (data.error) setError(data.error);
       else setCard(data.card);
     } catch (err: unknown) {
+      if (reqId !== requestIdRef.current) return;
+      if (err instanceof DOMException && err.name === "AbortError") return;
       const message = err instanceof Error ? err.message : "Failed to regenerate";
       setError(message);
     } finally {
-      setLoading(false);
+      if (reqId === requestIdRef.current) {
+        setLoading(false);
+        stopLoadingMessages();
+      }
     }
-  }, [rawStats, rarityOverride, router]);
+  }, [rawStats, rarityOverride, router, startLoadingMessages, stopLoadingMessages]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const reqId = ++requestIdRef.current;
+
+    startLoadingMessages();
+
     fetch("/api/card", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
+      signal: controller.signal,
     })
       .then((r) => {
         if (r.status === 401) {
@@ -97,12 +157,25 @@ function CardContent() {
       })
       .then((data) => {
         if (!data) return;
+        if (reqId !== requestIdRef.current) return;
         if (data.error) setError(data.error);
         else { setCard(data.card); setRawStats(data.raw); setShowReveal(true); }
         setLoading(false);
+        stopLoadingMessages();
       })
-      .catch((err) => { setError(err.message); setLoading(false); });
-  }, [router]);
+      .catch((err) => {
+        if (reqId !== requestIdRef.current) return;
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setError(err.message);
+        setLoading(false);
+        stopLoadingMessages();
+      });
+
+    return () => {
+      controller.abort();
+      stopLoadingMessages();
+    };
+  }, [router, startLoadingMessages, stopLoadingMessages]);
 
   const rarityColor = card ? RARITY_COLORS[card.rarity] : null;
 
@@ -151,7 +224,6 @@ function CardContent() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
           >
-            {/* Rarity flash */}
             <motion.div
               className="absolute inset-0"
               initial={{ opacity: 0 }}
@@ -165,7 +237,6 @@ function CardContent() {
                   background: `radial-gradient(circle at 50% 50%, ${rarityColor.hex}20, transparent 60%)`,
                 }}
               />
-              {/* Scan line */}
               <motion.div
                 className="absolute left-0 right-0 h-[1px]"
                 style={{ background: `${rarityColor.hex}50` }}
@@ -174,7 +245,6 @@ function CardContent() {
                 transition={{ duration: 0.6, ease: "easeInOut" }}
               />
             </motion.div>
-            {/* Card silhouette + reveal text */}
             <motion.div
               className="relative z-10 flex flex-col items-center gap-6"
               initial={{ opacity: 0, scale: 0.88, y: 20 }}
@@ -197,7 +267,7 @@ function CardContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.35 }}
               >
-                Generating your credential…
+                Generating your credential...
               </motion.p>
             </motion.div>
           </motion.div>
@@ -278,7 +348,8 @@ function CardContent() {
                 </span>
                 <button
                   onClick={() => regenerateWithTone(flavorTone === "hype" ? "roast" : "hype")}
-                  className="font-mono text-[10px] text-text-tertiary hover:text-text-secondary transition-colors underline underline-offset-2"
+                  disabled={loading}
+                  className="font-mono text-[10px] text-text-tertiary hover:text-text-secondary transition-colors underline underline-offset-2 disabled:opacity-40"
                 >
                   {flavorTone === "hype" ? "Want a roast?" : "Back to hype"}
                 </button>
@@ -362,11 +433,36 @@ function CardContent() {
             variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.4 } } }}
           >
             <p className="font-mono text-[10px] text-text-tertiary tracking-wide">
-              Generated with <span className="font-semibold text-text-secondary">DevMon</span> • Verified Developer Credential
+              Generated with <span className="font-semibold text-text-secondary">DevMon</span> &bull; Verified Developer Credential
             </p>
           </motion.div>
         </motion.div>
       </div>
+
+      {/* §6.3: Staged loading overlay (shown during regeneration) */}
+      <AnimatePresence>
+        {loading && card && (
+          <motion.div
+            className="fixed inset-0 z-40 bg-surface-0/60 backdrop-blur-sm flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="flex flex-col items-center gap-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="w-5 h-5 rounded-full border-2 border-text-tertiary border-t-transparent animate-spin" />
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-text-tertiary">
+                {loadingMessage}
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </main>
