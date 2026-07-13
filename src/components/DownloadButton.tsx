@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { toPng } from "html-to-image";
+import { toCanvas } from "html-to-image";
 
 interface DownloadButtonProps {
   cardRef: React.RefObject<HTMLDivElement | null>;
@@ -25,6 +25,8 @@ function waitForImg(img: HTMLImageElement): Promise<void> {
     img.onerror = () => resolve();
   });
 }
+
+const EXPORT_BUFFER_PX = 8;
 
 export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadButtonProps) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -80,7 +82,6 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       if (heroNum) {
         savedStyles.push({ el: heroNum, cssText: heroNum.style.cssText });
         heroNum.style.fontKerning = "none";
-        heroNum.style.paddingRight = "8px";
       }
 
       const heroStat = card.querySelector<HTMLElement>(".card-hero-stat");
@@ -94,12 +95,25 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
 
       let dataUrl: string;
       try {
-        dataUrl = await toPng(cardRef.current, {
-          quality: 1,
-          pixelRatio: 2,
+        const naturalWidth = card.clientWidth;
+        const naturalHeight = card.clientHeight;
+        const px = 2;
+
+        const wideCanvas = await toCanvas(card, {
+          pixelRatio: px,
           cacheBust: true,
           skipAutoScale: true,
+          width: naturalWidth + EXPORT_BUFFER_PX,
+          height: naturalHeight + EXPORT_BUFFER_PX,
         });
+
+        const croppedCanvas = document.createElement("canvas");
+        croppedCanvas.width = naturalWidth * px;
+        croppedCanvas.height = naturalHeight * px;
+        const ctx = croppedCanvas.getContext("2d")!;
+        ctx.drawImage(wideCanvas, 0, 0);
+
+        dataUrl = croppedCanvas.toDataURL("image/png");
       } finally {
         document.documentElement.removeAttribute("data-exporting");
         for (const { el, cssText } of savedStyles) {
