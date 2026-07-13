@@ -39,7 +39,29 @@ export async function GET(
 
   if (!match) {
     return NextResponse.json(
-      { error: "Card not found" },
+      {
+        error: "Card not found",
+        debug: {
+          searchedCardId: cardId,
+          totalProfiles: allProfiles?.length ?? 0,
+          profilesWithCard: (allProfiles ?? []).filter((p) => p.card != null).length,
+          sampleTypes: (allProfiles ?? []).slice(0, 1).map((p) => {
+            const c = p.card;
+            const type = typeof c;
+            const isString = typeof c === "string";
+            let parsed: Record<string, unknown> | null = null;
+            if (isString) { try { parsed = JSON.parse(c as string); } catch {} }
+            else if (c && typeof c === "object") { parsed = c as Record<string, unknown>; }
+            const verification = parsed?.verification;
+            return {
+              cardType: type,
+              cardIsNull: c == null,
+              verificationType: typeof verification,
+              verificationCardId: (verification as Record<string, unknown>)?.cardId,
+            };
+          }),
+        },
+      },
       { status: 404, headers: { "Cache-Control": "no-store" } }
     );
   }
