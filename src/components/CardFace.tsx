@@ -381,7 +381,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
                     ref={heroStatValueRef}
                     className="card-hero-stat-value card-hero-stat-gradient text-text-primary"
                     data-hero-number
-                    style={{ fontSize: `${heroFontSize}px`, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" }}
+                    style={{ fontSize: `${heroFontSize}px` }}
                   >
                     {heroStat.value}
                   </span>
