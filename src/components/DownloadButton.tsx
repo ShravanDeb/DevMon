@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { toCanvas } from "html-to-image";
+import { toPng } from "html-to-image";
 
 interface DownloadButtonProps {
   cardRef: React.RefObject<HTMLDivElement | null>;
@@ -25,8 +25,6 @@ function waitForImg(img: HTMLImageElement): Promise<void> {
     img.onerror = () => resolve();
   });
 }
-
-const EXPORT_BUFFER_PX = 8;
 
 export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadButtonProps) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -90,30 +88,23 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         heroStat.style.overflow = "visible";
       }
 
+      const heroVal = card.querySelector<HTMLElement>(".card-hero-stat-value");
+      if (heroVal) {
+        savedStyles.push({ el: heroVal, cssText: heroVal.style.cssText });
+        heroVal.style.fontSize = "66px";
+      }
+
       document.documentElement.setAttribute("data-exporting", "");
       await new Promise((r) => setTimeout(r, 50));
 
       let dataUrl: string;
       try {
-        const naturalWidth = card.clientWidth;
-        const naturalHeight = card.clientHeight;
-        const px = 2;
-
-        const wideCanvas = await toCanvas(card, {
-          pixelRatio: px,
+        dataUrl = await toPng(cardRef.current, {
+          quality: 1,
+          pixelRatio: 2,
           cacheBust: true,
           skipAutoScale: true,
-          width: naturalWidth + EXPORT_BUFFER_PX,
-          height: naturalHeight + EXPORT_BUFFER_PX,
         });
-
-        const croppedCanvas = document.createElement("canvas");
-        croppedCanvas.width = naturalWidth * px;
-        croppedCanvas.height = naturalHeight * px;
-        const ctx = croppedCanvas.getContext("2d")!;
-        ctx.drawImage(wideCanvas, 0, 0);
-
-        dataUrl = croppedCanvas.toDataURL("image/png");
       } finally {
         document.documentElement.removeAttribute("data-exporting");
         for (const { el, cssText } of savedStyles) {
