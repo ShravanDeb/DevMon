@@ -155,6 +155,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
         className="relative"
+        data-export-flatten
         style={{ perspective: "1600px" }}
         initial={{ opacity: 0, scale: 0.96, y: 20 }}
         animate={revealed ? { opacity: 1, scale: 1, y: 0 } : {}}
@@ -174,6 +175,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
           {/* Card body — 2:3 portrait, premium material */}
           <motion.div
             className="relative w-[540px] h-[840px] rounded-[18px] overflow-hidden card-soft-reflection"
+            data-export-flatten
             style={{
               rotateX,
               rotateY,
@@ -255,6 +257,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
               <div className="flex items-start gap-3 mb-3 shrink-0">
                 <motion.div
                   className="relative shrink-0 card-avatar-ring"
+                  data-export-flatten
                   style={{ ["--rarity-color" as string]: rarityColor.hex } as React.CSSProperties}
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={revealed ? { scale: 1, opacity: 1 } : {}}

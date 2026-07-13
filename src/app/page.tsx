@@ -190,8 +190,12 @@ function LeaderboardPreview() {
   useEffect(() => {
     fetch("/api/leaderboard?limit=3")
       .then((r) => r.json())
-      .then((d) => setEntries(d.entries || []))
-      .catch(() => {});
+      .then((d) => {
+        setEntries(d.entries || []);
+      })
+      .catch((err) => {
+        console.error("Leaderboard fetch failed:", err);
+      });
   }, []);
 
   if (entries.length === 0) return null;
