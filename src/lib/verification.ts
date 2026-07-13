@@ -42,3 +42,23 @@ export function generateVerification(
     sha256Hash: hmacHex,
   };
 }
+
+export function reSignVerification(
+  raw: RawGitHubStats,
+  stats: CardStats,
+  rarity: Rarity,
+  existingCardId: string,
+  existingEdition: number
+): VerificationData {
+  const now = new Date().toISOString();
+  const hmacHex = computeHmac(raw, stats, rarity, existingCardId);
+
+  return {
+    cardId: existingCardId,
+    edition: existingEdition,
+    generatedAt: now,
+    version: "1.0.0",
+    digitalSignature: `hmac_${hmacHex}`,
+    sha256Hash: hmacHex,
+  };
+}

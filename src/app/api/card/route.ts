@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchGitHubStats } from "@/lib/graphql";
 import { generateCard } from "@/lib/scoring";
+import { reSignVerification } from "@/lib/verification";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getSessionUser } from "@/lib/auth-helpers";
 import { CardPostSchema } from "@/lib/validation";
@@ -46,47 +47,45 @@ export async function POST(req: NextRequest) {
     }
 
     const raw = await fetchGitHubStats(session.accessToken);
-    const card = generateCard(raw, tone, rarity);
-    console.log(JSON.stringify({ reqId, event: "CARD_GENERATED", login: raw.login, newCardId: card.verification.cardId }));
 
     const admin = getSupabaseAdmin();
     if (!admin) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
-    // Check if user already has a card — preserve cardId so old verify links stay valid
-    const { data: allProfiles, error: profileQueryErr } = await admin
+    // Step 1: Look up existing profile FIRST to get stored cardId/edition
+    const { data: existingProfile, error: profileQueryErr } = await admin
       .from("profiles")
       .select("username, card")
-      .not("card", "is", null);
+      .eq("username", raw.login)
+      .not("card", "is", null)
+      .maybeSingle();
 
     if (profileQueryErr) {
       console.log(JSON.stringify({ reqId, event: "PROFILE_QUERY_ERROR", error: profileQueryErr.message }));
     }
 
-    const existingProfile = Array.isArray(allProfiles)
-      ? allProfiles.find((p) => p.username === raw.login)
-      : null;
-
     const existingCardObj = existingProfile?.card as Record<string, unknown> | null | undefined;
     const existingVerification = existingCardObj?.verification as Record<string, unknown> | undefined;
-    const foundExisting = !!existingVerification?.cardId;
+    const existingCardId = existingVerification?.cardId as string | undefined;
+    const existingEdition = (existingVerification?.edition as number) ?? 0;
 
     console.log(JSON.stringify({
       reqId,
       event: "EXISTING_LOOKUP",
-      profileCount: allProfiles?.length ?? 0,
-      foundExisting,
-      existingCardId: existingVerification?.cardId ?? null,
+      foundExisting: !!existingCardId,
+      existingCardId: existingCardId ?? null,
+      existingEdition,
       lookupUsername: raw.login,
-      profileUsernames: (allProfiles ?? []).map((p) => p.username),
     }));
 
-    if (existingVerification?.cardId) {
-      // Preserve existing cardId and edition — only update stats/class/flavor
-      card.verification.cardId = existingVerification.cardId as string;
-      card.verification.edition = (existingVerification.edition as number) ?? 0;
-      console.log(JSON.stringify({ reqId, event: "PRESERVED_CARD_ID", cardId: card.verification.cardId, edition: card.verification.edition }));
+    // Step 2: Generate card with fresh GitHub stats
+    const card = generateCard(raw, tone, rarity);
+
+    // Step 3: If existing card found, re-sign with the stored cardId + edition
+    if (existingCardId) {
+      card.verification = reSignVerification(raw, card.stats, card.rarity, existingCardId, existingEdition);
+      console.log(JSON.stringify({ reqId, event: "PRESERVED_CARD_ID", cardId: existingCardId, edition: existingEdition }));
     } else {
       // First time — get atomic edition number
       const { data: editionNum, error: editionErr } = await admin.rpc("increment_edition", {
@@ -138,8 +137,10 @@ export async function POST(req: NextRequest) {
       { onConflict: "username" }
     );
 
-    // Increment card count atomically
-    await admin.rpc("increment_card_count");
+    // Increment card count only for new cards
+    if (!existingCardId) {
+      await admin.rpc("increment_card_count");
+    }
 
     // Get rank
     const { count: totalCards } = await admin
