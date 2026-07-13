@@ -37,7 +37,7 @@ export default function TermsPage() {
             <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors mb-6">
               <span className="text-[16px] leading-none">&larr;</span> Home
             </Link>
-            <div className="rounded-[14px] neu-raised-lg p-8 md:p-12">
+            <div className="rounded-[14px] surface-card-elevated p-8 md:p-12">
               <h1 className="font-display text-[32px] font-[600] text-text-primary mb-2">
                 Terms of Service
               </h1>
@@ -64,7 +64,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="eligibility" className="scroll-mt-24">
                 <SectionHeading>Eligibility</SectionHeading>
@@ -76,7 +76,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="affiliation" className="scroll-mt-24">
                 <SectionHeading>No GitHub Affiliation</SectionHeading>
@@ -92,7 +92,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="verification" className="scroll-mt-24">
                 <SectionHeading>Public Verification Pages</SectionHeading>
@@ -110,7 +110,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="acceptable-use" className="scroll-mt-24">
                 <SectionHeading>Acceptable Use</SectionHeading>
@@ -139,7 +139,7 @@ export default function TermsPage() {
                 </BulletList>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="intellectual-property" className="scroll-mt-24">
                 <SectionHeading>Intellectual Property</SectionHeading>
@@ -156,7 +156,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="disclaimer" className="scroll-mt-24">
                 <SectionHeading>Disclaimer of Warranties</SectionHeading>
@@ -170,7 +170,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="liability" className="scroll-mt-24">
                 <SectionHeading>Limitation of Liability</SectionHeading>
@@ -183,7 +183,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="indemnification" className="scroll-mt-24">
                 <SectionHeading>Indemnification</SectionHeading>
@@ -195,7 +195,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="suspension" className="scroll-mt-24">
                 <SectionHeading>Account Suspension</SectionHeading>
@@ -208,7 +208,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="modifications" className="scroll-mt-24">
                 <SectionHeading>Service Modifications</SectionHeading>
@@ -220,7 +220,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="governing-law" className="scroll-mt-24">
                 <SectionHeading>Governing Law &amp; Disputes</SectionHeading>
@@ -232,7 +232,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="entire-agreement" className="scroll-mt-24">
                 <SectionHeading>Severability &amp; Entire Agreement</SectionHeading>
@@ -246,7 +246,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="changes" className="scroll-mt-24">
                 <SectionHeading>Changes to These Terms</SectionHeading>
@@ -258,7 +258,7 @@ export default function TermsPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="contact" className="scroll-mt-24">
                 <SectionHeading>Contact</SectionHeading>

@@ -44,3 +44,6 @@ next-env.d.ts
 # python
 __pycache__/
 *.pyc
+
+# one-time scripts with secrets
+scripts/wipe-db.mjs

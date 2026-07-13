@@ -46,7 +46,7 @@ function AccordionItem({
   onToggle: () => void;
 }) {
   return (
-    <div className="rounded-[10px] neu-raised overflow-hidden">
+    <div className="rounded-[10px] surface-card overflow-hidden">
       <button
         onClick={onToggle}
         className="w-full text-left px-6 py-5 flex items-center justify-between gap-4"

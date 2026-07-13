@@ -36,8 +36,8 @@ export function MagneticButton({
   const handleMouseLeave = () => setPos({ x: 0, y: 0 });
 
   const base = variant === "primary"
-    ? "neu-btn-accent font-medium"
-    : "neu-btn text-text-primary";
+    ? "surface-btn-accent font-medium"
+    : "surface-btn text-text-primary";
 
   const content = (
     <motion.div

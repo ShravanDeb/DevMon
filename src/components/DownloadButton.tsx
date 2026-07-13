@@ -132,7 +132,7 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       <button
         onClick={handleDownload}
         disabled={state === "loading"}
-        className="neu-btn inline-flex items-center gap-2 rounded-[8px] px-5 py-2.5 text-[13px] font-medium text-text-primary disabled:opacity-40"
+        className="surface-btn inline-flex items-center gap-2 rounded-[8px] px-5 py-2.5 text-[13px] font-medium text-text-primary disabled:opacity-40"
       >
         {state === "loading" ? (
           <motion.svg

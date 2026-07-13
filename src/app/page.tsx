@@ -338,7 +338,7 @@ function LeaderboardPreview() {
         >
           <a
             href="/leaderboard"
-            className="inline-flex items-center gap-2 rounded-[6px] px-5 py-2.5 text-[13px] leading-none font-medium neu-btn text-text-primary hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-2 rounded-[6px] px-5 py-2.5 text-[13px] leading-none font-medium surface-btn text-text-primary"
           >
             View Full Leaderboard
             <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -469,7 +469,7 @@ function MiniStatBars() {
           <span className="w-16 text-[11px] font-mono font-medium uppercase tracking-[0.06em] text-text-tertiary text-right shrink-0">
             {s.label}
           </span>
-          <div className="flex-1 h-1.5 rounded-full neu-bar-track overflow-hidden">
+          <div className="flex-1 h-1.5 rounded-full surface-track overflow-hidden">
             <motion.div
               className="h-full rounded-full"
               style={{ background: s.color }}
@@ -510,7 +510,7 @@ function HowItWorksStep({
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: 0.12 * index, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="shrink-0 w-10 h-10 rounded-[8px] neu-raised flex items-center justify-center">
+      <div className="shrink-0 w-10 h-10 rounded-[8px] surface-card flex items-center justify-center">
         <span className="font-mono text-[13px] font-medium text-text-tertiary">{number}</span>
       </div>
       <div>
@@ -645,7 +645,7 @@ export default function LandingPage() {
           {/* Badge */}
           <motion.div
             variants={variants.fadeUp}
-            className="mb-10 inline-flex items-center gap-2.5 px-4 py-2 rounded-full neu-badge"
+            className="mb-10 inline-flex items-center gap-2.5 px-4 py-2 rounded-full surface-badge"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-text-primary opacity-40 animate-ping" />
@@ -716,9 +716,9 @@ export default function LandingPage() {
       <section className="py-24 md:py-16 px-6">
         <div className="max-w-3xl mx-auto flex items-center justify-center gap-20 md:gap-12">
           <AnimatedCounter value={cardCount !== null ? cardCount : 0} label="Cards Generated" />
-          <div className="w-px h-16 bg-neu-dark" />
+          <div className="w-px h-16 bg-border-subtle" />
           <AnimatedCounter value={5} label="Rarity Tiers" />
-          <div className="w-px h-16 bg-neu-dark" />
+          <div className="w-px h-16 bg-border-subtle" />
           <AnimatedCounter value={12} label="DevMon Classes" />
         </div>
       </section>
@@ -790,7 +790,7 @@ export default function LandingPage() {
             "Each class gets its own character",
           ]}
           visual={
-            <div className="rounded-[10px] neu-raised-lg p-6 space-y-4">
+            <div className="rounded-[10px] surface-card-elevated p-6 space-y-4">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-mono font-medium uppercase tracking-[0.06em] text-text-tertiary">Rare · Polyglot Artisan</span>
               </div>
@@ -909,7 +909,7 @@ export default function LandingPage() {
               href="https://github.com/ShravanDeb/DevMon"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 rounded-[6px] px-6 py-3 text-[13px] leading-none font-medium neu-btn text-text-primary hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center gap-2.5 rounded-[6px] px-6 py-3 text-[13px] leading-none font-medium surface-btn text-text-primary"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>

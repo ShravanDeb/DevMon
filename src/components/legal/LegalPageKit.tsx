@@ -21,7 +21,7 @@ export function LegalToc({ sections }: { sections: { id: string; title: string }
       </nav>
 
       {/* Mobile TOC */}
-      <details className="lg:hidden mb-8 rounded-[10px] neu-raised overflow-hidden">
+      <details className="lg:hidden mb-8 rounded-[10px] surface-card overflow-hidden">
         <summary className="px-5 py-3.5 cursor-pointer text-[13px] font-mono uppercase tracking-[0.08em] text-text-tertiary select-none list-none flex items-center justify-between">
           <span>On this page</span>
           <span className="text-[18px] font-light text-text-tertiary leading-none">+</span>

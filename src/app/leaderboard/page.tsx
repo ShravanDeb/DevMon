@@ -82,12 +82,12 @@ export default function LeaderboardPage() {
             placeholder="Filter by company..."
             value={companyFilter}
             onChange={(e) => setCompanyFilter(e.target.value)}
-            className="flex-1 rounded-[8px] neu-input px-4 py-2.5 text-[13px] placeholder-text-tertiary font-mono"
+            className="flex-1 rounded-[8px] surface-input px-4 py-2.5 text-[13px] placeholder-text-tertiary font-mono"
           />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortKey)}
-            className="rounded-[8px] neu-select px-4 py-2.5 text-[13px]"
+            className="rounded-[8px] surface-input px-4 py-2.5 text-[13px] appearance-none"
           >
             <option value="rarity">Rarity</option>
             <option value="mergeForce">Merge Force</option>
@@ -115,7 +115,7 @@ export default function LeaderboardPage() {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="p-4 rounded-[8px] neu-inset text-[13px] text-text-secondary text-center"
+              className="p-4 rounded-[8px] surface-inset text-[13px] text-text-secondary text-center"
             >
               {error}
             </motion.div>
@@ -124,7 +124,7 @@ export default function LeaderboardPage() {
 
         {!loading && !error && (
           <motion.div
-            className="rounded-md overflow-hidden neu-raised"
+            className="rounded-md overflow-hidden surface-card"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.15 }}
@@ -199,7 +199,7 @@ export default function LeaderboardPage() {
         <div className="mt-10 text-center">
           <a
             href="/card"
-            className="inline-flex items-center gap-2 rounded-[8px] neu-btn-accent px-5 py-2.5 text-[13px] font-medium"
+            className="inline-flex items-center gap-2 rounded-[8px] surface-btn-accent px-5 py-2.5 text-[13px] font-medium"
           >
             Generate Your Credential
           </a>

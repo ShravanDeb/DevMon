@@ -38,13 +38,6 @@
     --scrollbar-thumb: #222228;
     --scrollbar-thumb-hover: #2C2C33;
 
-    /* Neumorphic: soft UI depth system */
-    --neu-base: #1C1C20;
-    --neu-light: rgba(255, 255, 255, 0.05);
-    --neu-dark: rgba(0, 0, 0, 0.5);
-    --neu-inset-light: rgba(255, 255, 255, 0.04);
-    --neu-inset-dark: rgba(0, 0, 0, 0.6);
-
     /* Accent (dark mode: subtle, light mode: saturated blue) */
     --accent: #5B9AE0;
     --accent-hover: #7BB0F0;
@@ -101,12 +94,6 @@
     --scrollbar-thumb: #D4D4D4;
     --scrollbar-thumb-hover: #A3A3A3;
 
-    /* Neumorphic: soft UI depth system */
-    --neu-base: #E8E7E3;
-    --neu-light: rgba(255, 255, 255, 0.8);
-    --neu-dark: rgba(174, 174, 192, 0.4);
-    --neu-inset-light: rgba(255, 255, 255, 0.7);
-    --neu-inset-dark: rgba(174, 174, 192, 0.5);
   }
 
   [data-theme="dark"] {
@@ -135,11 +122,6 @@
     --scrollbar-track: #08080A;
     --scrollbar-thumb: #222228;
     --scrollbar-thumb-hover: #2C2C33;
-    --neu-base: #1C1C20;
-    --neu-light: rgba(255, 255, 255, 0.05);
-    --neu-dark: rgba(0, 0, 0, 0.5);
-    --neu-inset-light: rgba(255, 255, 255, 0.04);
-    --neu-inset-dark: rgba(0, 0, 0, 0.6);
     --accent: #5B9AE0;
     --accent-hover: #7BB0F0;
     --accent-text: #08080A;
@@ -214,17 +196,14 @@
     background-position: 0 0, 2px 2px;
   }
 
-  /* Embossed text — subtle 3D depth, theme-aware */
+  /* Embossed text — antialiased only, no text-shadow */
   .card-embossed {
-    text-shadow:
-      0 1px 0 var(--overlay-6),
-      0 -1px 0 rgba(0, 0, 0, 0.25);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: geometricPrecision;
   }
 
-  /* Soft top reflection — luminance gradient across card surface, theme-aware */
+  /* Soft top reflection — subtle luminance gradient, no inset shadow */
   .card-soft-reflection::before {
     content: "";
     position: absolute;
@@ -771,148 +750,95 @@
   }
 }
 
-/* ── Neumorphic (soft UI) utilities ── */
-.neu-raised {
-  background: var(--neu-base);
-  box-shadow:
-    6px 6px 12px var(--neu-dark),
-    -6px -6px 12px var(--neu-light);
+/* ── Clean component system (Linear/Vercel-inspired) ── */
+
+/* Surface card — subtle border, single-direction depth */
+.surface-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-hairline);
+  border-radius: 12px;
 }
 
-.neu-raised-lg {
-  background: var(--neu-base);
-  box-shadow:
-    10px 10px 20px var(--neu-dark),
-    -10px -10px 20px var(--neu-light);
+/* Surface card elevated — larger shadow for hierarchy */
+.surface-card-elevated {
+  background: var(--surface-2);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
-.neu-inset {
-  background: var(--neu-base);
-  box-shadow:
-    inset 4px 4px 8px var(--neu-inset-dark),
-    inset -4px -4px 8px var(--neu-inset-light);
+/* Surface inset — recessed area */
+.surface-inset {
+  background: var(--surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: 8px;
 }
 
-.neu-inset-sm {
-  background: var(--neu-base);
-  box-shadow:
-    inset 2px 2px 5px var(--neu-inset-dark),
-    inset -2px -2px 5px var(--neu-inset-light);
+/* Button — ghost style, transparent bg with subtle border */
+.surface-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border-hairline);
+  border-radius: 8px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.surface-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--border-subtle);
+}
+.surface-btn:active {
+  background: var(--surface-4);
 }
 
-.neu-flat {
-  background: var(--neu-base);
-  box-shadow: none;
-}
-
-/* ── Neumorphic button system ── */
-.neu-btn {
-  background: var(--neu-base);
-  box-shadow:
-    5px 5px 10px var(--neu-dark),
-    -5px -5px 10px var(--neu-light);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
-}
-.neu-btn:active {
-  box-shadow:
-    inset 3px 3px 6px var(--neu-inset-dark),
-    inset -3px -3px 6px var(--neu-inset-light);
-}
-
-.neu-btn-accent {
+/* Button accent — solid accent bg */
+.surface-btn-accent {
   background: var(--accent);
   color: var(--accent-text);
-  box-shadow:
-    5px 5px 10px var(--neu-dark),
-    -5px -5px 10px var(--neu-light);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: background 0.15s ease;
 }
-.neu-btn-accent:hover {
+.surface-btn-accent:hover {
   background: var(--accent-hover);
 }
-.neu-btn-accent:active {
-  box-shadow:
-    inset 3px 3px 6px rgba(0, 0, 0, 0.3),
-    inset -3px -3px 6px rgba(255, 255, 255, 0.1);
-}
 
-/* ── Neumorphic input system ── */
-.neu-input {
-  background: var(--neu-base);
+/* Input field — clean bordered input */
+.surface-input {
+  background: var(--surface-1);
   color: var(--text-primary);
-  box-shadow:
-    inset 3px 3px 6px var(--neu-inset-dark),
-    inset -3px -3px 6px var(--neu-inset-light);
-  transition: box-shadow 0.2s ease;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.neu-input:focus {
+.surface-input:focus {
   outline: none;
-  box-shadow:
-    inset 3px 3px 6px var(--neu-inset-dark),
-    inset -3px -3px 6px var(--neu-inset-light),
-    0 0 0 2px var(--focus-ring);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
-/* ── Neumorphic select ── */
-.neu-select {
-  background: var(--neu-base);
-  color: var(--text-primary);
-  box-shadow:
-    inset 2px 2px 5px var(--neu-inset-dark),
-    inset -2px -2px 5px var(--neu-inset-light);
-  transition: box-shadow 0.2s ease;
-  appearance: none;
-}
-.neu-select:focus {
-  outline: none;
-  box-shadow:
-    inset 2px 2px 5px var(--neu-inset-dark),
-    inset -2px -2px 5px var(--neu-inset-light),
-    0 0 0 2px var(--focus-ring);
+/* Badge / pill — small surface */
+.surface-badge {
+  background: var(--surface-2);
+  border: 1px solid var(--border-hairline);
+  border-radius: 9999px;
 }
 
-/* ── Neumorphic badge / pill ── */
-.neu-badge {
-  background: var(--neu-base);
-  box-shadow:
-    3px 3px 6px var(--neu-dark),
-    -3px -3px 6px var(--neu-light);
-}
-
-/* ── Neumorphic toggle track ── */
-.neu-toggle-track {
-  background: var(--neu-base);
-  box-shadow:
-    inset 3px 3px 6px var(--neu-inset-dark),
-    inset -3px -3px 6px var(--neu-inset-light);
-}
-
-/* ── Neumorphic toggle thumb ── */
-.neu-toggle-thumb {
-  background: var(--neu-base);
-  box-shadow:
-    2px 2px 4px var(--neu-dark),
-    -2px -2px 4px var(--neu-light);
-}
-
-/* ── Neumorphic progress bar track ── */
-.neu-bar-track {
-  background: var(--neu-base);
-  box-shadow:
-    inset 2px 2px 5px var(--neu-inset-dark),
-    inset -2px -2px 5px var(--neu-inset-light);
-}
-
-/* ── Neumorphic divider (soft gradient line) ── */
-.neu-divider {
+/* Divider — clean gradient line */
+.surface-divider {
   height: 1px;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    var(--neu-dark) 20%,
-    var(--neu-dark) 80%,
+    var(--border-subtle) 20%,
+    var(--border-subtle) 80%,
     transparent 100%
   );
+}
+
+/* Track — progress bar background */
+.surface-track {
+  background: var(--surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: 9999px;
 }
 
 /* ── Marquee shimmer keyframe ── */
@@ -992,9 +918,6 @@
 }
 [data-exporting] .card-soft-reflection::before {
   display: none !important;
-}
-[data-exporting] .card-embossed {
-  text-shadow: none !important;
 }
 [data-exporting] .card-rarity-glow::after {
   display: none !important;

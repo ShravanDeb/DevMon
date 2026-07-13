@@ -33,7 +33,7 @@ export default function PrivacyPage() {
             <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors mb-6">
               <span className="text-[16px] leading-none">&larr;</span> Home
             </Link>
-            <div className="rounded-[14px] neu-raised-lg p-8 md:p-12">
+            <div className="rounded-[14px] surface-card-elevated p-8 md:p-12">
               <h1 className="font-display text-[32px] font-[600] text-text-primary mb-2">
                 Privacy Policy
               </h1>
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="how-we-use" className="scroll-mt-24">
                 <SectionHeading>How We Use Your Data</SectionHeading>
@@ -109,7 +109,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="card-storage" className="scroll-mt-24">
                 <SectionHeading>Card Data &amp; Public Verification</SectionHeading>
@@ -136,7 +136,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="cookies" className="scroll-mt-24">
                 <SectionHeading>Cookies &amp; Local Storage</SectionHeading>
@@ -170,7 +170,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="third-parties" className="scroll-mt-24">
                 <SectionHeading>Third-Party Services</SectionHeading>
@@ -202,7 +202,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="data-retention" className="scroll-mt-24">
                 <SectionHeading>Data Retention</SectionHeading>
@@ -217,7 +217,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="your-rights" className="scroll-mt-24">
                 <SectionHeading>Your Rights</SectionHeading>
@@ -258,7 +258,7 @@ export default function PrivacyPage() {
                 </BulletList>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="additional-rights" className="scroll-mt-24">
                 <SectionHeading>Additional Rights (EEA, UK &amp; California)</SectionHeading>
@@ -283,7 +283,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="children" className="scroll-mt-24">
                 <SectionHeading>Children&apos;s Privacy</SectionHeading>
@@ -295,7 +295,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="changes" className="scroll-mt-24">
                 <SectionHeading>Changes to This Policy</SectionHeading>
@@ -307,7 +307,7 @@ export default function PrivacyPage() {
                 </Paragraph>
               </section>
 
-              <div className="neu-divider my-8" />
+              <div className="surface-divider my-8" />
 
               <section id="contact" className="scroll-mt-24">
                 <SectionHeading>Contact</SectionHeading>

@@ -12,7 +12,7 @@ export function ContactForm() {
   const mailtoHref = `mailto:shravandeb@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   return (
-    <div className="rounded-[14px] neu-raised-lg p-8 md:p-10">
+    <div className="rounded-[14px] surface-card-elevated p-8 md:p-10">
       <div className="space-y-6">
         <div>
           <label
@@ -27,7 +27,7 @@ export function ContactForm() {
             placeholder="Your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-[8px] neu-input px-4 py-3 text-[14px] text-text-primary placeholder:text-text-tertiary"
+            className="w-full rounded-[8px] surface-input px-4 py-3 text-[14px] text-text-primary placeholder:text-text-tertiary"
           />
         </div>
 
@@ -44,7 +44,7 @@ export function ContactForm() {
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-[8px] neu-input px-4 py-3 text-[14px] text-text-primary placeholder:text-text-tertiary"
+            className="w-full rounded-[8px] surface-input px-4 py-3 text-[14px] text-text-primary placeholder:text-text-tertiary"
           />
         </div>
 
@@ -61,13 +61,13 @@ export function ContactForm() {
             placeholder="What's on your mind?"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="w-full rounded-[8px] neu-input px-4 py-3 text-[14px] text-text-primary placeholder:text-text-tertiary resize-none"
+            className="w-full rounded-[8px] surface-input px-4 py-3 text-[14px] text-text-primary placeholder:text-text-tertiary resize-none"
           />
         </div>
 
         <a
           href={mailtoHref}
-          className="inline-flex items-center gap-2 rounded-[8px] neu-btn-accent px-6 py-3 text-[13px] font-medium"
+          className="inline-flex items-center gap-2 rounded-[8px] surface-btn-accent px-6 py-3 text-[13px] font-medium"
         >
           Send via Email
         </a>
