@@ -75,6 +75,39 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       document.documentElement.setAttribute("data-exporting", "");
       await new Promise((r) => setTimeout(r, 50));
 
+      // ── DIAGNOSTICS: hero stat clipping source ──
+      const heroVal = card.querySelector<HTMLElement>(".card-hero-stat-value");
+      if (heroVal) {
+        const chain: HTMLElement[] = [];
+        let el: HTMLElement | null = heroVal;
+        while (el && el !== card) {
+          chain.push(el);
+          el = el.parentElement;
+        }
+        chain.push(card);
+        console.group("DevMon export diagnostics — hero stat chain");
+        for (const node of chain) {
+          const r = node.getBoundingClientRect();
+          const cs = window.getComputedStyle(node);
+          console.log(node.tagName + (node.className ? "." + (node.className as string).split(" ").slice(0, 3).join(".") : ""), {
+            rect: { top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom },
+            scrollH: node.scrollHeight,
+            offsetH: node.offsetHeight,
+            overflow: cs.overflow,
+            overflowY: cs.overflowY,
+            lineHeight: cs.lineHeight,
+            fontSize: cs.fontSize,
+            paddingTop: cs.paddingTop,
+            paddingBottom: cs.paddingBottom,
+            minHeight: cs.minHeight,
+            maxHeight: cs.maxHeight,
+            height: cs.height,
+          });
+        }
+        console.groupEnd();
+      }
+      // ── END DIAGNOSTICS ──
+
       let dataUrl: string;
       try {
         dataUrl = await toPng(cardRef.current, {
