@@ -107,6 +107,21 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         heroVal.style.fontSize = computedSize;
       }
 
+      // Re-measure hero stat against the export-time layout so the font-size
+      // accounts for the forced card body width and overflow:visible changes.
+      if (heroVal) {
+        const heroContainer = heroVal.parentElement;
+        if (heroContainer) {
+          const availableWidth = heroContainer.clientWidth - 4;
+          const currentSize = parseFloat(window.getComputedStyle(heroVal).fontSize);
+          // Step down if the current size no longer fits the export layout
+          for (let size = currentSize; size >= 28; size -= 2) {
+            heroVal.style.fontSize = `${size}px`;
+            if (heroVal.scrollWidth <= availableWidth) break;
+          }
+        }
+      }
+
       document.documentElement.setAttribute("data-exporting", "");
 
       // Embed @font-face CSS so html-to-image SVG foreignObject has Fraunces

@@ -140,10 +140,13 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
       const containerWidth = container.clientWidth;
       if (containerWidth === 0) return;
 
+      // Safety margin: 4px buffer so font overhang never clips the last glyph
+      const availableWidth = containerWidth - 4;
+
       // Start at max size and shrink until it fits
       for (let size = 72; size >= 28; size -= 2) {
         el.style.fontSize = `${size}px`;
-        if (el.scrollWidth <= containerWidth) {
+        if (el.scrollWidth <= availableWidth) {
           setHeroFontSize(size);
           return;
         }
@@ -371,7 +374,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
 
               {/* HERO STAT — The Centerpiece */}
               <motion.div
-                className="card-hero-stat mb-3 flex flex-col justify-center relative shrink-0 w-full overflow-hidden"
+                className="card-hero-stat mb-3 flex flex-col justify-center relative shrink-0 w-full"
                 initial={{ opacity: 0, y: 6 }}
                 animate={revealed ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
