@@ -340,7 +340,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
 
               {/* HERO STAT — The Centerpiece */}
               <motion.div
-                className="card-hero-stat mb-3 flex flex-col justify-center relative"
+                className="card-hero-stat mb-3 flex flex-col justify-center relative shrink-0"
                 initial={{ opacity: 0, y: 6 }}
                 animate={revealed ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
