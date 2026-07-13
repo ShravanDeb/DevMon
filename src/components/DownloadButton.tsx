@@ -76,7 +76,6 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       if (heroNum) {
         savedStyles.push({ el: heroNum, cssText: heroNum.style.cssText });
         heroNum.style.fontKerning = "none";
-        heroNum.style.letterSpacing = "0.02em";
       }
 
       document.documentElement.setAttribute("data-exporting", "");
