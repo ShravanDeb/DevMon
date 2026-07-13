@@ -94,7 +94,7 @@ BEGIN
   SELECT c.card_id INTO existing_card_id FROM cards c WHERE c.user_id = p_user_id;
 
   IF existing_card_id IS NULL THEN
-    -- First-time insert: use the candidate card_id and edition
+    -- First-time insert: auto-assign edition from sequence
     INSERT INTO cards (
       user_id, github_username, display_name, avatar_url, company, primary_language,
       card_id, edition, raw_stats, stats, rarity, rarity_score, primary_class, secondary_class,
@@ -102,10 +102,11 @@ BEGIN
       sha256_hash, digital_signature, updated_at
     ) VALUES (
       p_user_id, p_github_username, p_display_name, p_avatar_url, p_company, p_primary_language,
-      p_card_id, p_edition, p_raw_stats, p_stats, p_rarity, p_rarity_score, p_primary_class, p_secondary_class,
+      p_card_id, nextval('card_edition_seq'), p_raw_stats, p_stats, p_rarity, p_rarity_score, p_primary_class, p_secondary_class,
       p_hero_stat, p_signature_move, p_achievements, p_flavor_text, p_flavor_tone,
       p_sha256_hash, p_digital_signature, now()
-    );
+    )
+    RETURNING cards.card_id, cards.edition INTO card_id, edition;
 
     card_id := p_card_id;
     edition := p_edition;
