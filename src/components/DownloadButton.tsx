@@ -70,12 +70,17 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         savedStyles.push({ el, cssText: el.style.cssText });
         el.style.transform = "none";
         el.style.perspective = "none";
+        el.style.setProperty("rotateX", "none");
+        el.style.setProperty("rotateY", "none");
+        el.style.setProperty("transform-style", "flat");
+        el.style.overflow = "visible";
       }
 
       const heroNum = card.querySelector<HTMLElement>("[data-hero-number]");
       if (heroNum) {
         savedStyles.push({ el: heroNum, cssText: heroNum.style.cssText });
         heroNum.style.fontKerning = "none";
+        heroNum.style.paddingRight = "8px";
       }
 
       const heroStat = card.querySelector<HTMLElement>(".card-hero-stat");
