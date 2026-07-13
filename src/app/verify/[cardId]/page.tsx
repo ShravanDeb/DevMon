@@ -296,21 +296,6 @@ export default function VerifyPage() {
           </div>
         </motion.div>
 
-        {/* Flavor Text */}
-        <motion.div
-          className="mb-10"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-        >
-          <p className="text-[11px] text-text-tertiary uppercase tracking-wider mb-2 font-mono">
-            Flavor Text
-          </p>
-          <p className="text-[14px] text-text-secondary italic leading-relaxed">
-            &ldquo;{card.flavorText}&rdquo;
-          </p>
-        </motion.div>
-
         {/* Divider */}
         <div className="surface-divider mb-10" />
 
