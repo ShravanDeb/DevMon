@@ -98,7 +98,7 @@ export default function VerifyPage() {
   }, []);
 
   useEffect(() => {
-    fetch(`/api/verify/${cardId}`)
+    fetch(`/api/verify/${cardId}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((json) => {
         if (json.error) setError(json.error);

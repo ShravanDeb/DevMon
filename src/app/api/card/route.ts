@@ -6,6 +6,8 @@ import { getSessionUser } from "@/lib/auth-helpers";
 import { CardPostSchema } from "@/lib/validation";
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getSessionUser();
@@ -41,12 +43,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
-    // Get atomic edition number
-    const { data: editionNum, error: editionErr } = await admin.rpc("increment_edition", {
-      p_card_id: card.verification.cardId,
-    });
-    if (!editionErr && typeof editionNum === "number") {
-      card.verification.edition = editionNum;
+    // Check if user already has a card — preserve cardId so old verify links stay valid
+    const { data: allProfiles } = await admin
+      .from("profiles")
+      .select("card")
+      .not("card", "is", null);
+
+    const existingProfile = Array.isArray(allProfiles)
+      ? allProfiles.find((p) => {
+          const c = p.card as Record<string, unknown> | null;
+          const v = c?.verification as Record<string, unknown> | undefined;
+          return v?.username === raw.login;
+        })
+      : null;
+
+    const existingVerification = existingProfile?.card &&
+      (existingProfile.card as Record<string, unknown>).verification as Record<string, unknown> | undefined;
+
+    if (existingVerification?.cardId) {
+      // Preserve existing cardId and edition — only update stats/class/flavor
+      card.verification.cardId = existingVerification.cardId as string;
+      card.verification.edition = (existingVerification.edition as number) ?? 0;
+    } else {
+      // First time — get atomic edition number
+      const { data: editionNum, error: editionErr } = await admin.rpc("increment_edition", {
+        p_card_id: card.verification.cardId,
+      });
+      if (!editionErr && typeof editionNum === "number") {
+        card.verification.edition = editionNum;
+      }
     }
 
     const topLang = raw.languages[0]?.name || null;
