@@ -340,17 +340,17 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
 
               {/* HERO STAT — The Centerpiece */}
               <motion.div
-                className="card-hero-stat mb-3 flex flex-col justify-center relative shrink-0"
+                className="card-hero-stat mb-3 flex flex-col justify-center relative shrink-0 w-full overflow-hidden"
                 initial={{ opacity: 0, y: 6 }}
                 animate={revealed ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="relative flex items-baseline gap-1">
-                  <span className="card-hero-stat-value card-hero-stat-gradient text-text-primary" data-hero-number>
+                <div className="relative flex items-baseline gap-1 w-full min-w-0">
+                  <span className="card-hero-stat-value card-hero-stat-gradient text-text-primary" data-hero-number style={{ maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {heroStat.value}
                   </span>
                   {heroStat.unit && (
-                    <span className="card-hero-stat-unit text-text-secondary">
+                    <span className="card-hero-stat-unit text-text-secondary shrink-0">
                       {heroStat.unit}
                     </span>
                   )}

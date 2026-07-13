@@ -42,6 +42,7 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
 
     const savedStyles: { el: HTMLElement; cssText: string }[] = [];
     const savedSrcs: { img: HTMLImageElement; src: string }[] = [];
+    let fontStyleEl: HTMLStyleElement | null = null;
     const CARD_W = 540;
     const CARD_H = 840;
     const BUFFER = 8;
@@ -105,6 +106,26 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       }
 
       document.documentElement.setAttribute("data-exporting", "");
+
+      // Embed @font-face CSS so html-to-image SVG foreignObject has Fraunces
+      try {
+        let fontCss = "";
+        for (const sheet of Array.from(document.styleSheets)) {
+          try {
+            for (const rule of Array.from(sheet.cssRules)) {
+              if (rule instanceof CSSFontFaceRule) {
+                fontCss += rule.cssText + "\n";
+              }
+            }
+          } catch { /* cross-origin sheet, skip */ }
+        }
+        if (fontCss) {
+          fontStyleEl = document.createElement("style");
+          fontStyleEl.textContent = fontCss;
+          card.appendChild(fontStyleEl);
+        }
+      } catch { /* ignore */ }
+
       await new Promise((r) => setTimeout(r, 50));
 
       let dataUrl: string;
@@ -119,6 +140,7 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         });
       } finally {
         document.documentElement.removeAttribute("data-exporting");
+        if (fontStyleEl?.parentNode) fontStyleEl.remove();
         for (const { el, cssText } of savedStyles) {
           el.style.cssText = cssText;
         }
@@ -140,6 +162,7 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       setState("error");
       setTimeout(() => reset(), 3000);
       document.documentElement.removeAttribute("data-exporting");
+      if (fontStyleEl?.parentNode) fontStyleEl.remove();
       for (const { el, cssText } of savedStyles) {
         el.style.cssText = cssText;
       }
