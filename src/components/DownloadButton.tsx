@@ -72,6 +72,13 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         el.style.perspective = "none";
       }
 
+      const heroNum = card.querySelector<HTMLElement>("[data-hero-number]");
+      if (heroNum) {
+        savedStyles.push({ el: heroNum, cssText: heroNum.style.cssText });
+        heroNum.style.fontKerning = "none";
+        heroNum.style.letterSpacing = "0.02em";
+      }
+
       document.documentElement.setAttribute("data-exporting", "");
       await new Promise((r) => setTimeout(r, 50));
 

@@ -346,7 +346,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
                 transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div className="relative flex items-baseline gap-1">
-                  <span className="card-hero-stat-value card-hero-stat-gradient text-text-primary">
+                  <span className="card-hero-stat-value card-hero-stat-gradient text-text-primary" data-hero-number>
                     {heroStat.value}
                   </span>
                   {heroStat.unit && (
