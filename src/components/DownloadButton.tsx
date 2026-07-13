@@ -42,6 +42,9 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
 
     const savedStyles: { el: HTMLElement; cssText: string }[] = [];
     const savedSrcs: { img: HTMLImageElement; src: string }[] = [];
+    const CARD_W = 540;
+    const CARD_H = 840;
+    const BUFFER = 8;
 
     try {
       await document.fonts.ready;
@@ -76,6 +79,13 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         el.style.overflow = "visible";
       }
 
+      const cardBody = flattenEls[1];
+      if (cardBody) {
+        savedStyles.push({ el: cardBody, cssText: cardBody.style.cssText });
+        cardBody.style.width = `${CARD_W + BUFFER}px`;
+        cardBody.style.minWidth = `${CARD_W + BUFFER}px`;
+      }
+
       const heroNum = card.querySelector<HTMLElement>("[data-hero-number]");
       if (heroNum) {
         savedStyles.push({ el: heroNum, cssText: heroNum.style.cssText });
@@ -104,6 +114,8 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
           pixelRatio: 2,
           cacheBust: true,
           skipAutoScale: true,
+          canvasWidth: CARD_W * 2,
+          canvasHeight: CARD_H * 2,
         });
       } finally {
         document.documentElement.removeAttribute("data-exporting");
