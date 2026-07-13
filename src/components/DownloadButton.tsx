@@ -112,7 +112,9 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       if (heroVal) {
         const heroContainer = heroVal.parentElement;
         if (heroContainer) {
-          const availableWidth = heroContainer.clientWidth - 4;
+          // No extra margin — padding-right on .card-hero-stat-value handles glyph overhang,
+          // and scrollWidth includes padding.
+          const availableWidth = heroContainer.clientWidth;
           const currentSize = parseFloat(window.getComputedStyle(heroVal).fontSize);
           // Step down if the current size no longer fits the export layout
           for (let size = currentSize; size >= 28; size -= 2) {

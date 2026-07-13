@@ -140,8 +140,9 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
       const containerWidth = container.clientWidth;
       if (containerWidth === 0) return;
 
-      // Safety margin: 4px buffer so font overhang never clips the last glyph
-      const availableWidth = containerWidth - 4;
+      // No extra margin here — the 4px padding-right on .card-hero-stat-value
+      // already accounts for glyph overhang, and scrollWidth includes padding.
+      const availableWidth = containerWidth;
 
       // Start at max size and shrink until it fits
       for (let size = 72; size >= 28; size -= 2) {

@@ -689,6 +689,12 @@
     letter-spacing: -0.04em;
     font-variant-numeric: tabular-nums;
     display: inline-block;
+    /* Extends the gradient background box past the last glyph's advance width
+       so -webkit-background-clip: text covers font overhang/bearing on the
+       final character. scrollWidth now includes this padding, so the safety
+       margin in the fit-to-width logic (CardFace / DownloadButton) is set to 0
+       to avoid double-counting. */
+    padding-right: 4px;
   }
 
   .card-hero-stat-gradient {
