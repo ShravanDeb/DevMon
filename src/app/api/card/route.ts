@@ -46,15 +46,11 @@ export async function POST(req: NextRequest) {
     // Check if user already has a card — preserve cardId so old verify links stay valid
     const { data: allProfiles } = await admin
       .from("profiles")
-      .select("card")
+      .select("username, card")
       .not("card", "is", null);
 
     const existingProfile = Array.isArray(allProfiles)
-      ? allProfiles.find((p) => {
-          const c = p.card as Record<string, unknown> | null;
-          const v = c?.verification as Record<string, unknown> | undefined;
-          return v?.username === raw.login;
-        })
+      ? allProfiles.find((p) => p.username === raw.login)
       : null;
 
     const existingVerification = existingProfile?.card &&
