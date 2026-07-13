@@ -2,26 +2,28 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { toPng } from "html-to-image";
 
 interface DownloadButtonProps {
   cardRef: React.RefObject<HTMLDivElement | null>;
   filename?: string;
 }
 
-function inlineImage(img: HTMLImageElement): Promise<void> {
+function imgToCanvasDataUrl(img: HTMLImageElement): string {
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0);
+  return canvas.toDataURL("image/png");
+}
+
+function waitForImg(img: HTMLImageElement): Promise<void> {
   return new Promise((resolve) => {
     if (img.complete && img.naturalWidth > 0) return resolve();
     img.onload = () => resolve();
     img.onerror = () => resolve();
   });
-}
-
-function canvasToDataUrl(img: HTMLImageElement): string {
-  const c = document.createElement("canvas");
-  c.width = img.naturalWidth;
-  c.height = img.naturalHeight;
-  c.getContext("2d")!.drawImage(img, 0, 0);
-  return c.toDataURL("image/png");
 }
 
 export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadButtonProps) {
@@ -38,51 +40,98 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
     setState("loading");
     setErrorMsg("");
 
-    const originals: { img: HTMLImageElement; src: string }[] = [];
+    const savedStyles: { el: HTMLElement; cssText: string }[] = [];
+    const savedSrcs: { img: HTMLImageElement; src: string }[] = [];
 
     try {
       await document.fonts.ready;
 
       const card = cardRef.current;
-
       const imgs = Array.from(card.querySelectorAll("img"));
-      await Promise.all(imgs.map(inlineImage));
+
+      await Promise.all(imgs.map(waitForImg));
 
       for (const img of imgs) {
         if (img.naturalWidth === 0) continue;
         try {
-          originals.push({ img, src: img.src });
-          img.src = canvasToDataUrl(img);
-          await inlineImage(img);
-        } catch {
-          // skip broken images
+          const dataUrl = imgToCanvasDataUrl(img);
+          savedSrcs.push({ img, src: img.src });
+          img.src = dataUrl;
+          await waitForImg(img);
+        } catch (e) {
+          console.warn("DownloadButton: could not inline image", img.src, e);
         }
       }
 
-      const html2canvas = (await import("html2canvas")).default;
+      const flattenEls = Array.from(card.querySelectorAll<HTMLElement>(
+        "[data-export-flatten]"
+      ));
+      for (const el of flattenEls) {
+        savedStyles.push({ el, cssText: el.style.cssText });
+        el.style.transform = "none";
+        el.style.perspective = "none";
+        el.style.setProperty("rotateX", "none");
+        el.style.setProperty("rotateY", "none");
+        el.style.setProperty("transform-style", "flat");
+        el.style.overflow = "visible";
+      }
 
-      const canvas = await html2canvas(card, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
-        logging: false,
-      });
+      const heroNum = card.querySelector<HTMLElement>("[data-hero-number]");
+      if (heroNum) {
+        savedStyles.push({ el: heroNum, cssText: heroNum.style.cssText });
+        heroNum.style.fontKerning = "none";
+      }
+
+      const heroStat = card.querySelector<HTMLElement>(".card-hero-stat");
+      if (heroStat) {
+        savedStyles.push({ el: heroStat, cssText: heroStat.style.cssText });
+        heroStat.style.overflow = "visible";
+      }
+
+      const heroVal = card.querySelector<HTMLElement>(".card-hero-stat-value");
+      if (heroVal) {
+        savedStyles.push({ el: heroVal, cssText: heroVal.style.cssText });
+        heroVal.style.fontSize = "66px";
+      }
+
+      document.documentElement.setAttribute("data-exporting", "");
+      await new Promise((r) => setTimeout(r, 50));
+
+      let dataUrl: string;
+      try {
+        dataUrl = await toPng(cardRef.current, {
+          quality: 1,
+          pixelRatio: 2,
+          cacheBust: true,
+          skipAutoScale: true,
+        });
+      } finally {
+        document.documentElement.removeAttribute("data-exporting");
+        for (const { el, cssText } of savedStyles) {
+          el.style.cssText = cssText;
+        }
+        for (const { img, src } of savedSrcs) {
+          img.src = src;
+        }
+      }
 
       const link = document.createElement("a");
       link.download = `${filename}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
       link.click();
-
       setState("done");
       setTimeout(() => setState("idle"), 2000);
     } catch (err) {
       console.error("DevMon download failed:", err);
-      setErrorMsg(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(msg);
       setState("error");
       setTimeout(() => reset(), 3000);
-    } finally {
-      for (const { img, src } of originals) {
+      document.documentElement.removeAttribute("data-exporting");
+      for (const { el, cssText } of savedStyles) {
+        el.style.cssText = cssText;
+      }
+      for (const { img, src } of savedSrcs) {
         img.src = src;
       }
     }
