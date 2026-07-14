@@ -15,14 +15,14 @@ export async function GET(req: NextRequest) {
 
     let query = admin
       .from("cards")
-      .select("github_username, display_name, avatar_url, rarity, rarity_score, primary_class, stats, company, primary_language, updated_at", { count: "exact" })
+      .select("github_username, display_name, avatar_url, rarity, rarity_score, primary_class, stats, company, primary_language, updated_at")
       .order("rarity_score", { ascending: false });
 
     if (company) {
       query = query.eq("company", company);
     }
 
-    const { data, error, count } = await query;
+    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500, headers: NO_STORE });
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       generatedAt: row.updated_at,
     }));
 
-    return NextResponse.json({ entries, total: count ?? entries.length }, { headers: NO_STORE });
+    return NextResponse.json({ entries, total: paged.length }, { headers: NO_STORE });
   } catch (err) {
     console.error("[leaderboard] error:", err);
     return NextResponse.json({ entries: [], total: 0, error: String(err) }, { headers: NO_STORE });
