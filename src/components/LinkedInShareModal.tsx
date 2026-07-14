@@ -143,21 +143,6 @@ export function LinkedInShareModal({
               />
             </div>
 
-            {/* Image preview */}
-            <div className="mb-4">
-              <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-2">
-                Image Preview
-              </span>
-              <div className="rounded-[10px] surface-inset overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt="Card preview"
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-            </div>
-
             {/* Text preview */}
             <div className="mb-5">
               <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-2">
