@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       generatedAt: row.updated_at,
     }));
 
-    return NextResponse.json({ entries, total: count ?? entries.length }, { headers: NO_STORE });
+    return NextResponse.json({ debugBuildId: "manual-check-1", entries, total: count ?? entries.length }, { headers: NO_STORE });
   } catch (err) {
     console.error("[leaderboard] error:", err);
     return NextResponse.json({ entries: [], total: 0, error: String(err) }, { headers: NO_STORE });
