@@ -51,6 +51,7 @@ const config: Config = {
         shimmer: "shimmer 3s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         float: "float 3s ease-in-out infinite",
+        "crown-float": "crown-float 4s ease-in-out infinite",
       },
       keyframes: {
         shimmer: {
@@ -65,6 +66,10 @@ const config: Config = {
         float: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-4px)" },
+        },
+        "crown-float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-2px)" },
         },
       },
     },
