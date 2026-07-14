@@ -17,21 +17,32 @@ export function RarityCrown({ rank, className = "" }: RarityCrownProps) {
 
   return (
     <div
-      className={`absolute -top-[14px] -left-[10px] z-10 transition-transform duration-250 ease-out group-hover:scale-104 animate-crown-float ${className}`}
+      className={`absolute z-10 top-[-50px] left-[-6px] sm:top-[-60px] sm:left-[-7px] lg:top-[-71px] lg:left-[-8px] ${className}`}
       style={{
-        transform: "rotate(-18deg) perspective(900px) rotateY(-6deg) rotateX(2deg)",
         filter: "drop-shadow(0 5px 8px rgba(0,0,0,.28))",
       }}
     >
-      <Image
-        src={crown.src}
-        alt={crown.alt}
-        width={110}
-        height={110}
-        className="w-[80px] sm:w-[95px] lg:w-[110px] h-auto pointer-events-none select-none"
-        draggable={false}
-        priority={rank === 1}
-      />
+      <div className="animate-crown-float">
+        <div className="transition-transform duration-250 ease-out group-hover:scale-104">
+          <div
+            style={{
+              transformOrigin: "bottom left",
+              transform:
+                "rotate(-18deg) perspective(900px) rotateY(-5deg) rotateX(2deg)",
+            }}
+          >
+            <Image
+              src={crown.src}
+              alt={crown.alt}
+              width={110}
+              height={110}
+              className="w-[80px] sm:w-[95px] lg:w-[110px] h-auto pointer-events-none select-none"
+              draggable={false}
+              priority={rank === 1}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
