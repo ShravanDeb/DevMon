@@ -17,7 +17,7 @@ export function RarityCrown({ rank, className = "" }: RarityCrownProps) {
 
   return (
     <div
-      className={`absolute z-10 top-[-50px] left-[-6px] sm:top-[-60px] sm:left-[-7px] lg:top-[-40px] lg:left-[-35px] ${className}`}
+      className={`absolute z-10 top-[-35px] left-[-27px] sm:top-[-60px] sm:left-[-7px] lg:top-[-40px] lg:left-[-35px] ${className}`}
       style={{
         filter: "drop-shadow(0 5px 8px rgba(0,0,0,.28))",
       }}
@@ -36,7 +36,7 @@ export function RarityCrown({ rank, className = "" }: RarityCrownProps) {
               alt={crown.alt}
               width={110}
               height={110}
-              className="w-[80px] sm:w-[95px] lg:w-[110px] h-auto pointer-events-none select-none"
+              className="w-[110px] sm:w-[95px] lg:w-[130px] h-auto pointer-events-none select-none"
               draggable={false}
               priority={rank === 1}
             />
