@@ -9,6 +9,109 @@ interface DownloadButtonProps {
   filename?: string;
 }
 
+/* ── colour helpers for canvas gradient ─────────────────────────── */
+
+function parseRgb(color: string): [number, number, number] | null {
+  const hex = color.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i);
+  if (hex)
+    return [parseInt(hex[1], 16), parseInt(hex[2], 16), parseInt(hex[3], 16)];
+  const rgb = color.match(
+    /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/,
+  );
+  if (rgb)
+    return [parseInt(rgb[1], 10), parseInt(rgb[2], 10), parseInt(rgb[3], 10)];
+  return null;
+}
+
+function mixColor(c1: string, c2: string, ratio: number): string {
+  const a = parseRgb(c1);
+  const b = parseRgb(c2);
+  if (!a || !b) return c1;
+  const r = Math.round(a[0] * ratio + b[0] * (1 - ratio));
+  const g = Math.round(a[1] * ratio + b[1] * (1 - ratio));
+  const bl = Math.round(a[2] * ratio + b[2] * (1 - ratio));
+  return `rgb(${r},${g},${bl})`;
+}
+
+/* ── canvas-render the hero stat (bypasses SVG foreignObject) ───── */
+
+function renderHeroStatCanvas(
+  span: HTMLSpanElement,
+): { dataUrl: string; width: number; height: number } | null {
+  const text = span.textContent?.trim();
+  if (!text) return null;
+
+  const computed = window.getComputedStyle(span);
+  const fontSize = parseFloat(computed.fontSize);
+  const fontFamily = computed.fontFamily;
+  const fontWeight = computed.fontWeight;
+
+  const ls = computed.letterSpacing;
+  const letterSpacing = ls === "normal" ? 0 : parseFloat(ls);
+
+  const root = window.getComputedStyle(document.documentElement);
+  const textPrimary =
+    root.getPropertyValue("--text-primary").trim() || "#F2F1EE";
+  const heroRarity =
+    root.getPropertyValue("--hero-rarity-color").trim() || textPrimary;
+
+  const dpr = 2;
+
+  const mc = document.createElement("canvas");
+  const mctx = mc.getContext("2d")!;
+  mctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+
+  let textWidth = 0;
+  for (const ch of Array.from(text)) textWidth += mctx.measureText(ch).width;
+  textWidth += (text.length - 1) * letterSpacing;
+
+  const tm = mctx.measureText(text);
+  const ascent = tm.actualBoundingBoxAscent || fontSize * 0.78;
+  const descent = tm.actualBoundingBoxDescent || fontSize * 0.22;
+
+  const padX = Math.ceil(fontSize * 0.15);
+  const padTop = Math.ceil(ascent * 0.1);
+  const padBottom = Math.ceil(descent * 0.1);
+
+  const cssW = Math.ceil(textWidth + padX * 2);
+  const cssH = Math.ceil(ascent + descent + padTop + padBottom);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  const ctx = canvas.getContext("2d")!;
+  ctx.scale(dpr, dpr);
+
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.textBaseline = "alphabetic";
+
+  const rad = (135 * Math.PI) / 180;
+  const cx = cssW / 2;
+  const cy = cssH / 2;
+  const len = Math.max(cssW, cssH);
+  const grad = ctx.createLinearGradient(
+    cx - Math.cos(rad) * len,
+    cy - Math.sin(rad) * len,
+    cx + Math.cos(rad) * len,
+    cy + Math.sin(rad) * len,
+  );
+  grad.addColorStop(0.15, textPrimary);
+  grad.addColorStop(0.75, heroRarity);
+  grad.addColorStop(1.0, mixColor(heroRarity, "#FFFFFF", 0.6));
+
+  ctx.fillStyle = grad;
+  const baseY = padTop + ascent;
+  let x = padX;
+  for (const ch of Array.from(text)) {
+    ctx.fillText(ch, x, baseY);
+    x += mctx.measureText(ch).width + letterSpacing;
+  }
+
+  return { dataUrl: canvas.toDataURL("image/png"), width: cssW, height: cssH };
+}
+
+/* ── image helpers ──────────────────────────────────────────────── */
+
 function imgToCanvasDataUrl(img: HTMLImageElement): string {
   const canvas = document.createElement("canvas");
   canvas.width = img.naturalWidth;
@@ -26,8 +129,15 @@ function waitForImg(img: HTMLImageElement): Promise<void> {
   });
 }
 
-export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadButtonProps) {
-  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+/* ── component ──────────────────────────────────────────────────── */
+
+export function DownloadButton({
+  cardRef,
+  filename = "devmon-card",
+}: DownloadButtonProps) {
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">(
+    "idle",
+  );
   const [errorMsg, setErrorMsg] = useState("");
 
   const reset = useCallback(() => {
@@ -43,6 +153,12 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
     const savedStyles: { el: HTMLElement; cssText: string }[] = [];
     const savedSrcs: { img: HTMLImageElement; src: string }[] = [];
     let fontStyleEl: HTMLStyleElement | null = null;
+    let heroStatSwap: {
+      span: HTMLSpanElement;
+      innerHTML: string;
+      className: string;
+      cssText: string;
+    } | null = null;
     const CARD_W = 540;
     const CARD_H = 840;
     const BUFFER = 8;
@@ -67,9 +183,9 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         }
       }
 
-      const flattenEls = Array.from(card.querySelectorAll<HTMLElement>(
-        "[data-export-flatten]"
-      ));
+      const flattenEls = Array.from(
+        card.querySelectorAll<HTMLElement>("[data-export-flatten]"),
+      );
       for (const el of flattenEls) {
         savedStyles.push({ el, cssText: el.style.cssText });
         el.style.transform = "none";
@@ -99,24 +215,22 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         heroStat.style.overflow = "visible";
       }
 
-      const heroVal = card.querySelector<HTMLElement>(".card-hero-stat-value");
+      const heroVal = card.querySelector<HTMLElement>(
+        ".card-hero-stat-value",
+      );
       if (heroVal) {
         savedStyles.push({ el: heroVal, cssText: heroVal.style.cssText });
-        // §6.2: Read the live font size instead of hardcoding
         const computedSize = window.getComputedStyle(heroVal).fontSize;
         heroVal.style.fontSize = computedSize;
       }
 
-      // Re-measure hero stat against the export-time layout so the font-size
-      // accounts for the forced card body width and overflow:visible changes.
       if (heroVal) {
         const heroContainer = heroVal.parentElement;
         if (heroContainer) {
-          // No extra margin — padding-right on .card-hero-stat-value handles glyph overhang,
-          // and scrollWidth includes padding.
           const availableWidth = heroContainer.clientWidth;
-          const currentSize = parseFloat(window.getComputedStyle(heroVal).fontSize);
-          // Step down if the current size no longer fits the export layout
+          const currentSize = parseFloat(
+            window.getComputedStyle(heroVal).fontSize,
+          );
           for (let size = currentSize; size >= 28; size -= 2) {
             heroVal.style.fontSize = `${size}px`;
             if (heroVal.scrollWidth <= availableWidth) break;
@@ -126,7 +240,6 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
 
       document.documentElement.setAttribute("data-exporting", "");
 
-      // Embed @font-face CSS so html-to-image SVG foreignObject has Fraunces
       try {
         let fontCss = "";
         for (const sheet of Array.from(document.styleSheets)) {
@@ -136,14 +249,52 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
                 fontCss += rule.cssText + "\n";
               }
             }
-          } catch { /* cross-origin sheet, skip */ }
+          } catch {
+            /* cross-origin sheet, skip */
+          }
         }
         if (fontCss) {
           fontStyleEl = document.createElement("style");
           fontStyleEl.textContent = fontCss;
           card.appendChild(fontStyleEl);
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
+
+      /* ── canvas-swap the hero stat ─────────────────────────────── */
+      if (heroVal) {
+        try {
+          const result = renderHeroStatCanvas(heroVal as HTMLSpanElement);
+          if (result) {
+            const span = heroVal as HTMLSpanElement;
+            heroStatSwap = {
+              span,
+              innerHTML: span.innerHTML,
+              className: span.className,
+              cssText: span.style.cssText,
+            };
+
+            const img = document.createElement("img");
+            img.src = result.dataUrl;
+            img.style.cssText = `display:block;width:${result.width}px;height:${result.height}px;pointer-events:none;`;
+
+            span.innerHTML = "";
+            span.appendChild(img);
+            span.className = span.className
+              .replace(/card-hero-stat-gradient/g, "")
+              .replace(/\s+/g, " ")
+              .trim();
+            span.style.width = `${result.width}px`;
+            span.style.height = `${result.height}px`;
+            span.style.display = "flex";
+            span.style.alignItems = "center";
+            span.style.justifyContent = "center";
+          }
+        } catch (e) {
+          console.warn("DownloadButton: canvas hero-stat render failed", e);
+        }
+      }
 
       await new Promise((r) => setTimeout(r, 50));
 
@@ -165,6 +316,13 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
         }
         for (const { img, src } of savedSrcs) {
           img.src = src;
+        }
+        /* restore canvas swap */
+        if (heroStatSwap) {
+          heroStatSwap.span.innerHTML = heroStatSwap.innerHTML;
+          heroStatSwap.span.className = heroStatSwap.className;
+          heroStatSwap.span.style.cssText = heroStatSwap.cssText;
+          heroStatSwap = null;
         }
       }
 
@@ -188,6 +346,11 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
       for (const { img, src } of savedSrcs) {
         img.src = src;
       }
+      if (heroStatSwap) {
+        heroStatSwap.span.innerHTML = heroStatSwap.innerHTML;
+        heroStatSwap.span.className = heroStatSwap.className;
+        heroStatSwap.span.style.cssText = heroStatSwap.cssText;
+      }
     }
   };
 
@@ -208,19 +371,55 @@ export function DownloadButton({ cardRef, filename = "devmon-card" }: DownloadBu
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           >
-            <circle cx="12" cy="12" r="10" strokeDasharray="30 70" strokeDashoffset="0" />
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              strokeDasharray="30 70"
+              strokeDashoffset="0"
+            />
           </motion.svg>
         ) : state === "done" ? (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 13l4 4L19 7"
+            />
           </svg>
         ) : state === "error" ? (
-          <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-4 h-4 text-red-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         ) : (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
         )}
         <span>
