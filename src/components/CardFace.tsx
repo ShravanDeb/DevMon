@@ -196,7 +196,15 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
         animate={revealed ? { opacity: 1, scale: 1, y: 0 } : {}}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
       >
-        {/* Card frame — tiered border, escalating from neutral to foil-stamped */}
+        {/* Responsive scale wrapper — prevents 540px card from overflowing on mobile */}
+        <div
+          className="origin-top flex justify-center w-full"
+          style={{
+            transform: "scale(var(--card-scale, 1))",
+            "--card-scale": "clamp(0.52, calc((100vw - 2rem) / 540), 1)",
+          } as React.CSSProperties}
+        >
+          {/* Card frame — tiered border, escalating from neutral to foil-stamped */}
         <div
           className="relative rounded-[20px] p-[1px]"
           style={{
@@ -595,7 +603,10 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
             </div>
           </motion.div>
         </div>
-      </motion.div>
+        {/* end responsive scale wrapper */}
+      </div>
+      {/* end card-soft-reflection */}
+    </motion.div>
     </div>
   );
 });

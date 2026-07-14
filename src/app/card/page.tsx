@@ -199,10 +199,10 @@ function CardContent() {
           <p className="text-[15px] text-text-secondary mb-8 leading-[1.6]">{error}</p>
           <button
             onClick={() => router.push("/")}
-            className="inline-flex items-center gap-2 rounded-[10px] surface-btn-accent px-6 py-3 text-[13px] font-semibold"
-          >
-            Try Again
-          </button>
+              className="inline-flex items-center gap-2 rounded-[10px] surface-btn-accent px-6 py-3 text-[13px] font-semibold touch-manipulation"
+            >
+              Try Again
+            </button>
         </motion.div>
       </div>
     );
@@ -288,7 +288,7 @@ function CardContent() {
       <div className="fixed inset-0 pointer-events-none z-0 grid-bg opacity-30" />
 
       {/* Desktop: side-by-side. Mobile: stacked */}
-      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-16 px-4 sm:px-8 pt-12 sm:pt-16 pb-16 lg:py-12 max-w-[1400px] mx-auto">
+      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-16 px-4 sm:px-8 pt-12 sm:pt-16 pb-16 lg:py-12 max-w-[1400px] mx-auto overflow-hidden">
 
         {/* === LEFT: Card === */}
         <motion.div
@@ -385,7 +385,7 @@ function CardContent() {
           <motion.div
             variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
           >
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5">
               <div ref={downloadBtnRef}>
                 <DownloadButton
                   cardRef={cardRef as unknown as React.RefObject<HTMLDivElement | null>}

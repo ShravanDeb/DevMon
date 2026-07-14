@@ -37,7 +37,7 @@ function AnimatedCounter({ value, label }: { value: string | number; label: stri
 
   return (
     <div ref={ref} className="text-center">
-      <div className="text-[48px] font-display font-[600] tracking-[-0.02em] text-text-primary tabular-nums leading-none">
+      <div className="text-[36px] sm:text-[48px] font-display font-[600] tracking-[-0.02em] text-text-primary tabular-nums leading-none">
         {numericValue > 0 && isInView ? displayValue.toLocaleString() : value}
       </div>
       <div className="text-[13px] font-mono font-medium uppercase tracking-[0.08em] text-text-tertiary mt-3">
@@ -206,10 +206,10 @@ function LeaderboardPreview() {
   const display = sorted.slice(0, 3);
 
   return (
-    <section ref={ref} className="py-32 md:py-24 px-6">
+    <section ref={ref} className="py-20 md:py-24 px-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 md:mb-16">
           <motion.span
             className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary"
             initial={{ opacity: 0, y: 16 }}
@@ -242,7 +242,7 @@ function LeaderboardPreview() {
         )}
 
         {/* Podium */}
-        <div className="flex items-end justify-center gap-4 mb-12 pt-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-end justify-center gap-6 sm:gap-4 mb-12 pt-8">
           {/* 2nd place */}
           {display[1] && (
             <motion.div
@@ -489,7 +489,7 @@ function MiniStatBars() {
     <div ref={ref} className="w-full max-w-xs space-y-3">
       {stats.map((s, i) => (
         <div key={s.label} className="flex items-center gap-3">
-          <span className="w-16 text-[11px] font-mono font-medium uppercase tracking-[0.06em] text-text-tertiary text-right shrink-0">
+          <span className="w-20 sm:w-16 text-[11px] font-mono font-medium uppercase tracking-[0.06em] text-text-tertiary text-right shrink-0">
             {s.label}
           </span>
           <div className="flex-1 h-1.5 rounded-full surface-track overflow-hidden">
@@ -629,7 +629,7 @@ export default function LandingPage() {
   return (
     <main ref={containerRef} className="min-h-screen flex flex-col">
       {/* ═══════ THEME TOGGLE ═══════ */}
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50">
         <ThemeToggle />
       </div>
 
@@ -726,7 +726,7 @@ export default function LandingPage() {
       <HorizontalMarquee />
 
       {/* ═══════ MANIFESTO ═══════ */}
-      <section className="py-32 md:py-24 px-6">
+      <section className="py-20 md:py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <WordReveal
             text="Your GitHub profile is a story. Every commit, every PR, every abandoned side project — it all adds up to something. We just gave it a name, a class, and a rarity tier."
@@ -737,18 +737,18 @@ export default function LandingPage() {
 
       {/* ═══════ STATS ═══════ */}
       <section className="py-24 md:py-16 px-6">
-        <div className="max-w-3xl mx-auto flex items-center justify-center gap-20 md:gap-12">
+        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
           <AnimatedCounter value={cardCount !== null ? cardCount : 0} label="Cards Generated" />
-          <div className="w-px h-16 bg-border-subtle" />
+          <div className="w-px h-16 bg-border-subtle hidden sm:block" />
           <AnimatedCounter value={5} label="Rarity Tiers" />
-          <div className="w-px h-16 bg-border-subtle" />
+          <div className="w-px h-16 bg-border-subtle hidden sm:block" />
           <AnimatedCounter value={12} label="DevMon Classes" />
         </div>
       </section>
 
       {/* ═══════ HOW IT WORKS ═══════ */}
       <section className="py-32 md:py-24 px-6">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-start">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-24 items-start">
           <div>
             <span className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
               How it works
@@ -769,7 +769,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ FEATURES — split layouts ═══════ */}
-      <section className="py-32 md:py-24 px-6 space-y-32 md:space-y-24">
+      <section className="py-20 md:py-24 px-6 space-y-20 md:space-y-24">
         {/* Feature 1 — Stats Engine */}
         <FeatureSplit
           eyebrow="The Engine"
@@ -845,7 +845,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ FINAL CTA ═══════ */}
-      <section className="py-40 md:py-32 px-6">
+      <section className="py-24 md:py-32 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <motion.h2
             className="font-display text-[48px] md:text-[64px] leading-[0.95] font-[640] tracking-[-0.03em] text-text-primary"
@@ -885,7 +885,7 @@ export default function LandingPage() {
       <section className="py-24 md:py-16 px-6 relative overflow-hidden">
         {/* Subtle radial glow behind text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[600px] h-[300px] rounded-full bg-gradient-to-b from-[var(--overlay-4)] to-transparent blur-3xl opacity-60" />
+          <div className="w-full max-w-[600px] sm:w-[600px] h-[200px] sm:h-[300px] rounded-full bg-gradient-to-b from-[var(--overlay-4)] to-transparent blur-3xl opacity-60" />
         </div>
 
         <div className="relative max-w-3xl mx-auto text-center space-y-10">

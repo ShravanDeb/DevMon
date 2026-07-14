@@ -47,7 +47,7 @@ export function LegalToc({ sections }: { sections: { id: string; title: string }
 
 export function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-display text-[20px] font-[600] text-text-primary mt-12 mb-4">
+    <h2 className="font-display text-[20px] font-[600] text-text-primary mt-8 sm:mt-12 mb-4">
       {children}
     </h2>
   );

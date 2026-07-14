@@ -64,7 +64,7 @@ function StatBar({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="w-[120px] text-[12px] font-mono text-text-secondary shrink-0">
+      <span className="w-[90px] sm:w-[120px] text-[12px] font-mono text-text-secondary shrink-0">
         {label}
       </span>
       <div className="flex-1 h-[5px] rounded-full surface-track overflow-hidden">
@@ -213,7 +213,7 @@ export default function VerifyPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <h1 className="text-[36px] sm:text-[42px] font-bold text-text-primary tracking-[-0.03em] leading-[1.1] mb-1.5">
+          <h1 className="text-[28px] sm:text-[36px] md:text-[42px] font-bold text-text-primary tracking-[-0.03em] leading-[1.1] mb-1.5">
             {card.displayName}
           </h1>
           <p className="text-[14px] text-text-secondary font-mono mb-4">
@@ -351,7 +351,7 @@ export default function VerifyPage() {
 
         {/* Share */}
         <motion.div
-          className="flex flex-col sm:flex-row gap-3"
+          className="flex flex-col sm:flex-row sm:flex-wrap gap-3"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.6 }}

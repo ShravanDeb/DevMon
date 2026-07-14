@@ -15,7 +15,7 @@ export default function ContactPage() {
         <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors mb-6">
           <span className="text-[16px] leading-none">&larr;</span> Home
         </Link>
-        <h1 className="font-display text-[32px] font-[600] text-text-primary mb-2">
+        <h1 className="font-display text-[26px] sm:text-[32px] font-[600] text-text-primary mb-2">
           Contact
         </h1>
         <p className="text-[15px] text-text-secondary mb-10">

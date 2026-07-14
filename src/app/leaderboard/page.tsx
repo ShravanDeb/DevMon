@@ -87,12 +87,12 @@ export default function LeaderboardPage() {
   });
 
   return (
-    <main className="min-h-screen bg-surface-0 flex flex-col items-center px-4 pt-32 pb-32 md:pt-16 md:pb-16">
+    <main className="min-h-screen bg-surface-0 flex flex-col items-center px-4 pt-20 pb-20 md:pt-16 md:pb-16">
       <div className="fixed top-4 right-4 z-40"><ThemeToggle /></div>
       <div className="w-full max-w-4xl">
         {/* Header */}
         <motion.div
-          className="mb-12"
+          className="mb-8 md:mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -100,7 +100,7 @@ export default function LeaderboardPage() {
           <span className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
             Rankings
           </span>
-          <h1 className="font-display text-[36px] md:text-[42px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary mt-3">
+          <h1 className="font-display text-[28px] sm:text-[36px] md:text-[42px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary mt-3">
             DevMon Leaderboard
           </h1>
           <p className="text-[15px] text-text-secondary mt-3 max-w-md">
@@ -170,7 +170,7 @@ export default function LeaderboardPage() {
               return (
                 <motion.div
                   key={entry.username}
-                  className="rounded-[12px] surface-card p-4 sm:p-5 flex items-center gap-4 sm:gap-6 group hover:scale-[1.005] transition-transform"
+                  className="rounded-[12px] surface-card p-4 sm:p-5 flex items-center gap-3 sm:gap-6 group hover:scale-[1.005] transition-transform"
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.15 + Math.min(i, 8) * 0.04 }}
@@ -216,8 +216,8 @@ export default function LeaderboardPage() {
                         {entry.rarity}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-mono text-text-tertiary truncate">
+                    <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                      <span className="text-[13px] font-mono text-text-tertiary truncate min-w-0">
                         @{entry.username}
                       </span>
                       <span className="w-[1px] h-3 bg-[var(--overlay-8)]" />
@@ -244,7 +244,7 @@ export default function LeaderboardPage() {
                   {/* Rarity score */}
                   <div className="shrink-0 text-right">
                     <span
-                      className="font-display text-[22px] font-[700] tracking-[-0.01em] leading-none"
+                      className="font-display text-[18px] sm:text-[22px] font-[700] tracking-[-0.01em] leading-none"
                       style={{ color: rarityColor.hex }}
                     >
                       {entry.rarityScore}

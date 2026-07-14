@@ -16,7 +16,7 @@ export function Footer() {
   return (
     <footer className="mt-auto py-12 border-t border-border-hairline">
       <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
           <span className="font-display text-[16px] font-[600] text-text-primary">DevMon</span>
           <span className="text-[13px] font-mono text-text-tertiary">·</span>
           <span className="text-[13px] font-mono text-text-secondary">by Shravan Deb</span>
@@ -33,7 +33,7 @@ export function Footer() {
             </a>
           ))}
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
           {footerLinks.map((link) => (
             <Link
               key={link.href}

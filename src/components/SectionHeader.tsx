@@ -18,7 +18,7 @@ export function SectionHeader({ eyebrow, headline, className = "" }: SectionHead
       <span className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
         {eyebrow}
       </span>
-      <h2 className="font-display text-[36px] leading-[1.1] font-[600] tracking-[-0.01em] text-text-primary md:text-[28px] text-center">
+      <h2 className="font-display text-[24px] sm:text-[28px] md:text-[36px] leading-[1.1] font-[600] tracking-[-0.01em] text-text-primary text-center">
         {headline}
       </h2>
     </motion.div>

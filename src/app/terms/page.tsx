@@ -30,14 +30,14 @@ export default function TermsPage() {
   return (
     <main className="min-h-screen flex flex-col">
       <div className="flex-1 max-w-5xl mx-auto px-6 py-24 w-full">
-        <div className="flex gap-16">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-16">
           <LegalToc sections={sections} />
 
           <article className="flex-1 min-w-0">
             <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] font-mono text-text-tertiary hover:text-text-secondary transition-colors mb-6">
               <span className="text-[16px] leading-none">&larr;</span> Home
             </Link>
-            <div className="rounded-[14px] surface-card-elevated p-8 md:p-12">
+            <div className="rounded-[14px] surface-card-elevated p-5 sm:p-8 md:p-12">
               <h1 className="font-display text-[32px] font-[600] text-text-primary mb-2">
                 Terms of Service
               </h1>

@@ -12,7 +12,7 @@ export function ContactForm() {
   const mailtoHref = `mailto:shravandeb@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   return (
-    <div className="rounded-[14px] surface-card-elevated p-8 md:p-10">
+    <div className="rounded-[14px] surface-card-elevated p-5 sm:p-8 md:p-10">
       <div className="space-y-6">
         <div>
           <label
