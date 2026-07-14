@@ -13,11 +13,16 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20")));
     const offset = Math.max(0, parseInt(searchParams.get("offset") || "0"));
 
+    const noRange = searchParams.get("noRange") === "1";
+
     let query = admin
       .from("cards")
       .select("github_username, display_name, avatar_url, rarity, rarity_score, primary_class, stats, company, primary_language, updated_at", { count: "exact" })
-      .order("rarity_score", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .order("rarity_score", { ascending: false });
+
+    if (!noRange) {
+      query = query.range(offset, offset + limit - 1);
+    }
 
     if (company) {
       query = query.eq("company", company);
@@ -48,7 +53,7 @@ export async function GET(req: NextRequest) {
       generatedAt: row.updated_at,
     }));
 
-    return NextResponse.json({ debugBuildId: "manual-check-2", entries, total: count ?? entries.length, debug: { rawLimit, rawOffset, parsedLimit: limit, parsedOffset: offset, dataLength: data?.length, count } }, { headers: NO_STORE });
+    return NextResponse.json({ debugBuildId: "manual-check-3", entries, total: count ?? entries.length, debug: { rawLimit, rawOffset, parsedLimit: limit, parsedOffset: offset, noRange, dataLength: data?.length, count } }, { headers: NO_STORE });
   } catch (err) {
     console.error("[leaderboard] error:", err);
     return NextResponse.json({ entries: [], total: 0, error: String(err) }, { headers: NO_STORE });
