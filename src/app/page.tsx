@@ -240,7 +240,7 @@ function LeaderboardPreview() {
         )}
 
         {/* Podium */}
-        <div className="flex items-end justify-center gap-4 mb-12">
+        <div className="flex items-end justify-center gap-4 mb-12 pt-4">
           {/* 2nd place */}
           {display[1] && (
             <motion.div
@@ -250,7 +250,7 @@ function LeaderboardPreview() {
               transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
               <div
-                className="relative rounded-t-[12px] rounded-b-[4px] border p-5 text-center space-y-3 overflow-hidden"
+                className="rounded-t-[12px] rounded-b-[4px] border p-5 text-center space-y-3 overflow-hidden min-h-[260px]"
                 style={{
                   background: `linear-gradient(180deg, ${RARITY_COLORS[display[1].rarity].hex}12 0%, ${RARITY_COLORS[display[1].rarity].hex}04 100%)`,
                   borderColor: `${RARITY_COLORS[display[1].rarity].hex}30`,
@@ -262,8 +262,8 @@ function LeaderboardPreview() {
                     <img src={display[1].avatarUrl} alt={display[1].displayName} className="w-full h-full object-cover" />
                   </div>
                 </div>
-                <p className="text-[13px] font-medium text-text-primary truncate max-w-[100px]">{display[1].displayName}</p>
-                <p className="text-[11px] font-mono text-text-tertiary truncate max-w-[100px]">{display[1].primaryClass}</p>
+                <p className={`font-medium text-text-primary max-w-full whitespace-normal ${display[1].displayName.length > 18 ? 'text-[11px]' : display[1].displayName.length > 12 ? 'text-[12px]' : 'text-[13px]'}`}>{display[1].displayName}</p>
+                <p className="text-[11px] font-mono text-text-tertiary truncate max-w-full">{display[1].primaryClass}</p>
                 <p className="font-display text-[24px] font-[700] tracking-[-0.01em]" style={{ color: RARITY_COLORS[display[1].rarity].hex }}>
                   {display[1].rarityScore}
                 </p>
@@ -282,30 +282,32 @@ function LeaderboardPreview() {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div
-                className="relative rounded-t-[12px] rounded-b-[4px] border p-6 text-center space-y-3 overflow-hidden animate-float"
-                style={{
-                  background: `linear-gradient(180deg, ${RARITY_COLORS[display[0].rarity].hex}12 0%, ${RARITY_COLORS[display[0].rarity].hex}04 100%)`,
-                  borderColor: `${RARITY_COLORS[display[0].rarity].hex}30`,
-                  boxShadow: `0 0 32px ${RARITY_COLORS[display[0].rarity].hex}18, inset 0 1px 0 ${RARITY_COLORS[display[0].rarity].hex}15`,
-                }}
-              >
+              <div className="relative animate-float">
                 {/* Crown */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center text-[12px]" style={{ background: RARITY_COLORS[display[0].rarity].hex, color: '#08080A', boxShadow: `0 0 8px ${RARITY_COLORS[display[0].rarity].hex}30` }}>
                   &#9733;
                 </div>
-                <div className="w-[80px] h-[80px] rounded-full border mx-auto flex items-center justify-center animate-glow-pulse" style={{ borderColor: `${RARITY_COLORS[display[0].rarity].hex}12`, boxShadow: `0 0 20px ${RARITY_COLORS[display[0].rarity].hex}15` }}>
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2" style={{ borderColor: `${RARITY_COLORS[display[0].rarity].hex}50` }}>
-                    <img src={display[0].avatarUrl} alt={display[0].displayName} className="w-full h-full object-cover" />
+                <div
+                  className="rounded-t-[12px] rounded-b-[4px] border p-6 text-center space-y-3 overflow-hidden min-h-[280px]"
+                  style={{
+                    background: `linear-gradient(180deg, ${RARITY_COLORS[display[0].rarity].hex}12 0%, ${RARITY_COLORS[display[0].rarity].hex}04 100%)`,
+                    borderColor: `${RARITY_COLORS[display[0].rarity].hex}30`,
+                    boxShadow: `0 0 32px ${RARITY_COLORS[display[0].rarity].hex}18, inset 0 1px 0 ${RARITY_COLORS[display[0].rarity].hex}15`,
+                  }}
+                >
+                  <div className="w-[80px] h-[80px] rounded-full border mx-auto flex items-center justify-center animate-glow-pulse" style={{ borderColor: `${RARITY_COLORS[display[0].rarity].hex}12`, boxShadow: `0 0 20px ${RARITY_COLORS[display[0].rarity].hex}15` }}>
+                    <div className="w-16 h-16 rounded-full overflow-hidden border-2" style={{ borderColor: `${RARITY_COLORS[display[0].rarity].hex}50` }}>
+                      <img src={display[0].avatarUrl} alt={display[0].displayName} className="w-full h-full object-cover" />
+                    </div>
                   </div>
-                </div>
-                <p className="text-[14px] font-medium text-text-primary truncate max-w-[120px]">{display[0].displayName}</p>
-                <p className="text-[11px] font-mono text-text-tertiary truncate max-w-[120px]">{display[0].primaryClass}</p>
-                <p className="font-display text-[28px] font-[700] tracking-[-0.01em]" style={{ color: RARITY_COLORS[display[0].rarity].hex }}>
-                  {display[0].rarityScore}
-                </p>
-                <div className="w-full flex items-center justify-center" style={{ height: 32, background: `linear-gradient(180deg, ${RARITY_COLORS[display[0].rarity].hex}06 0%, ${RARITY_COLORS[display[0].rarity].hex}0A 100%)`, borderTop: `1px solid ${RARITY_COLORS[display[0].rarity].hex}12`, borderRadius: '0 0 4px 4px' }}>
-                  <span className="text-[12px] font-mono font-medium uppercase tracking-[0.06em]" style={{ color: RARITY_COLORS[display[0].rarity].hex }}>1st</span>
+                  <p className={`font-medium text-text-primary max-w-full whitespace-normal ${display[0].displayName.length > 18 ? 'text-[11px]' : display[0].displayName.length > 12 ? 'text-[12px]' : 'text-[14px]'}`}>{display[0].displayName}</p>
+                  <p className="text-[11px] font-mono text-text-tertiary truncate max-w-full">{display[0].primaryClass}</p>
+                  <p className="font-display text-[28px] font-[700] tracking-[-0.01em]" style={{ color: RARITY_COLORS[display[0].rarity].hex }}>
+                    {display[0].rarityScore}
+                  </p>
+                  <div className="w-full flex items-center justify-center" style={{ height: 32, background: `linear-gradient(180deg, ${RARITY_COLORS[display[0].rarity].hex}06 0%, ${RARITY_COLORS[display[0].rarity].hex}0A 100%)`, borderTop: `1px solid ${RARITY_COLORS[display[0].rarity].hex}12`, borderRadius: '0 0 4px 4px' }}>
+                    <span className="text-[12px] font-mono font-medium uppercase tracking-[0.06em]" style={{ color: RARITY_COLORS[display[0].rarity].hex }}>1st</span>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -320,7 +322,7 @@ function LeaderboardPreview() {
               transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <div
-                className="relative rounded-t-[12px] rounded-b-[4px] border p-5 text-center space-y-3 overflow-hidden"
+                className="rounded-t-[12px] rounded-b-[4px] border p-5 text-center space-y-3 overflow-hidden min-h-[260px]"
                 style={{
                   background: `linear-gradient(180deg, ${RARITY_COLORS[display[2].rarity].hex}12 0%, ${RARITY_COLORS[display[2].rarity].hex}04 100%)`,
                   borderColor: `${RARITY_COLORS[display[2].rarity].hex}30`,
@@ -332,8 +334,8 @@ function LeaderboardPreview() {
                     <img src={display[2].avatarUrl} alt={display[2].displayName} className="w-full h-full object-cover" />
                   </div>
                 </div>
-                <p className="text-[13px] font-medium text-text-primary truncate max-w-[100px]">{display[2].displayName}</p>
-                <p className="text-[11px] font-mono text-text-tertiary truncate max-w-[100px]">{display[2].primaryClass}</p>
+                <p className={`font-medium text-text-primary max-w-full whitespace-normal ${display[2].displayName.length > 18 ? 'text-[11px]' : display[2].displayName.length > 12 ? 'text-[12px]' : 'text-[13px]'}`}>{display[2].displayName}</p>
+                <p className="text-[11px] font-mono text-text-tertiary truncate max-w-full">{display[2].primaryClass}</p>
                 <p className="font-display text-[22px] font-[700] tracking-[-0.01em]" style={{ color: RARITY_COLORS[display[2].rarity].hex }}>
                   {display[2].rarityScore}
                 </p>
