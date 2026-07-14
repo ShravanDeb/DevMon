@@ -53,7 +53,14 @@ export async function GET(req: NextRequest) {
       generatedAt: row.updated_at,
     }));
 
-    return NextResponse.json({ debugBuildId: "manual-check-3", entries, total: count ?? entries.length, debug: { rawLimit, rawOffset, parsedLimit: limit, parsedOffset: offset, noRange, dataLength: data?.length, count } }, { headers: NO_STORE });
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "not set";
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "not set";
+    const debugEnv = {
+      url: supabaseUrl,
+      keyPrefix: serviceKey.substring(0, 12),
+      keyLen: serviceKey.length,
+    };
+    return NextResponse.json({ debugBuildId: "diag-1", debugEnv, entries, total: count ?? entries.length, debug: { rawLimit, rawOffset, parsedLimit: limit, parsedOffset: offset, noRange, dataLength: data?.length, count } }, { headers: NO_STORE });
   } catch (err) {
     console.error("[leaderboard] error:", err);
     return NextResponse.json({ entries: [], total: 0, error: String(err) }, { headers: NO_STORE });
