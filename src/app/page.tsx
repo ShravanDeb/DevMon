@@ -186,6 +186,7 @@ function LeaderboardPreview() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/leaderboard")
@@ -195,10 +196,9 @@ function LeaderboardPreview() {
       })
       .catch((err) => {
         console.error("Leaderboard fetch failed:", err);
-      });
+      })
+      .finally(() => setIsLoading(false));
   }, []);
-
-  if (entries.length === 0) return null;
 
   const sorted = [...entries].sort((a, b) => b.rarityScore - a.rarityScore);
   const display = sorted.slice(0, 3);
@@ -225,6 +225,19 @@ function LeaderboardPreview() {
             Top developers.
           </motion.h2>
         </div>
+
+        {display.length === 0 && (
+          <motion.div
+            className="text-center py-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <p className="text-[15px] text-text-tertiary">
+              {isLoading ? "Loading rankings..." : "No rankings yet. Be the first to generate a card."}
+            </p>
+          </motion.div>
+        )}
 
         {/* Podium */}
         <div className="flex items-end justify-center gap-4 mb-12">
