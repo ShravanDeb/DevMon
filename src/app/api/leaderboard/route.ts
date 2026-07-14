@@ -3,6 +3,8 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
+const NO_STORE = { "Cache-Control": "no-store" } as const;
+
 export async function GET(req: NextRequest) {
   try {
     const admin = getSupabaseAdmin();
@@ -24,7 +26,7 @@ export async function GET(req: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500, headers: NO_STORE });
     }
 
     const entries = (data || []).map((row) => ({
@@ -40,8 +42,8 @@ export async function GET(req: NextRequest) {
       generatedAt: row.updated_at,
     }));
 
-    return NextResponse.json({ entries, total: count ?? entries.length });
+    return NextResponse.json({ entries, total: count ?? entries.length }, { headers: NO_STORE });
   } catch {
-    return NextResponse.json({ entries: [], total: 0 });
+    return NextResponse.json({ entries: [], total: 0 }, { headers: NO_STORE });
   }
 }

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, Suspense, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import type { CardData, FlavorTone, Rarity, RawGitHubStats } from "@/types";
+import type { CardData, FlavorTone, Rarity } from "@/types";
 import { RARITY_COLORS, CLASS_SUBTITLES } from "@/types";
 
 import { CardFace } from "@/components/CardFace";
@@ -60,7 +60,6 @@ function CardContent() {
   const [cardReady, setCardReady] = useState(false);
   const [flavorTone, setFlavorTone] = useState<FlavorTone>("hype");
   const [rarityOverride, setRarityOverride] = useState<Rarity | undefined>(undefined);
-  const [rawStats, setRawStats] = useState<RawGitHubStats | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const downloadBtnRef = useRef<HTMLDivElement>(null);
@@ -92,7 +91,6 @@ function CardContent() {
   }, []);
 
   const regenerateWithTone = useCallback(async (tone: FlavorTone, rarity?: Rarity) => {
-    if (!rawStats) return;
     setFlavorTone(tone);
     if (rarity !== undefined) setRarityOverride(rarity);
     const activeRarity = rarity !== undefined ? rarity : rarityOverride;
@@ -135,7 +133,7 @@ function CardContent() {
         stopLoadingMessages();
       }
     }
-  }, [rawStats, rarityOverride, router, startLoadingMessages, stopLoadingMessages]);
+  }, [rarityOverride, router, startLoadingMessages, stopLoadingMessages]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,7 +159,7 @@ function CardContent() {
         if (!data) return;
         if (reqId !== requestIdRef.current) return;
         if (data.error) setError(data.error);
-        else { setCard(data.card); setRawStats(data.raw); setShowReveal(true); }
+        else { setCard(data.card); setShowReveal(true); }
         setLoading(false);
         stopLoadingMessages();
       })

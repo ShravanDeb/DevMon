@@ -8,20 +8,22 @@ import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
+const NO_STORE = { "Cache-Control": "no-store" } as const;
+
 export async function POST(req: NextRequest) {
   const start = Date.now();
 
   try {
     const session = await getSessionUser();
     if (!session?.accessToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE });
     }
 
     const rl = await rateLimit("card-gen", session.userId, RATE_LIMITS.cardGen);
     if (!rl.success) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Try again in a minute." },
-        { status: 429 }
+        { status: 429, headers: NO_STORE }
       );
     }
 
@@ -77,7 +79,7 @@ export async function POST(req: NextRequest) {
       console.error("upsert_card error:", upsertErr.message);
       return NextResponse.json(
         { error: `Failed to save card: ${upsertErr.message}` },
-        { status: 500 }
+        { status: 500, headers: NO_STORE }
       );
     }
 
@@ -85,7 +87,7 @@ export async function POST(req: NextRequest) {
     const row = (Array.isArray(upsertResult) ? upsertResult[0] : upsertResult) as Record<string, unknown> | undefined;
     if (!row?.card_id) {
       console.error("upsert_card returned no row:", JSON.stringify(upsertResult));
-      return NextResponse.json({ error: "Failed to generate card: upsert returned no data" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to generate card: upsert returned no data" }, { status: 500, headers: NO_STORE });
     }
 
     // Re-sign using ONLY values from the DB row
@@ -156,10 +158,10 @@ export async function POST(req: NextRequest) {
         rank,
         totalCards: totalCards ?? 0,
       },
-    });
+    }, { headers: NO_STORE });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to generate card";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500, headers: NO_STORE });
   }
 }
 
@@ -169,8 +171,8 @@ export async function GET() {
     const { count } = await admin
       .from("cards")
       .select("*", { count: "exact", head: true });
-    return NextResponse.json({ count: count ?? 0 });
+    return NextResponse.json({ count: count ?? 0 }, { headers: NO_STORE });
   } catch {
-    return NextResponse.json({ count: 0 });
+    return NextResponse.json({ count: 0 }, { headers: NO_STORE });
   }
 }

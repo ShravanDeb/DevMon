@@ -306,6 +306,7 @@ export async function fetchGitHubStats(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ query, variables }),
+    cache: "no-store",
   });
 
   if (!res.ok) {
