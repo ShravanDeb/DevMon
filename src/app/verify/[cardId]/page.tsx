@@ -7,6 +7,7 @@ import { RARITY_COLORS, CLASS_SUBTITLES, STAT_LABELS } from "@/types";
 import type { CardData } from "@/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
+import { LinkedInShareModal } from "@/components/LinkedInShareModal";
 
 interface VerifyResponse {
   verified: boolean;
@@ -100,7 +101,7 @@ export default function VerifyPage() {
   const [loading, setLoading] = useState(true);
   const [verifyError, setVerifyError] = useState<VerifyError | null>(null);
   const [copied, setCopied] = useState(false);
-  const [linkedinCopied, setLinkedinCopied] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState(VERIFY_MESSAGES[0]);
 
   const copyUrl = useCallback(() => {
@@ -189,6 +190,8 @@ export default function VerifyPage() {
   const { card } = data;
   const rarityColor = RARITY_COLORS[card.rarity];
   const verifyUrl = typeof window !== "undefined" ? window.location.href : "";
+  const homepageUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const shareText = `🚀 Just leveled up my dev profile! My verified GitHub credentials are now a shareable trading card on DevMon.\n\nCheck out the receipts 👇\n${verifyUrl}\n\nWant your own? Generate yours free 👇\n${homepageUrl}\n\n#DevMon #BuildInPublic #GitHub #DevCommunity`;
 
   return (
     <div className="min-h-screen bg-surface-0">
@@ -354,19 +357,13 @@ export default function VerifyPage() {
           transition={{ duration: 0.4, delay: 0.6 }}
         >
           <button
-            onClick={() => {
-              const text = `Just generated my developer trading card on DevMon! Check out my verified GitHub credentials:\n\n${verifyUrl}`;
-              navigator.clipboard.writeText(text);
-              setLinkedinCopied(true);
-              setTimeout(() => setLinkedinCopied(false), 1500);
-              window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(verifyUrl)}`, "_blank");
-            }}
+            onClick={() => setShareModalOpen(true)}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0A66C2] text-white px-5 py-2.5 text-[13px] font-medium hover:bg-[#0958A8] transition-colors"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
             </svg>
-            {linkedinCopied ? "Text copied! Paste in LinkedIn" : "Share on LinkedIn"}
+            Share on LinkedIn
           </button>
           <button
             onClick={copyUrl}
@@ -399,6 +396,14 @@ export default function VerifyPage() {
       </div>
 
       <Footer />
+
+      <LinkedInShareModal
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        shareText={shareText}
+        imageUrl={`/api/og?username=${card.username}`}
+        filename={`devmon-${card.username}`}
+      />
     </div>
   );
 }
