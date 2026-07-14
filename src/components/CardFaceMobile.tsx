@@ -106,7 +106,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
 
   const heroStat = card.heroStat;
   const heroStatValueRef = useRef<HTMLSpanElement>(null);
-  const [heroFontSize, setHeroFontSize] = useState(39);
+  const [heroFontSize, setHeroFontSize] = useState(28);
 
   useEffect(() => {
     const el = heroStatValueRef.current;
@@ -121,14 +121,14 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
 
       const availableWidth = containerWidth;
 
-      for (let size = 43; size >= 17; size -= 1) {
+      for (let size = 32; size >= 13; size -= 1) {
         el.style.fontSize = `${size}px`;
         if (el.scrollWidth <= availableWidth) {
           setHeroFontSize(size);
           return;
         }
       }
-      setHeroFontSize(17);
+      setHeroFontSize(13);
     };
 
     measure();
@@ -244,7 +244,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                 </motion.div>
               )}
 
-              <div className="flex items-start gap-2 mb-2 shrink-0">
+              <div className="flex items-start gap-1.5 mb-1 shrink-0">
                 <motion.div
                   className="relative shrink-0 card-avatar-ring"
                   style={{ ["--rarity-color" as string]: rarityColor.hex } as React.CSSProperties}
@@ -325,7 +325,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
               </div>
 
               <motion.div
-                className="card-hero-stat mb-2 flex flex-col justify-center relative shrink-0 w-full"
+                className="card-hero-stat mb-1.5 flex flex-col justify-center relative shrink-0 w-full"
                 initial={{ opacity: 0, y: 6 }}
                 animate={revealed ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -351,7 +351,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
               </motion.div>
 
               <motion.div
-                className="rounded-[6px] p-[6px] mb-2 flex items-center gap-1.5 relative overflow-hidden shrink-0 card-signature-border"
+                className="rounded-[6px] p-[6px] mb-1.5 flex items-center gap-1.5 relative overflow-hidden shrink-0 card-signature-border"
                 style={{
                   background: `color-mix(in srgb, ${rarityColor.hex}08, #1C1C20)`,
                   border: `1px solid #28282C`,
@@ -384,11 +384,11 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                 </div>
               </motion.div>
 
-              <div className="mb-2 shrink-0">
+              <div className="mb-1.5 shrink-0">
                 <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-1">
                   Attributes
                 </span>
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   {stats.map((s, i) => {
                     const isHero = heroStatKey === s.key;
                     return (
@@ -424,12 +424,12 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                 </div>
               </div>
 
-              <div className="mb-2 shrink-0">
+              <div className="mb-1.5 shrink-0">
                 <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-1">
                   Achievements
                 </span>
                 <motion.div
-                  className="flex flex-wrap gap-1"
+                  className="flex flex-wrap gap-0.5"
                   initial={{ opacity: 0 }}
                   animate={revealed ? { opacity: 1 } : {}}
                   transition={{ duration: 0.4, delay: 0.6 }}
@@ -455,10 +455,10 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                 </motion.div>
               </div>
 
-              <div className="card-divider mb-1.5 shrink-0" />
+              <div className="card-divider mb-1 shrink-0" />
 
               <motion.div
-                className="rounded-[5px] px-[7px] py-[5px] relative mb-2 shrink-0"
+                className="rounded-[5px] px-[7px] py-[5px] relative mb-1.5 shrink-0"
                 style={{
                   background: `color-mix(in srgb, ${rarityColor.hex}06, #1C1C20)`,
                   border: `1px solid #26262A`,

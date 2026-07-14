@@ -342,7 +342,7 @@
 
   /* === MOBILE CARD OVERRIDES — scoped to .card-mobile wrapper === */
   .card-mobile .card-hero-stat {
-    padding: 8px 10px 6px;
+    padding: 6px 10px 4px;
   }
   .card-mobile .card-hero-stat-unit {
     font-size: 12px;
