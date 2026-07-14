@@ -99,7 +99,7 @@ BEGIN
     sha256_hash, digital_signature, version, updated_at
   ) VALUES (
     p_user_id, p_github_username, p_username, p_display_name, p_avatar_url, p_company, p_primary_language,
-    p_card_id, COALESCE(p_edition, nextval('card_edition_seq')), p_raw_stats, p_stats, p_rarity, p_rarity_score, p_primary_class, p_secondary_class,
+    p_card_id, CASE WHEN p_edition IS NULL OR p_edition = 0 THEN nextval('card_edition_seq') ELSE p_edition END, p_raw_stats, p_stats, p_rarity, p_rarity_score, p_primary_class, p_secondary_class,
     p_hero_stat, p_signature_move, p_achievements, p_flavor_text, p_flavor_tone,
     p_sha256_hash, p_digital_signature, p_version, now()
   )
