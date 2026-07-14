@@ -17,8 +17,11 @@ export function RarityCrown({ rank, className = "" }: RarityCrownProps) {
 
   return (
     <div
-      className={`absolute -top-[30px] -left-[22px] z-10 rotate-[-24deg] transition-transform duration-250 ease-out group-hover:scale-104 animate-crown-float ${className}`}
-      style={{ filter: "drop-shadow(0 6px 8px rgba(0,0,0,.28))" }}
+      className={`absolute -top-[14px] -left-[10px] z-10 transition-transform duration-250 ease-out group-hover:scale-104 animate-crown-float ${className}`}
+      style={{
+        transform: "rotate(-18deg) perspective(900px) rotateY(-6deg) rotateX(2deg)",
+        filter: "drop-shadow(0 5px 8px rgba(0,0,0,.28))",
+      }}
     >
       <Image
         src={crown.src}
