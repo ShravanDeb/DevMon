@@ -188,10 +188,10 @@ function LeaderboardPreview() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
-    fetch("/api/leaderboard?limit=3")
+    fetch("/api/leaderboard")
       .then((r) => r.json())
       .then((d) => {
-        setEntries(d.entries || []);
+        setEntries((d.entries || []).slice(0, 3));
       })
       .catch((err) => {
         console.error("Leaderboard fetch failed:", err);
