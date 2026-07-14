@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       .order("rarity_score", { ascending: false });
 
     if (!noRange) {
-      query = query.range(offset, offset + limit - 1);
+      query = query.limit(limit).offset(offset);
     }
 
     if (company) {
