@@ -13,16 +13,10 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20")));
     const offset = Math.max(0, parseInt(searchParams.get("offset") || "0"));
 
-    const noRange = searchParams.get("noRange") === "1";
-
     let query = admin
       .from("cards")
       .select("github_username, display_name, avatar_url, rarity, rarity_score, primary_class, stats, company, primary_language, updated_at", { count: "exact" })
       .order("rarity_score", { ascending: false });
-
-    if (!noRange) {
-      query = query.limit(limit).offset(offset);
-    }
 
     if (company) {
       query = query.eq("company", company);
@@ -34,7 +28,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500, headers: NO_STORE });
     }
 
-    const entries = (data || []).map((row) => ({
+    const paged = (data || []).slice(offset, offset + limit);
+
+    const entries = paged.map((row) => ({
       username: row.github_username,
       displayName: row.display_name,
       avatarUrl: row.avatar_url,
