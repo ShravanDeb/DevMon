@@ -27,7 +27,7 @@ export function generateVerification(
   raw: RawGitHubStats,
   stats: CardStats,
   rarity: Rarity,
-  edition?: number
+  edition: number
 ): VerificationData {
   const cardId = generateCardId();
   const now = new Date().toISOString();
@@ -35,7 +35,7 @@ export function generateVerification(
 
   return {
     cardId,
-    edition: edition ?? 0,
+    edition,
     generatedAt: now,
     version: "1.0.0",
     digitalSignature: `hmac_${hmacHex}`,

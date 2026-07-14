@@ -45,7 +45,7 @@ export async function GET(
       {
         verified: true,
         card: {
-          username: card.github_username,
+          username: card.username || card.github_username,
           displayName: card.display_name,
           avatarUrl: card.avatar_url,
           rarity: card.rarity,
@@ -60,8 +60,8 @@ export async function GET(
           verification: {
             cardId: card.card_id,
             edition: card.edition,
-            generatedAt: card.created_at,
-            version: card.verification_version,
+            generatedAt: card.updated_at,
+            version: card.version || card.verification_version,
             digitalSignature: card.digital_signature,
             sha256Hash: card.sha256_hash,
           },

@@ -46,22 +46,17 @@ export async function POST(req: NextRequest) {
 
     const topLang = raw.languages[0]?.name || null;
 
-    // Generate a candidate card_id + HMAC (only used on insert; discarded on conflict)
-    const candidateCardId = card.verification.cardId;
-    const candidateEdition = card.verification.edition;
-    const candidateSha256 = card.verification.sha256Hash;
-    const candidateSignature = card.verification.digitalSignature;
-
-    // Single atomic upsert — one row, one statement, race-safe
+    // Single atomic upsert — one statement, RETURNING every column
     const { data: upsertResult, error: upsertErr } = await admin.rpc("upsert_card", {
       p_user_id: session.userId,
       p_github_username: raw.login,
+      p_username: raw.login,
       p_display_name: raw.name || raw.login,
       p_avatar_url: raw.avatarUrl,
       p_company: raw.company || null,
       p_primary_language: topLang,
-      p_card_id: candidateCardId,
-      p_edition: candidateEdition,
+      p_card_id: card.verification.cardId,
+      p_edition: card.verification.edition,
       p_raw_stats: raw as unknown as Record<string, unknown>,
       p_stats: card.stats as unknown as Record<string, unknown>,
       p_rarity: card.rarity,
@@ -73,8 +68,9 @@ export async function POST(req: NextRequest) {
       p_achievements: card.achievements as unknown as Record<string, unknown>[],
       p_flavor_text: card.flavorText,
       p_flavor_tone: tone || "hype",
-      p_sha256_hash: candidateSha256,
-      p_digital_signature: candidateSignature,
+      p_sha256_hash: card.verification.sha256Hash,
+      p_digital_signature: card.verification.digitalSignature,
+      p_version: card.verification.version,
     });
 
     if (upsertErr) {
@@ -85,19 +81,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // upsertResult is an array from .rpc(); extract first row
+    // row is the full cards row from RETURNING *
     const row = (Array.isArray(upsertResult) ? upsertResult[0] : upsertResult) as Record<string, unknown> | undefined;
     if (!row?.card_id) {
       console.error("upsert_card returned no row:", JSON.stringify(upsertResult));
       return NextResponse.json({ error: "Failed to generate card: upsert returned no data" }, { status: 500 });
     }
-    const finalCardId = row.card_id as string;
-    const finalEdition = row.edition as number;
-    const wasInserted = row.was_inserted as boolean;
 
-    // Re-sign with the authoritative card_id + edition from the DB
+    // Re-sign using ONLY values from the DB row
     const { reSignVerification } = await import("@/lib/verification");
-    const finalVerification = reSignVerification(raw, card.stats, card.rarity, finalCardId, finalEdition);
+    const finalVerification = reSignVerification(raw, row.stats as import("@/types").CardStats, row.rarity as import("@/types").Rarity, row.card_id as string, row.edition as number);
+
+    // Write the re-signed hash/sig back to the same row
+    const { error: signUpdateErr } = await admin
+      .from("cards")
+      .update({
+        sha256_hash: finalVerification.sha256Hash,
+        digital_signature: finalVerification.digitalSignature,
+        updated_at: new Date(finalVerification.generatedAt).toISOString(),
+      })
+      .eq("card_id", row.card_id);
+
+    if (signUpdateErr) {
+      console.error("re-sign update error:", signUpdateErr.message);
+    }
 
     // Compute rank and total from the cards table directly
     const { count: totalCards } = await admin
@@ -107,7 +114,7 @@ export async function POST(req: NextRequest) {
     const { data: rankData } = await admin
       .from("cards")
       .select("user_id")
-      .gt("rarity_score", card.rarityScore)
+      .gt("rarity_score", (row.rarity_score as number))
       .order("rarity_score", { ascending: false });
     const rank = (rankData?.length ?? 0) + 1;
 
@@ -117,16 +124,35 @@ export async function POST(req: NextRequest) {
         method: "POST",
         route: "/api/card",
         userId: session.userId,
-        outcome: wasInserted ? "created" : "updated",
-        cardId: finalCardId,
+        cardId: row.card_id,
         duration,
       })
     );
 
     return NextResponse.json({
       card: {
-        ...card,
-        verification: finalVerification,
+        username: row.username as string,
+        displayName: row.display_name as string,
+        avatarUrl: row.avatar_url as string,
+        stats: row.stats as Record<string, number>,
+        rarity: row.rarity as string,
+        rarityScore: row.rarity_score as number,
+        primaryClass: row.primary_class as string,
+        secondaryClass: row.secondary_class as string | null,
+        flavorText: row.flavor_text as string,
+        signatureMove: row.signature_move as { name: string; description: string; icon: string },
+        achievements: row.achievements as { label: string; value: string; icon: string }[],
+        verification: {
+          cardId: row.card_id as string,
+          edition: row.edition as number,
+          generatedAt: finalVerification.generatedAt,
+          version: finalVerification.version,
+          sha256Hash: finalVerification.sha256Hash,
+          digitalSignature: finalVerification.digitalSignature,
+        },
+        heroStat: row.hero_stat as { key: string; label: string; value: string; unit: string; qualifier: string },
+        className: row.primary_class as string,
+        generatedAt: finalVerification.generatedAt,
         rank,
         totalCards: totalCards ?? 0,
       },

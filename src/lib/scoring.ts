@@ -70,7 +70,7 @@ export function generateCard(raw: RawGitHubStats, tone?: FlavorTone, rarityOverr
   const flavorText = generateFlavorText(raw, stats, rarity, primary, tone);
   const signatureMove = generateSignatureMove(raw, stats);
   const achievements = generateAchievements(raw, stats);
-  const verification = generateVerification(raw, stats, rarity);
+  const verification = generateVerification(raw, stats, rarity, 0);
   const heroStat = selectHeroStat(raw, stats);
 
   return {

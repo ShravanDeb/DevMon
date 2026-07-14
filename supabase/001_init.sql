@@ -19,6 +19,7 @@ CREATE TABLE cards (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id             UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   github_username     TEXT NOT NULL,
+  username            TEXT,
   display_name        TEXT,
   avatar_url          TEXT,
   company             TEXT,
@@ -39,6 +40,9 @@ CREATE TABLE cards (
   sha256_hash         TEXT NOT NULL,
   digital_signature   TEXT NOT NULL,
   verification_version TEXT NOT NULL DEFAULT 'v1',
+  version             TEXT,
+  rank                INTEGER,
+  total_cards         INTEGER,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -55,10 +59,12 @@ CREATE POLICY "public read" ON cards
 CREATE POLICY "service role full access" ON cards
   FOR ALL USING (auth.role() = 'service_role');
 
--- Atomic upsert: inserts if new user, updates if existing. card_id and edition are never overwritten.
+-- Atomic upsert: single INSERT ... ON CONFLICT (user_id) DO UPDATE.
+-- Preserves card_id, edition, created_at on update. Returns every column.
 CREATE OR REPLACE FUNCTION upsert_card(
   p_user_id UUID,
   p_github_username TEXT,
+  p_username TEXT,
   p_display_name TEXT,
   p_avatar_url TEXT,
   p_company TEXT,
@@ -77,68 +83,48 @@ CREATE OR REPLACE FUNCTION upsert_card(
   p_flavor_text TEXT,
   p_flavor_tone TEXT,
   p_sha256_hash TEXT,
-  p_digital_signature TEXT
+  p_digital_signature TEXT,
+  p_version TEXT
 )
-RETURNS TABLE (
-  card_id TEXT,
-  edition INTEGER,
-  was_inserted BOOLEAN
-)
+RETURNS SETOF cards
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
-DECLARE
-  existing_card_id TEXT;
 BEGIN
-  -- Check if user already exists
-  SELECT c.card_id INTO existing_card_id FROM cards c WHERE c.user_id = p_user_id;
-
-  IF existing_card_id IS NULL THEN
-    -- First-time insert: auto-assign edition from sequence
-    INSERT INTO cards (
-      user_id, github_username, display_name, avatar_url, company, primary_language,
-      card_id, edition, raw_stats, stats, rarity, rarity_score, primary_class, secondary_class,
-      hero_stat, signature_move, achievements, flavor_text, flavor_tone,
-      sha256_hash, digital_signature, updated_at
-    ) VALUES (
-      p_user_id, p_github_username, p_display_name, p_avatar_url, p_company, p_primary_language,
-      p_card_id, nextval('card_edition_seq'), p_raw_stats, p_stats, p_rarity, p_rarity_score, p_primary_class, p_secondary_class,
-      p_hero_stat, p_signature_move, p_achievements, p_flavor_text, p_flavor_tone,
-      p_sha256_hash, p_digital_signature, now()
-    )
-    RETURNING cards.card_id, cards.edition INTO card_id, edition;
-
-    card_id := p_card_id;
-    edition := p_edition;
-    was_inserted := TRUE;
-    RETURN NEXT;
-  ELSE
-    -- Update existing: preserve card_id, edition, created_at
-    UPDATE cards SET
-      github_username = p_github_username,
-      display_name = p_display_name,
-      avatar_url = p_avatar_url,
-      company = p_company,
-      primary_language = p_primary_language,
-      raw_stats = p_raw_stats,
-      stats = p_stats,
-      rarity = p_rarity,
-      rarity_score = p_rarity_score,
-      primary_class = p_primary_class,
-      secondary_class = p_secondary_class,
-      hero_stat = p_hero_stat,
-      signature_move = p_signature_move,
-      achievements = p_achievements,
-      flavor_text = p_flavor_text,
-      flavor_tone = p_flavor_tone,
-      sha256_hash = p_sha256_hash,
-      digital_signature = p_digital_signature,
-      updated_at = now()
-    WHERE user_id = p_user_id
-    RETURNING cards.card_id, cards.edition INTO card_id, edition;
-
-    was_inserted := FALSE;
-    RETURN NEXT;
-  END IF;
+  RETURN QUERY
+  INSERT INTO cards (
+    user_id, github_username, username, display_name, avatar_url, company, primary_language,
+    card_id, edition, raw_stats, stats, rarity, rarity_score, primary_class, secondary_class,
+    hero_stat, signature_move, achievements, flavor_text, flavor_tone,
+    sha256_hash, digital_signature, version, updated_at
+  ) VALUES (
+    p_user_id, p_github_username, p_username, p_display_name, p_avatar_url, p_company, p_primary_language,
+    p_card_id, COALESCE(p_edition, nextval('card_edition_seq')), p_raw_stats, p_stats, p_rarity, p_rarity_score, p_primary_class, p_secondary_class,
+    p_hero_stat, p_signature_move, p_achievements, p_flavor_text, p_flavor_tone,
+    p_sha256_hash, p_digital_signature, p_version, now()
+  )
+  ON CONFLICT (user_id) DO UPDATE SET
+    github_username = EXCLUDED.github_username,
+    username = EXCLUDED.username,
+    display_name = EXCLUDED.display_name,
+    avatar_url = EXCLUDED.avatar_url,
+    company = EXCLUDED.company,
+    primary_language = EXCLUDED.primary_language,
+    raw_stats = EXCLUDED.raw_stats,
+    stats = EXCLUDED.stats,
+    rarity = EXCLUDED.rarity,
+    rarity_score = EXCLUDED.rarity_score,
+    primary_class = EXCLUDED.primary_class,
+    secondary_class = EXCLUDED.secondary_class,
+    hero_stat = EXCLUDED.hero_stat,
+    signature_move = EXCLUDED.signature_move,
+    achievements = EXCLUDED.achievements,
+    flavor_text = EXCLUDED.flavor_text,
+    flavor_tone = EXCLUDED.flavor_tone,
+    sha256_hash = EXCLUDED.sha256_hash,
+    digital_signature = EXCLUDED.digital_signature,
+    version = EXCLUDED.version,
+    updated_at = now()
+  RETURNING *;
 END;
 $$;
