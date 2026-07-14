@@ -9,7 +9,7 @@ async function main() {
     return match ? match[1].replace(/^"|"$/g, '').trim() : null;
   };
 
-  const projectRef = 'sqnycndqbbychopyzntw';
+  const projectRef = 'mlbtqsqcdumzgyrzisxw';
   const dbPassword = getVar('SUPABASE_DB_PASSWORD');
 
   if (!dbPassword) {

@@ -1,242 +1,91 @@
-import pg from "pg";
+import { createClient } from "@supabase/supabase-js";
+import { Client } from "pg";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const POOLER_HOST = "aws-0-us-east-1.pooler.supabase.com";
-const PROJECT_REF = "sqnycndqbbychopyzntw";
-const PASSWORD = "DfI1k1sh80zUqxCJ";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-async function tryConnect(host) {
-  const connStr = `postgresql://postgres.${PROJECT_REF}:${PASSWORD}@${host}:6543/postgres`;
-  console.log(`Trying: ${host}...`);
-  const client = new pg.Client({ connectionString: connStr, ssl: { rejectUnauthorized: false } });
-  await client.connect();
-  return client;
+const envPath = path.join(__dirname, "..", ".env");
+const env = fs.readFileSync(envPath, "utf8");
+
+const getVar = (name) => {
+  const m = env.match(new RegExp(`^${name}=(.+)`, "m"));
+  return m ? m[1].replace(/^"|"$/g, "").trim() : null;
+};
+
+const projectRef = getVar("NEXT_PUBLIC_SUPABASE_URL")
+  ?.replace("https://", "")
+  .replace(".supabase.co", "");
+const serviceRoleKey = getVar("SUPABASE_SERVICE_ROLE_KEY");
+const dbPassword = getVar("SUPABASE_DB_PASSWORD");
+
+if (!projectRef || !serviceRoleKey || !dbPassword) {
+  console.error("Missing env vars. Ensure NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_DB_PASSWORD are set.");
+  process.exit(1);
 }
 
-async function main() {
-  let client;
-  const hosts = [
-    "aws-0-us-east-1.pooler.supabase.com",
-    "aws-0-us-west-1.pooler.supabase.com",
-    "aws-0-us-west-2.pooler.supabase.com",
-    "aws-0-ap-southeast-1.pooler.supabase.com",
-    "aws-0-ap-southeast-2.pooler.supabase.com",
-    "aws-0 eu-west-1.pooler.supabase.com",
-    "aws-0-eu-central-1.pooler.supabase.com",
-    "aws-0-sa-east-1.pooler.supabase.com",
-  ];
+const supabaseUrl = `https://${projectRef}.supabase.co`;
+const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-  for (const h of hosts) {
-    try {
-      client = await tryConnect(h);
-      console.log(`Connected via ${h}`);
-      break;
-    } catch (e) {
-      console.log(`  Failed: ${e.message.split("\n")[0]}`);
-    }
-  }
+async function reset() {
+  console.log(`Target: ${supabaseUrl}\n`);
 
-  if (!client) {
-    console.error("Could not connect to any pooler host. Trying direct connection...");
-    try {
-      const directUrl = `postgresql://postgres:${PASSWORD}@db.${PROJECT_REF}.supabase.co:5432/postgres`;
-      client = new pg.Client({ connectionString: directUrl, ssl: { rejectUnauthorized: false } });
-      await client.connect();
-      console.log("Connected via direct connection");
-    } catch (e) {
-      console.error("Direct connection also failed:", e.message.split("\n")[0]);
-      process.exit(1);
-    }
-  }
+  // 1. Delete all cards
+  const { error: cardsErr, data: cardsData } = await supabase
+    .from("cards")
+    .delete()
+    .not("id", "is", null)
+    .select("count");
+  console.log(
+    cardsErr
+      ? `ERR deleting cards: ${cardsErr.message}`
+      : `Deleted all cards (table cleared)`
+  );
 
-  console.log("\n=== Connected. Running full reset ===\n");
-
-  const sql = `
--- 1. Drop everything
-DROP POLICY IF EXISTS "Users can read own profile" ON profiles;
-DROP POLICY IF EXISTS "Service role full access on profiles" ON profiles;
-DROP POLICY IF EXISTS "Anyone can read card count" ON card_count;
-DROP POLICY IF EXISTS "Authenticated can read card count" ON card_count;
-DROP POLICY IF EXISTS "Service role full access on card count" ON card_count;
-DROP POLICY IF EXISTS "Service role full access on editions" ON editions;
-DROP POLICY IF EXISTS "Anyone can read leaderboard" ON leaderboard;
-DROP POLICY IF EXISTS "Authenticated can read leaderboard" ON leaderboard;
-DROP POLICY IF EXISTS "Service role full access on leaderboard" ON leaderboard;
-
-DROP TABLE IF EXISTS profiles CASCADE;
-DROP TABLE IF EXISTS leaderboard CASCADE;
-DROP TABLE IF EXISTS editions CASCADE;
-DROP TABLE IF EXISTS card_count CASCADE;
-
-DROP FUNCTION IF EXISTS increment_card_count() CASCADE;
-DROP FUNCTION IF EXISTS increment_edition(TEXT) CASCADE;
-
--- 2. Recreate schema (001_initial_schema.sql)
-CREATE TABLE IF NOT EXISTS profiles (
-  id TEXT PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  username TEXT UNIQUE NOT NULL,
-  display_name TEXT,
-  avatar_url TEXT,
-  stats JSONB,
-  card JSONB,
-  company TEXT,
-  primary_language TEXT,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS card_count (
-  id INTEGER PRIMARY KEY DEFAULT 1,
-  count INTEGER NOT NULL DEFAULT 0
-);
-
-INSERT INTO card_count (id, count) VALUES (1, 0) ON CONFLICT (id) DO NOTHING;
-
-CREATE TABLE IF NOT EXISTS editions (
-  card_id TEXT PRIMARY KEY,
-  edition INTEGER NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS leaderboard (
-  username TEXT PRIMARY KEY,
-  display_name TEXT,
-  avatar_url TEXT,
-  rarity TEXT NOT NULL,
-  rarity_score INTEGER NOT NULL DEFAULT 0,
-  primary_class TEXT NOT NULL,
-  stats JSONB,
-  company TEXT,
-  primary_language TEXT,
-  generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_leaderboard_rarity_score ON leaderboard (rarity_score DESC);
-CREATE INDEX IF NOT EXISTS idx_leaderboard_company ON leaderboard (company);
-CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles (user_id);
-CREATE INDEX IF NOT EXISTS idx_profiles_updated_at ON profiles (updated_at);
-
--- 3. Recreate RLS policies (002_rls_policies.sql)
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE card_count ENABLE ROW LEVEL SECURITY;
-ALTER TABLE editions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE leaderboard ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can read own profile"
-  ON profiles FOR SELECT
-  TO authenticated
-  USING (user_id = auth.uid());
-
-CREATE POLICY "Service role full access on profiles"
-  ON profiles FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
-
-CREATE POLICY "Anyone can read card count"
-  ON card_count FOR SELECT
-  TO anon
-  USING (true);
-
-CREATE POLICY "Authenticated can read card count"
-  ON card_count FOR SELECT
-  TO authenticated
-  USING (true);
-
-CREATE POLICY "Service role full access on card count"
-  ON card_count FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
-
-CREATE POLICY "Service role full access on editions"
-  ON editions FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
-
-CREATE POLICY "Anyone can read leaderboard"
-  ON leaderboard FOR SELECT
-  TO anon
-  USING (true);
-
-CREATE POLICY "Authenticated can read leaderboard"
-  ON leaderboard FOR SELECT
-  TO authenticated
-  USING (true);
-
-CREATE POLICY "Service role full access on leaderboard"
-  ON leaderboard FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
-
--- 4. Recreate functions (003_functions.sql)
-CREATE OR REPLACE FUNCTION increment_card_count()
-RETURNS INTEGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  new_count INTEGER;
-BEGIN
-  UPDATE card_count SET count = count + 1 WHERE id = 1 RETURNING count INTO new_count;
-  IF new_count IS NULL THEN
-    INSERT INTO card_count (id, count) VALUES (1, 1) RETURNING count INTO new_count;
-  END IF;
-  RETURN new_count;
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION increment_edition(p_card_id TEXT)
-RETURNS INTEGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  new_edition INTEGER;
-BEGIN
-  INSERT INTO editions (card_id, edition)
-  VALUES (p_card_id, 1)
-  ON CONFLICT (card_id) DO UPDATE
-    SET edition = editions.edition + 1
-  RETURNING edition INTO new_edition;
-  RETURN new_edition;
-END;
-$$;
-
--- 5. Migration 004: UNIQUE constraint on user_id for onConflict upsert
-ALTER TABLE profiles ADD CONSTRAINT profiles_user_id_unique UNIQUE (user_id);
-`;
-
+  // 2. Reset edition sequence via direct SQL (needs pg connection)
+  const pgClient = new Client({
+    connectionString: `postgresql://postgres:${dbPassword}@db.${projectRef}.supabase.co:5432/postgres`,
+    ssl: { rejectUnauthorized: false },
+  });
   try {
-    await client.query(sql);
-    console.log("All SQL executed successfully.\n");
-  } catch (e) {
-    console.error("SQL error:", e.message);
-    console.error("Detail:", e.detail);
+    await pgClient.connect();
+    await pgClient.query("ALTER SEQUENCE card_edition_seq RESTART WITH 1");
+    console.log("Reset card_edition_seq to 1");
+    await pgClient.end();
+  } catch (err) {
+    console.error(`ERR resetting sequence: ${err.message}`);
+    console.error("Trying pooler fallback...");
+    try {
+      const fallback = new Client({
+        connectionString: `postgresql://postgres.${projectRef}:${dbPassword}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`,
+        ssl: { rejectUnauthorized: false },
+      });
+      await fallback.connect();
+      await fallback.query("ALTER SEQUENCE card_edition_seq RESTART WITH 1");
+      console.log("Reset card_edition_seq to 1 (via pooler)");
+      await fallback.end();
+    } catch (err2) {
+      console.error(`ERR resetting sequence via pooler: ${err2.message}`);
+    }
   }
 
-  // Verify
-  console.log("=== Verification ===");
-  for (const t of ["profiles", "leaderboard", "editions", "card_count"]) {
-    const r = await client.query(`SELECT count(*) as count FROM ${t}`);
-    console.log(`  ${t}: ${r.rows[0].count} rows`);
+  // 3. Delete all auth users
+  const { data: users, error: listErr } = await supabase.auth.admin.listUsers();
+  if (listErr) {
+    console.error(`ERR listing auth users: ${listErr.message}`);
+  } else if (users?.users?.length) {
+    console.log(`Found ${users.users.length} auth user(s) to delete...`);
+    for (const u of users.users) {
+      const { error: delErr } = await supabase.auth.admin.deleteUser(u.id);
+      if (delErr) console.error(`ERR deleting user ${u.email} (${u.id}): ${delErr.message}`);
+      else console.log(`Deleted user ${u.email || u.id}`);
+    }
+  } else {
+    console.log("No auth users to delete");
   }
 
-  // Verify constraints
-  const constraints = await client.query(`
-    SELECT conname, contype, conrelid::regclass as table_name
-    FROM pg_constraint
-    WHERE connamespace = 'public'::regnamespace
-    ORDER BY conrelid::regclass::text, contype
-  `);
-  console.log("\n=== Constraints ===");
-  for (const c of constraints.rows) {
-    const type = { p: "PK", u: "UNIQUE", f: "FK", c: "CHECK" }[c.contype] || c.contype;
-    console.log(`  ${c.table_name}: ${type} (${c.conname})`);
-  }
-
-  await client.end();
-  console.log("\nDone.");
+  console.log("\nReset complete. Database is clean and ready for migration.");
 }
 
-main();
+reset();

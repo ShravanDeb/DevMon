@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
 
     const topLang = raw.languages[0]?.name || null;
 
-    // Single atomic upsert — one statement, RETURNING every column
-    const { data: upsertResult, error: upsertErr } = await admin.rpc("upsert_card", {
+    // Single atomic upsert — SELECT FOR UPDATE, RETURNING every column
+    const { data: upsertResult, error: upsertErr } = await admin.rpc("upsert_card_v2", {
       p_user_id: session.userId,
       p_github_username: raw.login,
       p_username: raw.login,
@@ -90,9 +90,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to generate card: upsert returned no data" }, { status: 500, headers: NO_STORE });
     }
 
-    // Re-sign using ONLY values from the DB row
+    // Re-sign using fresh card data (not DB row) for verification integrity
     const { reSignVerification } = await import("@/lib/verification");
-    const finalVerification = reSignVerification(raw, row.stats as import("@/types").CardStats, row.rarity as import("@/types").Rarity, row.card_id as string, row.edition as number);
+    const finalVerification = reSignVerification(raw, card.stats, card.rarity, row.card_id as string, row.edition as number);
 
     // Write the re-signed hash/sig back to the same row
     const { error: signUpdateErr } = await admin
