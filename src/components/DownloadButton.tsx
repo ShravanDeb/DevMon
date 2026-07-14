@@ -159,14 +159,15 @@ export function DownloadButton({
       className: string;
       cssText: string;
     } | null = null;
-    const CARD_W = 540;
-    const CARD_H = 840;
-    const BUFFER = 8;
+    const card = cardRef.current;
+    const isMobileCard = card?.querySelector(".w-\\[320px\\]") != null;
+    const CARD_W = isMobileCard ? 320 : 540;
+    const CARD_H = isMobileCard ? 500 : 840;
+    const BUFFER = isMobileCard ? 6 : 8;
 
     try {
       await document.fonts.ready;
 
-      const card = cardRef.current;
       const imgs = Array.from(card.querySelectorAll("img"));
 
       await Promise.all(imgs.map(waitForImg));

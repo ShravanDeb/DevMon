@@ -7,6 +7,7 @@ import type { CardData, FlavorTone, Rarity } from "@/types";
 import { RARITY_COLORS, CLASS_SUBTITLES } from "@/types";
 
 import { CardFace } from "@/components/CardFace";
+import { CardFaceMobile } from "@/components/CardFaceMobile";
 import { DownloadButton } from "@/components/DownloadButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
@@ -62,6 +63,8 @@ function CardContent() {
   const [rarityOverride, setRarityOverride] = useState<Rarity | undefined>(undefined);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const downloadBtnRef = useRef<HTMLDivElement>(null);
 
   // §5: Race condition prevention
@@ -69,6 +72,15 @@ function CardContent() {
   const requestIdRef = useRef(0);
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
   const loadingMsgRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    const mq = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const startLoadingMessages = useCallback(() => {
     let idx = 0;
@@ -299,7 +311,11 @@ function CardContent() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
           <div ref={cardRef}>
-            <CardFace card={card} rarityOverride={rarityOverride} />
+            {mounted && isMobile ? (
+              <CardFaceMobile card={card} rarityOverride={rarityOverride} />
+            ) : (
+              <CardFace card={card} rarityOverride={rarityOverride} />
+            )}
           </div>
         </motion.div>
 
