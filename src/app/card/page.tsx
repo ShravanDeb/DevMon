@@ -292,7 +292,7 @@ function CardContent() {
 
         {/* === LEFT: Card === */}
         <motion.div
-          className="shrink-0"
+          className="shrink-0 flex justify-center"
           data-export-flatten
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={cardReady ? { opacity: 1, y: 0, scale: 1 } : {}}

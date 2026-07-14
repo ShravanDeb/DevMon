@@ -47,3 +47,11 @@ __pycache__/
 
 # one-time scripts with secrets
 scripts/wipe-db.mjs
+
+# test/debug files with secrets
+check_rls*.js
+check_rows*.js
+check_schema.js
+test_*.js
+og_debug.html
+og_error*.json

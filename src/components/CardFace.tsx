@@ -183,7 +183,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
   const secondaryAchievements = card.achievements.filter((a) => !PRIMARY_ACHIEVEMENTS.includes(a.label));
 
   return (
-    <div className="flex flex-col items-center" data-theme="dark">
+    <div className="flex flex-col items-center w-full" data-theme="dark">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
@@ -196,11 +196,11 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
         animate={revealed ? { opacity: 1, scale: 1, y: 0 } : {}}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
       >
-        {/* Responsive scale wrapper — prevents 540px card from overflowing on mobile */}
+        {/* Responsive scale wrapper — uses `zoom` (which affects layout, unlike transform:scale) */}
         <div
-          className="origin-top flex justify-center w-full"
+          className="flex justify-center w-full"
           style={{
-            transform: "scale(var(--card-scale, 1))",
+            zoom: "var(--card-scale, 1)",
             "--card-scale": "clamp(0.52, calc((100vw - 2rem) / 540), 1)",
           } as React.CSSProperties}
         >
