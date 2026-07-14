@@ -340,6 +340,40 @@
     opacity: 0.9;
   }
 
+  /* === MOBILE CARD OVERRIDES — scoped to .card-mobile wrapper === */
+  .card-mobile .card-hero-stat {
+    padding: 8px 10px 6px;
+  }
+  .card-mobile .card-hero-stat-unit {
+    font-size: 12px;
+  }
+  .card-mobile .card-hero-stat-label {
+    font-size: 7px;
+    margin-top: 1px;
+  }
+  .card-mobile .card-stat-bar-track,
+  .card-mobile .card-stat-bar-fill,
+  .card-mobile .card-stat-bar-fill-hero {
+    height: 6px;
+    border-radius: 3px;
+  }
+  .card-mobile .card-achievement-badge {
+    padding: 3px 6px;
+    font-size: 7px;
+    gap: 3px;
+    border-radius: 4px;
+  }
+  .card-mobile .card-achievement-badge-icon {
+    font-size: 8px;
+    width: 10px;
+  }
+  .card-mobile .card-achievement-badge-value {
+    font-size: 7px;
+  }
+  .card-mobile .card-achievement-badge-label {
+    font-size: 6px;
+  }
+
   /* === ORNAMENTAL CORNERS (currency-style) === */
 
   .card-ornament {

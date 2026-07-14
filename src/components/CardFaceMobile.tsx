@@ -159,7 +159,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
   const secondaryAchievements = card.achievements.filter((a) => !PRIMARY_ACHIEVEMENTS.includes(a.label));
 
   return (
-    <div className="flex flex-col items-center w-full" data-theme="dark">
+    <div className="flex flex-col items-center w-full card-mobile" data-theme="dark">
       <motion.div
         ref={cardRef}
         className="relative"
