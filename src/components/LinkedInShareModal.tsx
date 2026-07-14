@@ -9,6 +9,7 @@ interface LinkedInShareModalProps {
   shareText: string;
   imageUrl: string;
   filename: string;
+  onDownload?: () => Promise<string | void>;
 }
 
 type CopyStatus = "pending" | "ok" | "failed";
@@ -20,6 +21,7 @@ export function LinkedInShareModal({
   shareText,
   imageUrl,
   filename,
+  onDownload,
 }: LinkedInShareModalProps) {
   const [copyStatus, setCopyStatus] = useState<CopyStatus>("pending");
   const [downloadStatus, setDownloadStatus] = useState<DownloadStatus>("pending");
@@ -39,22 +41,26 @@ export function LinkedInShareModal({
 
   const doDownload = useCallback(async () => {
     try {
-      const res = await fetch(imageUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${filename}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      if (onDownload) {
+        await onDownload();
+      } else {
+        const res = await fetch(imageUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${filename}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
       setDownloadStatus("ok");
     } catch {
       setDownloadStatus("failed");
     }
-  }, [imageUrl, filename]);
+  }, [imageUrl, filename, onDownload]);
 
   // Fire copy + download once when modal opens
   useEffect(() => {

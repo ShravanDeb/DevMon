@@ -63,6 +63,7 @@ function CardContent() {
   const [rawStats, setRawStats] = useState<RawGitHubStats | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const downloadBtnRef = useRef<HTMLDivElement>(null);
 
   // §5: Race condition prevention
   const abortRef = useRef<AbortController | null>(null);
@@ -387,10 +388,12 @@ function CardContent() {
             variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
           >
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-              <DownloadButton
-                cardRef={cardRef as unknown as React.RefObject<HTMLDivElement | null>}
-                filename={`devmon-${card.username}`}
-              />
+              <div ref={downloadBtnRef}>
+                <DownloadButton
+                  cardRef={cardRef as unknown as React.RefObject<HTMLDivElement | null>}
+                  filename={`devmon-${card.username}`}
+                />
+              </div>
               <button
                 onClick={() => setShareModalOpen(true)}
                 className="inline-flex items-center justify-center gap-2 rounded-[10px] px-4 py-2.5 text-[12px] font-medium text-[#0A66C2] transition-all surface-btn"
@@ -468,6 +471,10 @@ function CardContent() {
         shareText={shareText}
         imageUrl={`/api/og?username=${card.username}`}
         filename={`devmon-${card.username}`}
+        onDownload={async () => {
+          const btn = downloadBtnRef.current?.querySelector("button");
+          if (btn) btn.click();
+        }}
       />
     </main>
   );
