@@ -43,7 +43,8 @@ export async function GET(req: NextRequest) {
     }));
 
     return NextResponse.json({ entries, total: count ?? entries.length }, { headers: NO_STORE });
-  } catch {
-    return NextResponse.json({ entries: [], total: 0 }, { headers: NO_STORE });
+  } catch (err) {
+    console.error("[leaderboard] error:", err);
+    return NextResponse.json({ entries: [], total: 0, error: String(err) }, { headers: NO_STORE });
   }
 }
