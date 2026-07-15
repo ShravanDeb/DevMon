@@ -7,8 +7,6 @@ import { RARITY_COLORS, ATTRIBUTE_LABELS, CLASS_SUBTITLES } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
 import React from "react";
 
-const PRIMARY_ACHIEVEMENTS = ["Stars", "Contributions", "Day Streak"];
-
 interface CardFaceProps {
   card: CardData;
   rarityOverride?: Rarity;
@@ -154,9 +152,6 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
     const d = new Date(card.verification.generatedAt);
     return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   }, [card.verification.generatedAt]);
-
-  const primaryAchievements = card.achievements.filter((a) => PRIMARY_ACHIEVEMENTS.includes(a.label));
-  const secondaryAchievements = card.achievements.filter((a) => !PRIMARY_ACHIEVEMENTS.includes(a.label));
 
   return (
     <div className="flex flex-col items-center w-full card-mobile" data-theme="dark">
@@ -348,134 +343,128 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                 </span>
               </motion.div>
 
-              <motion.div
-                className="rounded-[6px] p-[6px] mb-1.5 flex items-center gap-1.5 relative overflow-hidden shrink-0 card-signature-border"
-                style={{
-                  background: `color-mix(in srgb, ${rarityColor.hex}08, #1C1C20)`,
-                  border: `1px solid #28282C`,
-                  ["--rarity-color" as string]: rarityColor.hex,
-                } as React.CSSProperties}
-                initial={{ opacity: 0, y: 4 }}
-                animate={revealed ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.4 }}
-              >
-                <div
-                  className="w-[21px] h-[21px] rounded-[5px] flex items-center justify-center text-[9px] font-mono font-semibold shrink-0"
-                  style={{
-                    background: "#26262A",
-                    color: rarityColor.hex,
-                    border: `1px solid #32323A`,
-                  }}
-                >
-                  {card.signatureMove.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <span className="font-mono text-[7px] font-medium uppercase tracking-[0.14em] text-text-tertiary block mb-px">
-                    Signature Move
-                  </span>
-                  <p className="text-[9px] font-semibold text-text-primary leading-normal">
-                    {card.signatureMove.name}
-                  </p>
-                  <p className="text-[8px] text-text-secondary mt-0.5 leading-normal line-clamp-1">
-                    {card.signatureMove.description}
-                  </p>
-                </div>
-              </motion.div>
-
-              <div className="mb-1.5 shrink-0">
-                <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-1">
-                  Attributes
-                </span>
-                <div className="space-y-1">
-                  {stats.map((s, i) => {
-                    const isHero = heroStatAttr === s.key;
-                    return (
-                      <motion.div
-                        key={s.key}
-                        className="flex items-center gap-2"
-                        initial={{ opacity: 0, x: -3 }}
-                        animate={revealed ? { opacity: 1, x: 0 } : {}}
-                        transition={{ duration: 0.3, delay: 0.45 + i * 0.03, ease: [0.16, 1, 0.3, 1] }}
-                      >
-                        <span className={`font-mono shrink-0 tracking-[0.02em] text-[8px] w-[65px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
-                          {s.label}
-                        </span>
-                        <div className="flex-1 card-stat-bar-track">
-                          <motion.div
-                            className={isHero ? "card-stat-bar-fill-hero" : "card-stat-bar-fill"}
-                            style={{
-                              ["--bar-start" as string]: barColors.start,
-                              ["--bar-end" as string]: barColors.end,
-                              ["--rarity-color" as string]: rarityColor.hex,
-                            } as React.CSSProperties}
-                            initial={{ width: 0 }}
-                            animate={revealed ? { width: `${card.attributes[s.key]}%` } : {}}
-                            transition={{ duration: 0.6, delay: 0.5 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
-                          />
-                        </div>
-                        <span className={`font-mono text-right tabular-nums text-[8px] w-[19px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
-                          {card.attributes[s.key]}
-                        </span>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mb-1.5 shrink-0">
-                <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-1">
-                  Achievements
-                </span>
+              {/* SCROLLABLE CONTENT */}
+              <div className="flex-1 min-h-0 overflow-hidden">
                 <motion.div
-                  className="flex flex-wrap gap-0.5"
+                  className="rounded-[6px] p-[5px] mb-1.5 flex items-center gap-1.5 relative overflow-hidden card-signature-border"
+                  style={{
+                    background: `color-mix(in srgb, ${rarityColor.hex}08, #1C1C20)`,
+                    border: `1px solid #28282C`,
+                    ["--rarity-color" as string]: rarityColor.hex,
+                  } as React.CSSProperties}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={revealed ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.4 }}
+                >
+                  <div
+                    className="w-[21px] h-[21px] rounded-[5px] flex items-center justify-center text-[9px] font-mono font-semibold shrink-0"
+                    style={{
+                      background: "#26262A",
+                      color: rarityColor.hex,
+                      border: `1px solid #32323A`,
+                    }}
+                  >
+                    {card.signatureMove.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-mono text-[7px] font-medium uppercase tracking-[0.14em] text-text-tertiary block mb-px">
+                      Signature Move
+                    </span>
+                    <p className="text-[9px] font-semibold text-text-primary leading-normal truncate">
+                      {card.signatureMove.name}
+                    </p>
+                    <p className="text-[8px] text-text-secondary mt-0.5 leading-normal line-clamp-1">
+                      {card.signatureMove.description}
+                    </p>
+                  </div>
+                </motion.div>
+
+                <div className="mb-1.5">
+                  <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-1">
+                    Attributes
+                  </span>
+                  <div className="space-y-1">
+                    {stats.map((s, i) => {
+                      const isHero = heroStatAttr === s.key;
+                      return (
+                        <motion.div
+                          key={s.key}
+                          className="flex items-center gap-2"
+                          initial={{ opacity: 0, x: -3 }}
+                          animate={revealed ? { opacity: 1, x: 0 } : {}}
+                          transition={{ duration: 0.3, delay: 0.45 + i * 0.03, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <span className={`font-mono shrink-0 tracking-[0.02em] text-[8px] w-[65px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
+                            {s.label}
+                          </span>
+                          <div className="flex-1 card-stat-bar-track">
+                            <motion.div
+                              className={isHero ? "card-stat-bar-fill-hero" : "card-stat-bar-fill"}
+                              style={{
+                                ["--bar-start" as string]: barColors.start,
+                                ["--bar-end" as string]: barColors.end,
+                                ["--rarity-color" as string]: rarityColor.hex,
+                              } as React.CSSProperties}
+                              initial={{ width: 0 }}
+                              animate={revealed ? { width: `${card.attributes[s.key]}%` } : {}}
+                              transition={{ duration: 0.6, delay: 0.5 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
+                            />
+                          </div>
+                          <span className={`font-mono text-right tabular-nums text-[8px] w-[19px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
+                            {card.attributes[s.key]}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {card.achievements.length > 0 && (
+                  <div className="mb-1.5">
+                    <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-1">
+                      Achievements
+                    </span>
+                    <motion.div
+                      className="flex flex-wrap gap-0.5"
+                      initial={{ opacity: 0 }}
+                      animate={revealed ? { opacity: 1 } : {}}
+                      transition={{ duration: 0.4, delay: 0.6 }}
+                    >
+                      {card.achievements.map((a, i) => (
+                        <span key={`${a.label}-${i}`} className="card-achievement-badge">
+                          <span className="card-achievement-badge-icon">{a.icon}</span>
+                          <span className="card-achievement-badge-value">{a.value}</span>
+                          <span className="card-achievement-badge-label">{a.label}</span>
+                        </span>
+                      ))}
+                    </motion.div>
+                  </div>
+                )}
+
+                <div className="card-divider mb-1" />
+
+                <motion.div
+                  className="rounded-[5px] px-[6px] py-[4px] relative"
+                  style={{
+                    background: `color-mix(in srgb, ${rarityColor.hex}06, #1C1C20)`,
+                    border: `1px solid #26262A`,
+                  }}
                   initial={{ opacity: 0 }}
                   animate={revealed ? { opacity: 1 } : {}}
-                  transition={{ duration: 0.4, delay: 0.6 }}
+                  transition={{ duration: 0.4, delay: 0.65 }}
                 >
-                  {primaryAchievements.map((a) => (
-                    <span
-                      key={a.label}
-                      className="card-achievement-badge card-achievement-badge-accent"
-                      style={{ ["--rarity-color" as string]: rarityColor.hex } as React.CSSProperties}
-                    >
-                      <span className="card-achievement-badge-icon">{a.icon}</span>
-                      <span className="card-achievement-badge-value">{a.value}</span>
-                      <span className="card-achievement-badge-label">{a.label}</span>
-                    </span>
-                  ))}
-                  {secondaryAchievements.map((a) => (
-                    <span key={a.label} className="card-achievement-badge">
-                      <span className="card-achievement-badge-icon">{a.icon}</span>
-                      <span className="card-achievement-badge-value">{a.value}</span>
-                      <span className="card-achievement-badge-label">{a.label}</span>
-                    </span>
-                  ))}
+                  <div
+                    className="absolute left-0 top-1.5 bottom-1.5 w-[1px] rounded-full"
+                    style={{ background: rarityColor.hex }}
+                  />
+                  <p className="text-[8px] text-text-secondary italic leading-[1.5] pl-[5px] line-clamp-1">
+                    &ldquo;{card.flavorText}&rdquo;
+                  </p>
                 </motion.div>
               </div>
 
-              <div className="card-divider mb-1 shrink-0" />
-
               <motion.div
-                className="rounded-[5px] px-[7px] py-[5px] relative mb-1.5 shrink-0"
-                style={{
-                  background: `color-mix(in srgb, ${rarityColor.hex}06, #1C1C20)`,
-                  border: `1px solid #26262A`,
-                }}
-                initial={{ opacity: 0 }}
-                animate={revealed ? { opacity: 1 } : {}}
-                transition={{ duration: 0.4, delay: 0.65 }}
-              >
-                <div
-                  className="absolute left-0 top-2 bottom-2 w-[1px] rounded-full"
-                  style={{ background: rarityColor.hex }}
-                />
-                <p className="text-[8px] text-text-secondary italic leading-[1.6] pl-[5px] line-clamp-1">
-                  &ldquo;{card.flavorText}&rdquo;
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="mt-auto flex items-end justify-between gap-2 shrink-0"
+                className="mt-auto flex items-end justify-between gap-2 pt-1.5 shrink-0"
                 initial={{ opacity: 0, y: 2 }}
                 animate={revealed ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.3, delay: 0.7 }}
@@ -500,8 +489,8 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                 <div className="flex flex-col items-center gap-0.5">
                   <img
                     src="/favicon.svg"
-                    width={19}
-                    height={19}
+                    width={17}
+                    height={17}
                     alt="DevMon"
                     className="shrink-0"
                   />
@@ -515,7 +504,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                     <div className="p-[2px] rounded-[2px] bg-white">
                       <QRCodeSVG
                         value={verifyUrl}
-                        size={43}
+                        size={36}
                         bgColor="#ffffff"
                         fgColor="#1A1A1E"
                         level="H"

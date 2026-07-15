@@ -7,8 +7,6 @@ import { RARITY_COLORS, ATTRIBUTE_LABELS, CLASS_SUBTITLES } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
 import React from "react";
 
-const PRIMARY_ACHIEVEMENTS = ["Stars", "Contributions", "Day Streak"];
-
 interface CardFaceProps {
   card: CardData;
   rarityOverride?: Rarity;
@@ -178,9 +176,6 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
     const d = new Date(card.verification.generatedAt);
     return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   }, [card.verification.generatedAt]);
-
-  const primaryAchievements = card.achievements.filter((a) => PRIMARY_ACHIEVEMENTS.includes(a.label));
-  const secondaryAchievements = card.achievements.filter((a) => !PRIMARY_ACHIEVEMENTS.includes(a.label));
 
   return (
     <div className="flex flex-col items-center w-full" data-theme="dark">
@@ -406,149 +401,147 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
                 </span>
               </motion.div>
 
-              {/* SIGNATURE MOVE */}
-              <motion.div
-                className="rounded-[10px] p-2.5 mb-3 flex items-center gap-2.5 relative overflow-hidden shrink-0 card-signature-border"
-                style={{
-                  background: isDark
-                    ? `color-mix(in srgb, ${rarityColor.hex}08, #1C1C20)`
-                    : `color-mix(in srgb, ${rarityColor.hex}06, #F0EEE8)`,
-                  border: `1px solid ${isDark ? "#28282C" : "#E0DDD6"}`,
-                  ["--rarity-color" as string]: rarityColor.hex,
-                } as React.CSSProperties}
-                initial={{ opacity: 0, y: 4 }}
-                animate={revealed ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.4 }}
-              >
-                <div
-                  className="w-9 h-9 rounded-[8px] flex items-center justify-center text-[15px] font-mono font-semibold shrink-0"
-                  style={{
-                    background: isDark ? "#26262A" : "#E8E6E0",
-                    color: rarityColor.hex,
-                    border: `1px solid ${isDark ? "#32323A" : "#D8D6D0"}`,
-                  }}
-                >
-                  {card.signatureMove.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-tertiary block mb-0.5">
-                    Signature Move
-                  </span>
-                  <p className="text-[15px] font-semibold text-text-primary leading-normal">
-                    {card.signatureMove.name}
-                  </p>
-                  <p className="text-[13px] text-text-secondary mt-0.5 leading-normal line-clamp-2">
-                    {card.signatureMove.description}
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* ATTRIBUTES — Premium Stat Bars */}
-              <div className="mb-3 shrink-0">
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-2">
-                  Attributes
-                </span>
-                <div className="space-y-2">
-                  {stats.map((s, i) => {
-                    const isHero = heroStatAttr === s.key;
-                    return (
-                      <motion.div
-                        key={s.key}
-                        className="flex items-center gap-3"
-                        initial={{ opacity: 0, x: -3 }}
-                        animate={revealed ? { opacity: 1, x: 0 } : {}}
-                        transition={{ duration: 0.3, delay: 0.45 + i * 0.03, ease: [0.16, 1, 0.3, 1] }}
-                      >
-                        <span className={`font-mono shrink-0 tracking-[0.02em] text-[13px] w-[110px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
-                          {s.label}
-                        </span>
-                        <div className="flex-1 card-stat-bar-track">
-                          <motion.div
-                            className={isHero ? "card-stat-bar-fill-hero" : "card-stat-bar-fill"}
-                            style={{
-                              ["--bar-start" as string]: barColors.start,
-                              ["--bar-end" as string]: barColors.end,
-                              ["--rarity-color" as string]: rarityColor.hex,
-                            } as React.CSSProperties}
-                            initial={{ width: 0 }}
-                            animate={revealed ? { width: `${card.attributes[s.key]}%` } : {}}
-                            transition={{ duration: 0.6, delay: 0.5 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
-                          />
-                        </div>
-                        <span className={`font-mono text-right tabular-nums text-[13px] w-8 ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
-                          {card.attributes[s.key]}
-                        </span>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* ACHIEVEMENTS — Premium Badge Style */}
-              <div className="mb-3 shrink-0">
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-2">
-                  Achievements
-                </span>
+              {/* SCROLLABLE CONTENT — fills remaining space, never pushes footer */}
+              <div className="flex-1 min-h-0 overflow-hidden">
+                {/* SIGNATURE MOVE */}
                 <motion.div
-                  className="flex flex-wrap gap-1.5"
+                  className="rounded-[10px] p-2.5 mb-2.5 flex items-center gap-2.5 relative overflow-hidden card-signature-border"
+                  style={{
+                    background: isDark
+                      ? `color-mix(in srgb, ${rarityColor.hex}08, #1C1C20)`
+                      : `color-mix(in srgb, ${rarityColor.hex}06, #F0EEE8)`,
+                    border: `1px solid ${isDark ? "#28282C" : "#E0DDD6"}`,
+                    ["--rarity-color" as string]: rarityColor.hex,
+                  } as React.CSSProperties}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={revealed ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.4 }}
+                >
+                  <div
+                    className="w-9 h-9 rounded-[8px] flex items-center justify-center text-[15px] font-mono font-semibold shrink-0"
+                    style={{
+                      background: isDark ? "#26262A" : "#E8E6E0",
+                      color: rarityColor.hex,
+                      border: `1px solid ${isDark ? "#32323A" : "#D8D6D0"}`,
+                    }}
+                  >
+                    {card.signatureMove.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-tertiary block mb-0.5">
+                      Signature Move
+                    </span>
+                    <p className="text-[15px] font-semibold text-text-primary leading-normal truncate">
+                      {card.signatureMove.name}
+                    </p>
+                    <p className="text-[13px] text-text-secondary mt-0.5 leading-normal line-clamp-1">
+                      {card.signatureMove.description}
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* ATTRIBUTES — Premium Stat Bars */}
+                <div className="mb-2.5">
+                  <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-1.5">
+                    Attributes
+                  </span>
+                  <div className="space-y-1.5">
+                    {stats.map((s, i) => {
+                      const isHero = heroStatAttr === s.key;
+                      return (
+                        <motion.div
+                          key={s.key}
+                          className="flex items-center gap-3"
+                          initial={{ opacity: 0, x: -3 }}
+                          animate={revealed ? { opacity: 1, x: 0 } : {}}
+                          transition={{ duration: 0.3, delay: 0.45 + i * 0.03, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <span className={`font-mono shrink-0 tracking-[0.02em] text-[13px] w-[110px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
+                            {s.label}
+                          </span>
+                          <div className="flex-1 card-stat-bar-track">
+                            <motion.div
+                              className={isHero ? "card-stat-bar-fill-hero" : "card-stat-bar-fill"}
+                              style={{
+                                ["--bar-start" as string]: barColors.start,
+                                ["--bar-end" as string]: barColors.end,
+                                ["--rarity-color" as string]: rarityColor.hex,
+                              } as React.CSSProperties}
+                              initial={{ width: 0 }}
+                              animate={revealed ? { width: `${card.attributes[s.key]}%` } : {}}
+                              transition={{ duration: 0.6, delay: 0.5 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
+                            />
+                          </div>
+                          <span className={`font-mono text-right tabular-nums text-[13px] w-8 ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
+                            {card.attributes[s.key]}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ACHIEVEMENTS */}
+                {card.achievements.length > 0 && (
+                  <div className="mb-2.5">
+                    <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary block mb-1.5">
+                      Achievements
+                    </span>
+                    <motion.div
+                      className="flex flex-wrap gap-1"
+                      initial={{ opacity: 0 }}
+                      animate={revealed ? { opacity: 1 } : {}}
+                      transition={{ duration: 0.4, delay: 0.6 }}
+                    >
+                      {card.achievements.map((a, i) => (
+                        <span
+                          key={`${a.label}-${i}`}
+                          className="card-achievement-badge"
+                          style={{ ["--rarity-color" as string]: rarityColor.hex } as React.CSSProperties}
+                        >
+                          <span className="card-achievement-badge-icon">{a.icon}</span>
+                          <span className="card-achievement-badge-value">{a.value}</span>
+                          <span className="card-achievement-badge-label">{a.label}</span>
+                        </span>
+                      ))}
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* DIVIDER */}
+                <div className="card-divider mb-2.5" />
+
+                {/* FLAVOR TEXT */}
+                <motion.div
+                  className="rounded-[8px] px-3 py-1.5 relative"
+                  style={{
+                    background: isDark
+                      ? `color-mix(in srgb, ${rarityColor.hex}06, #1C1C20)`
+                      : `color-mix(in srgb, ${rarityColor.hex}04, #F6F4F0)`,
+                    border: `1px solid ${isDark ? "#26262A" : "#E8E6E0"}`,
+                  }}
                   initial={{ opacity: 0 }}
                   animate={revealed ? { opacity: 1 } : {}}
-                  transition={{ duration: 0.4, delay: 0.6 }}
+                  transition={{ duration: 0.4, delay: 0.65 }}
                 >
-                  {primaryAchievements.map((a) => (
-                    <span
-                      key={a.label}
-                      className="card-achievement-badge card-achievement-badge-accent"
-                      style={{ ["--rarity-color" as string]: rarityColor.hex } as React.CSSProperties}
-                    >
-                      <span className="card-achievement-badge-icon">{a.icon}</span>
-                      <span className="card-achievement-badge-value">{a.value}</span>
-                      <span className="card-achievement-badge-label">{a.label}</span>
-                    </span>
-                  ))}
-                  {secondaryAchievements.map((a) => (
-                    <span key={a.label} className="card-achievement-badge">
-                      <span className="card-achievement-badge-icon">{a.icon}</span>
-                      <span className="card-achievement-badge-value">{a.value}</span>
-                      <span className="card-achievement-badge-label">{a.label}</span>
-                    </span>
-                  ))}
+                  <div
+                    className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full"
+                    style={{ background: rarityColor.hex }}
+                  />
+                  <p className="text-[13px] text-text-secondary italic leading-[1.6] pl-2 line-clamp-1">
+                    &ldquo;{card.flavorText}&rdquo;
+                  </p>
                 </motion.div>
               </div>
 
-              {/* DIVIDER */}
-              <div className="card-divider mb-3 shrink-0" />
-
-              {/* FLAVOR TEXT */}
+              {/* FOOTER — always anchored at bottom */}
               <motion.div
-                className="rounded-[8px] px-3 py-2 relative mb-3 shrink-0"
-                style={{
-                  background: isDark
-                    ? `color-mix(in srgb, ${rarityColor.hex}06, #1C1C20)`
-                    : `color-mix(in srgb, ${rarityColor.hex}04, #F6F4F0)`,
-                  border: `1px solid ${isDark ? "#26262A" : "#E8E6E0"}`,
-                }}
-                initial={{ opacity: 0 }}
-                animate={revealed ? { opacity: 1 } : {}}
-                transition={{ duration: 0.4, delay: 0.65 }}
-              >
-                <div
-                  className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
-                  style={{ background: rarityColor.hex }}
-                />
-                <p className="text-[13px] text-text-secondary italic leading-[1.8] pl-2 line-clamp-1">
-                  &ldquo;{card.flavorText}&rdquo;
-                </p>
-              </motion.div>
-
-              {/* FOOTER */}
-              <motion.div
-                className="mt-auto flex items-end justify-between gap-3 shrink-0"
+                className="mt-auto flex items-end justify-between gap-3 pt-2 shrink-0"
                 initial={{ opacity: 0, y: 2 }}
                 animate={revealed ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.3, delay: 0.7 }}
               >
-                <div className="flex flex-col gap-[4px]">
+                <div className="flex flex-col gap-[3px]">
                   <div className="flex items-center gap-1.5">
                     <span className="font-mono text-[10px] text-text-tertiary uppercase tracking-[0.1em]">Edition</span>
                     <span className="font-mono text-[11px] font-semibold tabular-nums text-text-secondary">
@@ -568,8 +561,8 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
                 <div className="flex flex-col items-center gap-1">
                   <img
                     src="/favicon.svg"
-                    width={32}
-                    height={32}
+                    width={28}
+                    height={28}
                     alt="DevMon"
                     className="shrink-0"
                   />
@@ -583,7 +576,7 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
                     <div className="p-[3px] rounded-[3px] bg-white">
                       <QRCodeSVG
                         value={verifyUrl}
-                        size={72}
+                        size={60}
                         bgColor="#ffffff"
                         fgColor="#1A1A1E"
                         level="H"
