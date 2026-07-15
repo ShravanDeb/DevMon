@@ -3,7 +3,11 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-const NO_STORE = { "Cache-Control": "no-store" } as const;
+const NO_STORE = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  "Surrogate-Control": "no-store",
+  "CDN-Cache-Control": "no-store",
+} as const;
 
 export async function GET(req: NextRequest) {
   try {

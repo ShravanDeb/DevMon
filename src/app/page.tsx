@@ -190,7 +190,7 @@ function LeaderboardPreview() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/leaderboard")
+    fetch(`/api/leaderboard?_t=${Date.now()}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
         setEntries((d.entries || []).slice(0, 3));

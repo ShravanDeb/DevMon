@@ -58,9 +58,10 @@ export default function LeaderboardPage() {
     setLoading(true);
     const params = new URLSearchParams();
     params.set("limit", "50");
+    params.set("_t", Date.now().toString());
     if (companyFilter) params.set("company", companyFilter);
 
-    fetch(`/api/leaderboard?${params}`)
+    fetch(`/api/leaderboard?${params}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (data.error) {
