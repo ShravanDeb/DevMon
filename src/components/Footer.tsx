@@ -9,6 +9,11 @@ const footerLinks = [
   { label: "Source", href: "https://github.com/ShravanDeb/DevMon" },
 ];
 
+const socialLinks = [
+  { label: "GitHub", href: "https://github.com/ShravanDeb" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/shravan-kumar-deb-577b1037a" },
+];
+
 export function Footer() {
   return (
     <footer className="mt-auto py-12 border-t border-border-hairline">
@@ -40,6 +45,18 @@ export function Footer() {
           <span className="text-[11px] font-mono text-text-tertiary">
             &copy; 2026 Shravan Deb
           </span>
+          <span className="text-[11px] font-mono text-text-tertiary">&middot;</span>
+          {socialLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-mono text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
           <span className="text-[11px] font-mono text-text-tertiary">&middot;</span>
           <a
             href="https://github.com/ShravanDeb/DevMon/blob/master/LICENSE"
