@@ -18,24 +18,24 @@ const siteUrl = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "DevMon — Your GitHub Profile. Upgraded.",
+    default: "DevMon | Verified Developer Credentials",
     template: "%s | DevMon",
   },
   description:
-    "Turn your GitHub profile into a collectible developer trading card. Rarity, stats, class, and flavor text — all generated from your real code.",
+    "Generate a verified developer credential from your public GitHub activity. Rarity, stats, class, and contribution profile.",
   openGraph: {
-    title: "DevMon — Your GitHub Profile. Upgraded.",
+    title: "DevMon | Verified Developer Credentials",
     description:
-      "Turn your GitHub stats into a shareable developer trading card with rarity, class, and flavor text.",
+      "Generate a verified developer credential from your public GitHub activity. Rarity, stats, and class, scored from real contributions.",
     type: "website",
     siteName: "DevMon",
     images: [{ url: "/og", width: 1200, height: 630, alt: "DevMon" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DevMon — Your GitHub Profile. Upgraded.",
+    title: "DevMon | Verified Developer Credentials",
     description:
-      "Turn your GitHub stats into a shareable developer trading card.",
+      "Generate a verified developer credential from your public GitHub activity.",
     images: ["/og"],
   },
   robots: {

@@ -6,8 +6,6 @@
 
 @layer base {
   :root {
-    --card-width: 540px;
-    --card-height: 840px;
     --font-sans: 'Geist', sans-serif;
     --font-mono: 'Geist Mono', monospace;
 
@@ -25,7 +23,6 @@
     --elevation-1: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 24px rgba(0, 0, 0, 0.25);
     --elevation-2: 0 24px 64px rgba(0, 0, 0, 0.35);
     --grid-line: rgba(255, 255, 255, 0.045);
-    --orb-glow: rgba(255, 255, 255, 0.03);
     --stat-bar: rgba(255, 255, 255, 0.04);
     --overlay-2: rgba(255, 255, 255, 0.02);
     --overlay-3: rgba(255, 255, 255, 0.03);
@@ -96,38 +93,6 @@
 
   }
 
-  [data-theme="dark"] {
-    --surface-0: #08080A;
-    --surface-1: #111114;
-    --surface-2: #1A1A1E;
-    --surface-3: #222228;
-    --surface-4: #2C2C33;
-    --text-primary: #F2F1EE;
-    --text-secondary: #9A9895;
-    --text-tertiary: #5E5C58;
-    --border-hairline: rgba(255, 255, 255, 0.06);
-    --border-subtle: rgba(255, 255, 255, 0.10);
-    --elevation-1: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 24px rgba(0, 0, 0, 0.25);
-    --elevation-2: 0 24px 64px rgba(0, 0, 0, 0.35);
-    --grid-line: rgba(255, 255, 255, 0.045);
-    --orb-glow: rgba(255, 255, 255, 0.03);
-    --stat-bar: rgba(255, 255, 255, 0.04);
-    --overlay-2: rgba(255, 255, 255, 0.02);
-    --overlay-3: rgba(255, 255, 255, 0.03);
-    --overlay-4: rgba(255, 255, 255, 0.04);
-    --overlay-5: rgba(255, 255, 255, 0.05);
-    --overlay-6: rgba(255, 255, 255, 0.06);
-    --overlay-8: rgba(255, 255, 255, 0.08);
-    --overlay-12: rgba(255, 255, 255, 0.12);
-    --scrollbar-track: #08080A;
-    --scrollbar-thumb: #222228;
-    --scrollbar-thumb-hover: #2C2C33;
-    --accent: #5B9AE0;
-    --accent-hover: #7BB0F0;
-    --accent-text: #08080A;
-    --focus-ring: rgba(91,154,224,0.4);
-  }
-
   body {
     background: var(--surface-0);
     color: var(--text-primary);
@@ -156,46 +121,6 @@
     background-size: 64px 64px;
   }
 
-  .surface-gradient {
-    background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-0) 100%);
-  }
-
-  .surface-raised {
-    background: linear-gradient(135deg, var(--surface-3) 0%, var(--surface-2) 100%);
-  }
-
-  .card-surface {
-    background: linear-gradient(145deg, var(--surface-2) 0%, var(--surface-1) 100%);
-  }
-
-  .stat-bar-bg {
-    background: var(--stat-bar);
-  }
-
-  /* === PREMIUM CARD MATERIALS === */
-
-  /* Brushed metal — fine horizontal grain lines, theme-aware */
-  .card-brushed-metal {
-    background-image:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 1px,
-        var(--overlay-2) 1px,
-        var(--overlay-2) 2px
-      );
-    background-size: 100% 4px;
-  }
-
-  /* Matte carbon texture — fine cross-hatch */
-  .card-carbon-texture {
-    background-image:
-      linear-gradient(45deg, var(--overlay-2) 25%, transparent 25%, transparent 75%, var(--overlay-2) 75%),
-      linear-gradient(45deg, var(--overlay-2) 25%, transparent 25%, transparent 75%, var(--overlay-2) 75%);
-    background-size: 4px 4px;
-    background-position: 0 0, 2px 2px;
-  }
-
   /* Embossed text — antialiased only, no text-shadow */
   .card-embossed {
     -webkit-font-smoothing: antialiased;
@@ -216,37 +141,6 @@
       transparent 50%
     );
     pointer-events: none;
-  }
-
-  /* Premium layered shadow — deep, multi-layer depth, theme-aware */
-  .card-premium-shadow {
-    box-shadow:
-      0 0 0 1px var(--overlay-6),
-      0 1px 2px rgba(0, 0, 0, 0.1),
-      0 4px 8px rgba(0, 0, 0, 0.07),
-      0 12px 24px rgba(0, 0, 0, 0.06),
-      0 24px 48px rgba(0, 0, 0, 0.05);
-  }
-
-  /* Rarity glow — non-animated border glow */
-  .card-rarity-glow {
-    position: relative;
-  }
-  .card-rarity-glow::after {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    pointer-events: none;
-    box-shadow:
-      0 0 0 1px var(--rarity-color, transparent),
-      0 0 24px color-mix(in srgb, var(--rarity-color, transparent) 20%, transparent),
-      0 0 64px color-mix(in srgb, var(--rarity-color, transparent) 12%, transparent);
-    opacity: 0.6;
-    transition: opacity 0.4s ease;
-  }
-  .card-rarity-glow:hover::after {
-    opacity: 1;
   }
 
   /* === PREMIUM STAT BAR === */
@@ -372,62 +266,6 @@
   }
   .card-mobile .card-achievement-badge-label {
     font-size: 6px;
-  }
-
-  /* === ORNAMENTAL CORNERS (currency-style) === */
-
-  .card-ornament {
-    position: absolute;
-    pointer-events: none;
-    z-index: 5;
-  }
-
-  .card-ornament-corner {
-    width: 24px;
-    height: 24px;
-  }
-
-  .card-ornament-corner::before,
-  .card-ornament-corner::after {
-    content: "";
-    position: absolute;
-    background: var(--overlay-8);
-  }
-
-  .card-ornament-corner::before {
-    width: 24px;
-    height: 1px;
-  }
-
-  .card-ornament-corner::after {
-    width: 1px;
-    height: 24px;
-  }
-
-  /* Top-left */
-  .card-ornament-tl { top: 16px; left: 16px; }
-  .card-ornament-tl::before { top: 0; left: 0; }
-  .card-ornament-tl::after { top: 0; left: 0; }
-
-  /* Top-right */
-  .card-ornament-tr { top: 16px; right: 16px; }
-  .card-ornament-tr::before { top: 0; right: 0; }
-  .card-ornament-tr::after { top: 0; right: 0; }
-
-  /* Bottom-left */
-  .card-ornament-bl { bottom: 16px; left: 16px; }
-  .card-ornament-bl::before { bottom: 0; left: 0; }
-  .card-ornament-bl::after { bottom: 0; left: 0; }
-
-  /* Bottom-right */
-  .card-ornament-br { bottom: 16px; right: 16px; }
-  .card-ornament-br::before { bottom: 0; right: 0; }
-  .card-ornament-br::after { bottom: 0; right: 0; }
-
-  /* Rarity-accented ornaments — subtle color on corners */
-  .card-ornament-accent::before,
-  .card-ornament-accent::after {
-    background: color-mix(in srgb, var(--rarity-color, transparent) 25%, transparent);
   }
 
   /* === ACCENT BAR — full-width rarity stripe at card top === */
@@ -762,18 +600,6 @@
     margin-top: 2px;
   }
 
-  /* === NOISE TEXTURE === */
-
-  .card-texture-noise {
-    position: absolute;
-    inset: 0;
-    opacity: 0.12;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
-    background-size: 128px 128px;
-    pointer-events: none;
-  }
-
   /* === SECTION DIVIDER === */
 
   .card-divider {
@@ -946,20 +772,7 @@
 }
 
 /* === EXPORT: strip all blur/blend/filter for crisp PNG === */
-/* Per-tier surfaces (all static CSS) stay visible in export */
-[data-exporting] .card-texture-noise {
-  display: none !important;
-}
-[data-exporting] .card-brushed-metal {
-  opacity: 0 !important;
-}
-[data-exporting] .card-carbon-texture {
-  opacity: 0 !important;
-}
 [data-exporting] .card-soft-reflection::before {
-  display: none !important;
-}
-[data-exporting] .card-rarity-glow::after {
   display: none !important;
 }
 

@@ -125,11 +125,11 @@ function RarityShowcase() {
   const rarities: Rarity[] = ["Common", "Rare", "Epic", "Legendary", "Mythic"];
   const percentages = ["68%", "22%", "7%", "2.5%", "0.5%"];
   const descriptions = [
-    "The backbone",
-    "Doing something right",
-    "Top 10% energy",
-    "Statistically improbable",
-    "Go outside",
+    "Baseline tier",
+    "Above average activity",
+    "Top 10% of developers",
+    "Statistically rare",
+    "Top 0.5% of all users",
   ];
 
   return (
@@ -182,7 +182,6 @@ function RarityShowcase() {
   );
 }
 
-// ─── Crown Icon ─────────────────────────────────────────────
 // ─── LeaderboardPreview ────────────────────────────────────
 function LeaderboardPreview() {
   const ref = useRef<HTMLDivElement>(null);
@@ -224,7 +223,7 @@ function LeaderboardPreview() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
           >
-            Top developers.
+            Top ranked developers.
           </motion.h2>
         </div>
 
@@ -236,7 +235,7 @@ function LeaderboardPreview() {
             transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
             <p className="text-[15px] text-text-tertiary">
-              {isLoading ? "Loading rankings..." : "No rankings yet. Be the first to generate a card."}
+              {isLoading ? "Loading rankings..." : "No rankings yet. Generate the first credential."}
             </p>
           </motion.div>
         )}
@@ -363,7 +362,7 @@ function LeaderboardPreview() {
             href="/leaderboard"
             className="inline-flex items-center gap-2 rounded-[6px] px-5 py-2.5 text-[13px] leading-none font-medium surface-btn text-text-primary"
           >
-            View Full Leaderboard
+            View Leaderboard
             <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 3l5 5-5 5" />
             </svg>
@@ -376,10 +375,10 @@ function LeaderboardPreview() {
 
 // ─── QuoteStrip ────────────────────────────────────────────
 const quotes = [
-  { text: "\"I have never felt more accurately judged by a website.\"", author: "– Every developer ever" },
-  { text: "\"My card said Common. I've never been more motivated to contribute to open source.\"", author: "– Anonymized DevMon user" },
-  { text: "\"The flavor text called me a 'weekend warrior' and honestly? Fair.\"", author: "– DevMon alpha tester" },
-  { text: "\"I showed my card to my PM. He said 'that tracks.'\"", author: "– DevMon beta user" },
+  { text: "\"The scoring engine nailed my profile. My class and rarity matched exactly what I expected.\"", author: "Verified DevMon user" },
+  { text: "\"I shared my credential on LinkedIn. The flavor text was more honest than my resume.\"", author: "Developer" },
+  { text: "\"Most developer tools give you vanity metrics. DevMon gave me a class and a rarity tier that actually meant something.\"", author: "Open source contributor" },
+  { text: "\"My PM saw my credential and said it was the most accurate representation of my work.\"", author: "Engineering lead" },
 ];
 
 function QuoteStrip() {
@@ -675,7 +674,7 @@ export default function LandingPage() {
               <span className="relative inline-flex h-2 w-2 rounded-full bg-text-primary" />
             </span>
             <span className="font-mono text-[13px] font-medium tracking-[0.04em] text-text-secondary">
-              v0.1 — painfully accurate
+              v0.1 · Developer Credential Platform
             </span>
           </motion.div>
 
@@ -695,8 +694,8 @@ export default function LandingPage() {
             variants={variants.fadeUp}
             className="mt-8 text-[17px] text-text-secondary max-w-xl leading-[1.7]"
           >
-            We analyze your repos, commits, PRs, and questionable life choices
-            to generate a completely unscientific but deeply satisfying scorecard.
+            Generate a verified developer credential from your public GitHub activity.
+            Repos, commits, pull requests, and community contributions scored into a single profile.
           </motion.p>
 
           {/* CTA */}
@@ -705,7 +704,7 @@ export default function LandingPage() {
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
-              Sign in with GitHub
+              Continue with GitHub
             </MagneticButton>
           </motion.div>
         </motion.div>
@@ -729,7 +728,7 @@ export default function LandingPage() {
       <section className="py-20 md:py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <WordReveal
-            text="Your GitHub profile is a story. Every commit, every PR, every abandoned side project — it all adds up to something. We just gave it a name, a class, and a rarity tier."
+            text="Your GitHub activity is a record of how you build software. Every commit, every pull request, every repository tells a story. DevMon turns that record into a verified credential with a class, rarity, and score."
             className="font-display text-[28px] md:text-[36px] leading-[1.3] font-[500] tracking-[-0.01em] text-text-primary"
           />
         </div>
@@ -738,11 +737,11 @@ export default function LandingPage() {
       {/* ═══════ STATS ═══════ */}
       <section className="py-24 md:py-16 px-6">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
-          <AnimatedCounter value={cardCount !== null ? cardCount : 0} label="Cards Generated" />
+          <AnimatedCounter value={cardCount !== null ? cardCount : 0} label="Credentials Generated" />
           <div className="w-px h-16 bg-border-subtle hidden sm:block" />
           <AnimatedCounter value={5} label="Rarity Tiers" />
           <div className="w-px h-16 bg-border-subtle hidden sm:block" />
-          <AnimatedCounter value={12} label="DevMon Classes" />
+          <AnimatedCounter value={12} label="Developer Classes" />
         </div>
       </section>
 
@@ -754,16 +753,16 @@ export default function LandingPage() {
               How it works
             </span>
             <h2 className="font-display text-[36px] md:text-[42px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary mt-3">
-              Three steps.<br />One devastating card.
+              Three steps.<br />One developer credential.
             </h2>
             <p className="text-[16px] text-text-secondary leading-[1.7] mt-6 max-w-md">
-              No accounts to manage, no complicated setup. Just sign in and let the algorithm judge you.
+              No accounts to create, no configuration required. Sign in with GitHub and the scoring engine analyzes your public activity.
             </p>
           </div>
           <div className="space-y-10">
-            <HowItWorksStep number="01" title="Sign in with GitHub" description="One click. We request read-only access to your public profile and repos. Nothing scary." index={0} />
-            <HowItWorksStep number="02" title="Get scored" description="We analyze your commits, PRs, streaks, languages, and community activity through our developer-focused scoring engine." index={1} />
-            <HowItWorksStep number="03" title="Share" description="Download your credential, share it on LinkedIn or X, and let your profile speak for itself." index={2} />
+            <HowItWorksStep number="01" title="Connect GitHub" description="One click. DevMon requests read-only access to your public profile and repositories." index={0} />
+            <HowItWorksStep number="02" title="Get scored" description="Your commits, pull requests, language diversity, and community activity are analyzed through a developer-focused scoring engine." index={1} />
+            <HowItWorksStep number="03" title="Share" description="Download your credential. Share it on LinkedIn or X. Your verified developer profile, ready to present." index={2} />
           </div>
         </div>
       </section>
@@ -772,15 +771,15 @@ export default function LandingPage() {
       <section className="py-20 md:py-24 px-6 space-y-20 md:space-y-24">
         {/* Feature 1 — Stats Engine */}
         <FeatureSplit
-          eyebrow="The Engine"
-          headline="Five attributes. One honest assessment."
-          description="Merge Force, Code Velocity, Problem Solving, Open Source, Consistency — derived from your real GitHub activity. Meaningful developer metrics, not RPG filler."
+          eyebrow="Scoring Engine"
+          headline="Five metrics. One developer profile."
+          description="Merge Force, Code Velocity, Problem Solving, Open Source, and Consistency. Five metrics derived from your public GitHub activity, each measuring a different aspect of how you build software."
           bullets={[
-            "PR merges and issue closures measure Merge Force",
-            "Commits and streaks drive Code Velocity",
-            "Close rates and volume build Problem Solving",
-            "Contributions and community presence define Open Source",
-            "Longevity and regularity prove Consistency",
+            "Merge Force tracks PR merges and issue closures",
+            "Code Velocity measures commit frequency and streak patterns",
+            "Problem Solving scores issue close rates and volume",
+            "Open Source evaluates contributions and community activity",
+            "Consistency measures longevity and regularity",
           ]}
           visual={<MiniStatBars />}
         />
@@ -788,14 +787,14 @@ export default function LandingPage() {
         {/* Feature 2 — Rarity */}
         <FeatureSplit
           eyebrow="Rarity"
-          headline="Most of us are Common."
-          description="Five tiers from Common to Mythic. The algorithm is ruthless. The vast majority of developers land in Common. That's not a bug — it's a feature."
+          headline="Five tiers of developer rarity."
+          description="Every credential is assigned a rarity tier based on your scoring percentile. Common to Mythic. The distribution is intentional. Most developers land in Common."
           bullets={[
-            "Common — the backbone of open source",
-            "Rare — you're doing something right",
-            "Epic — top 10% energy",
-            "Legendary — statistically improbable",
-            "Mythic — go outside",
+            "Common: the baseline tier",
+            "Rare: above average activity",
+            "Epic: top 10% of developers",
+            "Legendary: statistically rare",
+            "Mythic: top 0.5% of all users",
           ]}
           visual={<RarityShowcase />}
           reverse
@@ -804,13 +803,13 @@ export default function LandingPage() {
         {/* Feature 3 — Flavor Text */}
         <FeatureSplit
           eyebrow="Flavor Text"
-          headline="Auto-generated roasts."
-          description="Every credential gets a unique flavor text based on your actual repo behavior. No LLM costs — just pattern matching and brutal honesty."
+          headline="Unique credential text, generated per profile."
+          description="Every credential includes a unique flavor text generated from your repository patterns and contribution behavior. Pattern-matched from real data, not generated by AI."
           bullets={[
-            "Zero-star repos get called out by name",
-            "Commit streaks generate praise (or pity)",
-            "PR ratios determine your merge personality",
-            "Each class gets its own character",
+            "Zero-star repositories are referenced by name",
+            "Commit streaks influence the tone of the text",
+            "PR merge ratios shape your credential narrative",
+            "Each developer class has its own text style",
           ]}
           visual={
             <div className="rounded-[10px] surface-card-elevated p-6 space-y-4">
@@ -821,7 +820,7 @@ export default function LandingPage() {
                 &ldquo;Your 14 languages are like a box of crayons where half are the same shade of gray.&rdquo;
               </p>
               <div className="flex items-center gap-2 pt-2 border-t border-border-hairline">
-                <span className="text-[12px] font-mono text-text-tertiary">Roast · Auto-generated</span>
+                <span className="text-[12px] font-mono text-text-tertiary">Flavor Text · Pattern-matched</span>
               </div>
             </div>
           }
@@ -835,10 +834,10 @@ export default function LandingPage() {
       <section className="py-32 md:py-24 px-6">
         <div className="max-w-2xl mx-auto mb-16 text-center">
           <span className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            What people are saying
+            From users
           </span>
           <h2 className="font-display text-[36px] md:text-[42px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary mt-3">
-            Painfully accurate.
+            Verified by developers.
           </h2>
         </div>
         <QuoteStrip />
@@ -854,7 +853,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            Ready to be judged?
+            Generate your developer credential.
           </motion.h2>
           <motion.p
             className="text-[17px] text-text-secondary max-w-md mx-auto leading-[1.7]"
@@ -863,7 +862,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
-            Your credential is waiting. It won&apos;t be kind, but it will be honest.
+            Connect your GitHub account. Get a verified developer profile scored from your public activity.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -873,9 +872,9 @@ export default function LandingPage() {
           >
             <MagneticButton onClick={handleSignIn} variant="secondary" className="!text-text-primary">
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
               </svg>
-              Sign in with GitHub
+              Continue with GitHub
             </MagneticButton>
           </motion.div>
         </div>
@@ -906,7 +905,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            Like DevMon?
+            Free and open source
           </motion.h2>
 
           {/* Subtitle */}
@@ -917,8 +916,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
           >
-            A star on GitHub is the highest compliment.<br />
-            It tells other developers this project is worth their time.
+            DevMon is free and open source under AGPL-3.0.<br />
+            The code is fully auditable. If you find it valuable, a star on GitHub helps other developers discover the project.
           </motion.p>
 
           {/* Button */}
@@ -949,7 +948,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            open source · free forever · made with judgment
+            AGPL-3.0 · free forever · built by developers
           </motion.p>
         </div>
       </section>

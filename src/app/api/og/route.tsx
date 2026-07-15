@@ -155,7 +155,7 @@ export async function GET(req: Request) {
             )}
 
             <div style={{ marginTop: 24, fontSize: 13, color: "#65635D", textAlign: "center", fontFamily: "Geist Mono, monospace" }}>
-              DevMon — Premium Developer Credentials
+              DevMon — Open-Source Developer Credentials
             </div>
           </div>
         </div>

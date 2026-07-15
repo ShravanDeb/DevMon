@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { getSupabaseAdmin } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 const NO_STORE = { "Cache-Control": "no-store" } as const;
 
 export async function GET(req: NextRequest) {
-  await headers();
   try {
     const admin = getSupabaseAdmin();
     const { searchParams } = new URL(req.url);

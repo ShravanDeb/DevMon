@@ -116,7 +116,7 @@ export interface LeaderboardEntry {
   generatedAt: string;
 }
 
-export interface RarityStyle {
+export const RARITY_COLORS: Record<Rarity, {
   hex: string;
   border: string;
   glow: string;
@@ -124,9 +124,7 @@ export interface RarityStyle {
   gradientLight: string[];
   accentGradient: string;
   foilEnabled: boolean;
-}
-
-export const RARITY_COLORS: Record<Rarity, RarityStyle> = {
+}> = {
   Common: {
     hex: "#8B8FA0",
     border: "border-[#8B8FA0]",
@@ -182,14 +180,6 @@ export const STAT_LABELS: Record<keyof CardStats, string> = {
   consistency: "Consistency",
 };
 
-export const STAT_ICONS: Record<keyof CardStats, string> = {
-  mergeForce: "M",
-  codeVelocity: "V",
-  problemSolving: "P",
-  openSource: "O",
-  consistency: "C",
-};
-
 export const CLASS_SUBTITLES: Record<ClassName, string> = {
   "Merge Griffin": "The Pull Request Architect",
   "Fork Warden": "The Repository Collector",
@@ -205,10 +195,4 @@ export const CLASS_SUBTITLES: Record<ClassName, string> = {
   "Zen Coder": "The Code Purifier",
 };
 
-export const RARITY_EMBLEM: Record<Rarity, string> = {
-  Common: "·",
-  Rare: "◆",
-  Epic: "★",
-  Legendary: "✦",
-  Mythic: "♠",
-};
+

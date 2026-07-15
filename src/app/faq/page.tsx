@@ -11,16 +11,48 @@ const faqs = [
     a: "DevMon fetches your public GitHub data (commits, PRs, repos, languages, contributions, streaks) and runs it through a scoring pipeline that computes five stat categories: Merge Force, Code Velocity, Problem Solving, Open Source, and Consistency. These stats are then mapped to a rarity tier — Common, Rare, Epic, Legendary, or Mythic — based on a composite rarity score. The algorithm weighs factors like contribution volume, repo diversity, PR close rates, and streak consistency.",
   },
   {
-    q: "Is my GitHub data stored or shared publicly?",
-    a: "Your GitHub data is stored in our database solely to render your card and power the verification page. It is not shared with third parties. However, your generated card — including your username, avatar, stats, rarity, and class — is publicly visible to anyone who has your verification link (/verify/DM-XXXXXX). This is by design: verification links exist so you can prove your card is authentic. You can request full deletion by contacting us.",
-  },
-  {
-    q: "Can I delete my card or revoke access?",
-    a: "Yes, on two fronts. To revoke DevMon's future access to your GitHub data, go to GitHub Settings → Applications and remove DevMon. To delete your stored card data and remove your leaderboard entry, email us at shravandeb@gmail.com with your GitHub username. We process deletion requests within 30 days.",
+    q: "Why did my score change when I regenerated my card?",
+    a: "DevMon fetches fresh data from GitHub each time you generate a card. If your score changed, it is because new commits, PRs, or other GitHub activity have been reflected in the calculation. The scoring algorithm itself does not change between generations.",
   },
   {
     q: "Can I regenerate my card with a different flavor tone?",
-    a: "Yes. When you generate a card, you can choose between \"hype\" (celebratory) and \"roast\" (brutally honest) flavor tones. Each tone produces different flavor text, achievements, and a different signature move. You can regenerate as many times as you like — each generation produces a new unique card ID.",
+    a: "Yes. When you generate a card, you can choose between \"hype\" (celebratory) and \"roast\" (brutally honest) flavor tones. Each tone produces different flavor text, achievements, and a different signature move. You can regenerate as many times as you like — each generation produces a new unique card ID and replaces your previous card.",
+  },
+  {
+    q: "Does DevMon modify my GitHub account?",
+    a: "No. DevMon only reads public GitHub data. It never writes to your repositories, creates content on your behalf, or modifies your GitHub account in any way. The OAuth scope is read-only.",
+  },
+  {
+    q: "What is the legal basis for DevMon processing my data?",
+    a: "DevMon processes your personal data on two lawful bases under the Digital Personal Data Protection Act, 2023 (DPDP Act). First, you provide consent by signing in with GitHub OAuth and using the Service. Second, your GitHub profile data is publicly available information that you have voluntarily shared, which falls under Section 7(2)(a) of the DPDP Act. See the Privacy Policy for full details.",
+  },
+  {
+    q: "What rights do I have as a Data Principal under the DPDP Act?",
+    a: "Under Section 9 of the DPDP Act, 2023, you have the right to access your personal data held by DevMon, request correction of inaccurate data, request erasure of your data, file a grievance with the Grievance Officer, and nominate a person to exercise your rights in case of death or incapacity. You also have the right to withdraw your consent at any time. Contact the Grievance Officer to exercise any of these rights.",
+  },
+  {
+    q: "How do I file a complaint if I am not satisfied?",
+    a: "If you have a complaint about how your personal data is being handled, contact the Grievance Officer at shravandeb@gmail.com. Under Section 13 of the DPDP Act, your complaint will be acknowledged within 48 hours and resolved within 7 days. If you are not satisfied with the resolution, you may escalate the matter to the Data Protection Board of India constituted under Section 18 of the DPDP Act.",
+  },
+  {
+    q: "Is my data transferred outside India?",
+    a: "Yes. To provide the Service, your personal data may be transferred to countries where our data processors operate, including the United States (Supabase on AWS, Vercel, Upstash) and the European Union. Under Section 16 of the DPDP Act, 2023, cross-border transfer is permitted except to countries notified as restricted by the Central Government. No restricted country list has been notified as of the date of this FAQ.",
+  },
+  {
+    q: "What GitHub information does DevMon access?",
+    a: "DevMon accesses your public profile (username, avatar, display name, bio, company, email), contribution history (commits, streaks, hours), repository data (stars, forks, languages, counts), and activity (PRs, issues, organizations). It does not access private repositories or any private data.",
+  },
+  {
+    q: "Is my card public?",
+    a: "Yes. Each card has a public verification page (/verify/DM-XXXXXX) that anyone can view without logging in. The leaderboard also displays all cards publicly. This is by design — verification pages exist so you can prove your card is authentic. Your GitHub username, avatar, stats, rarity, and class are all visible.",
+  },
+  {
+    q: "How is card verification performed?",
+    a: "Each card is signed with an HMAC-SHA-256 cryptographic signature that covers your username, stats, rarity, and card ID. The verification page displays this signature, and any third party can independently verify that the card was generated by DevMon and has not been tampered with.",
+  },
+  {
+    q: "Can I delete my card or remove my data?",
+    a: "Yes. Under Section 9(3) of the DPDP Act, you have the right to request erasure of your personal data. To revoke DevMon's future access to your GitHub data, go to GitHub Settings → Applications and remove DevMon. To delete your stored card data and remove your leaderboard entry, contact the Grievance Officer at shravandeb@gmail.com with your GitHub username. We process deletion requests within 30 days.",
   },
   {
     q: "Is DevMon free?",
@@ -31,8 +63,32 @@ const faqs = [
     a: "No. DevMon is an independent project and is not affiliated with, endorsed by, or sponsored by GitHub, Inc. GitHub is a registered trademark of GitHub, Inc.",
   },
   {
-    q: "How do I report a bug or contact support?",
-    a: "You can reach us at shravandeb@gmail.com or open an issue on our GitHub repository at github.com/ShravanDeb/DevMon/issues. We'll get back to you as soon as we can.",
+    q: "Can an employer verify my DevMon card?",
+    a: "Yes. Share your verification URL (/verify/DM-XXXXXX) with anyone. They can view the card and its cryptographic signature to confirm it was genuinely generated by DevMon and has not been altered.",
+  },
+  {
+    q: "How do I contact the Grievance Officer?",
+    a: "The Grievance Officer under Section 13 of the DPDP Act is Shravan Deb. Reach out at shravandeb@gmail.com. Complaints are acknowledged within 48 hours and resolved within 7 days. You may also open an issue on our GitHub repository at github.com/ShravanDeb/DevMon/issues.",
+  },
+  {
+    q: "What license is DevMon released under?",
+    a: "DevMon is released under the GNU Affero General Public License, Version 3.0 (AGPL-3.0-or-later). This means you can use, modify, and distribute the code, but if you run a modified version over a network, you must make the source code available to users. The AGPL-3.0 license does not cover the DevMon name, logo, card artwork, or visual identity — those are trademarks governed by a separate policy (see TRADEMARKS.md).",
+  },
+  {
+    q: "Can I fork DevMon and host my own instance?",
+    a: "Yes. The AGPL-3.0 license permits forking and self-hosting. If you run a modified version of DevMon over a network, you must provide the Corresponding Source (the full source code) to users of your instance. You must also not use the DevMon name, logo, or card artwork in a way that implies affiliation with the official project (see TRADEMARKS.md).",
+  },
+  {
+    q: "Can I use the DevMon name, logo, or card artwork?",
+    a: "The DevMon name, logo, card artwork, crowns, icons, and visual identity are trademarks of Shravan Deb. They are not licensed under AGPL-3.0. You may use the name in a fork's repository name to indicate origin, but you may not use the logo or artwork, and you must not imply endorsement or affiliation. See TRADEMARKS.md for full details.",
+  },
+  {
+    q: "How do I contribute to DevMon?",
+    a: "Read CONTRIBUTING.md for the full guidelines. In short: fork the repo, create a feature branch, make your changes, run lint and tests, and open a pull request. By submitting a PR, you agree to license your contributions under AGPL-3.0. See DEVELOPER_GUIDE.md for the development setup.",
+  },
+  {
+    q: "How do I report a security vulnerability?",
+    a: "Email shravandeb@gmail.com with a description of the vulnerability, steps to reproduce, and affected version. Do not open a public GitHub issue for security reports. See SECURITY.md for the full disclosure policy.",
   },
 ];
 

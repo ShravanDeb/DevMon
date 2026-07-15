@@ -1,20 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-
 export default function GlobalError({
-  error,
   reset,
 }: {
-  error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production") {
-      // Log to external error service if configured
-    }
-  }, [error]);
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface-primary">
       <div className="text-center space-y-6 px-6">

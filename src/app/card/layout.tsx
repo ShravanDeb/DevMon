@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Generate Card",
+  title: "Generate Credential",
   description:
-    "Generate your GitHub developer trading card with rarity, stats, and flavor text.",
+    "Generate your verified developer credential from public GitHub activity. Rarity, stats, class, and contribution profile.",
 };
 
 export default function CardLayout({ children }: { children: React.ReactNode }) {

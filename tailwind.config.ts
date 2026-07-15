@@ -25,11 +25,6 @@ const config: Config = {
           hairline: "var(--border-hairline)",
           subtle: "var(--border-subtle)",
         },
-        common: "#8A8F98",
-        rare: "#3E6FE0",
-        epic: "#6C4BA6",
-        legendary: "#E0932E",
-        mythic: "#B23A48",
       },
       fontFamily: {
         display: ["var(--font-display)", "serif"],
@@ -38,27 +33,13 @@ const config: Config = {
       },
       borderRadius: {
         xl: "10px",
-        card: "14px",
-      },
-      spacing: {
-        18: "4.5rem",
-      },
-      boxShadow: {
-        "elevation-1": "var(--elevation-1)",
-        "elevation-2": "var(--elevation-2)",
       },
       animation: {
-        shimmer: "shimmer 3s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         float: "float 3s ease-in-out infinite",
         "crown-float": "crown-float 4s ease-in-out infinite",
       },
       keyframes: {
-        shimmer: {
-          "0%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
-          "100%": { backgroundPosition: "0% 50%" },
-        },
         "glow-pulse": {
           "0%, 100%": { opacity: "0.6" },
           "50%": { opacity: "1" },
