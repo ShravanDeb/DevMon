@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAnon } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +11,13 @@ const NO_STORE = {
 
 export async function GET(req: NextRequest) {
   try {
-    const admin = getSupabaseAdmin();
+    const db = getSupabaseAnon();
     const { searchParams } = new URL(req.url);
     const company = searchParams.get("company");
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20")));
     const offset = Math.max(0, parseInt(searchParams.get("offset") || "0"));
 
-    let query = admin
+    let query = db
       .from("cards")
       .select("github_username, display_name, avatar_url, rarity, rarity_score, primary_class, stats, company, primary_language, updated_at")
       .order("rarity_score", { ascending: false });

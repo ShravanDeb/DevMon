@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAnon } from "@/lib/supabase";
 import { CardIdSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -19,8 +19,8 @@ export async function GET(
   }
 
   try {
-    const admin = getSupabaseAdmin();
-    const { data: card, error: queryError } = await admin
+    const db = getSupabaseAnon();
+    const { data: card, error: queryError } = await db
       .from("cards")
       .select("*")
       .eq("card_id", cardId)

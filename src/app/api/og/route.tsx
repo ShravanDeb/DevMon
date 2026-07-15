@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { fetchGitHubStats } from "@/lib/github";
 import { generateCard } from "@/lib/scoring";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAnon } from "@/lib/supabase";
 
 export async function GET(req: Request) {
   try {
@@ -23,8 +23,8 @@ export async function GET(req: Request) {
       card = generateCard(raw);
     } catch {
       // Try reading from Supabase cache (cards table)
-      const admin = getSupabaseAdmin();
-      const { data } = await admin
+      const db = getSupabaseAnon();
+      const { data } = await db
         .from("cards")
         .select("stats, rarity, rarity_score, primary_class, display_name, avatar_url")
         .eq("github_username", username)
