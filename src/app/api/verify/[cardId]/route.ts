@@ -3,6 +3,7 @@ import { getSupabaseAnon } from "@/lib/supabase";
 import { CardIdSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 export async function GET(
   _req: NextRequest,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAnon } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 const NO_STORE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
