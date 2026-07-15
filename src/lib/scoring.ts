@@ -1,95 +1,136 @@
-import type { RawGitHubStats, CardStats, CardData, Rarity, FlavorTone } from "@/types";
-import { computeRarity } from "./rarity";
-import { assignClasses } from "./classes";
-import { generateFlavorText } from "./flavor-text";
+import type { RawGitHubStats, CardData, CardDataDebug, Rarity, ClassName, FlavorTone, EngineContext } from "@/types";
+import { normalizeAll } from "./normalization";
+import { computeAttributes } from "./attributes";
+import { computeArchetype } from "./archetypes";
+import { computeRarityFromAttributes } from "./rarity";
+import { selectHeroStat } from "./hero-stat";
 import { generateSignatureMove } from "./signature-move";
 import { generateAchievements } from "./achievements";
+import { assignClasses } from "./classes";
+import { generateFlavorText } from "./flavor-text";
 import { generateVerification } from "./verification";
-import { selectHeroStat } from "./hero-stat";
+import { buildDebugMetadata } from "./explainability";
+import { computeHarmony } from "./harmony";
+import { ENGINE_VERSIONS, ENGINE_FLAGS } from "@/lib/config";
 
-function logScale(value: number, factor: number = 10, max: number = 100): number {
-  if (value <= 0) return 0;
-  return Math.min(max, Math.round(Math.log2(value + 1) * factor));
+function createEngineContext(raw: RawGitHubStats): EngineContext {
+  return {
+    rawMetrics: raw,
+    normalizedMetrics: {
+      followers: 0, stars: 0, commits: 0, recentCommits: 0,
+      mergedPRs: 0, closedIssues: 0, repositories: 0, originalRepositories: 0,
+      contributedTo: 0, organizations: 0, languages: 0, accountAge: 0,
+      forks: 0, currentStreak: 0, longestStreak: 0,
+    },
+    attributeComponents: {},
+    behaviouralAttributes: { execution: 0, impact: 0, synergy: 0, consistency: 0, mastery: 0 },
+    attributeExplanations: [],
+    normalizationExplanations: {},
+    archetype: "Builder",
+    topAttribute: "execution",
+    secondAttribute: "impact",
+    weakestAttribute: "mastery",
+    rarityScore: 0,
+    rarity: "Common",
+    rarityBreakdown: {
+      weightedAverage: 0, harmonyBonus: 0,
+      harmonyFactors: { weakestAttribute: "mastery", weakestScore: 0, spread: 0 },
+      finalScore: 0, tier: "Common",
+    },
+    rarityExplanation: { weightedAverage: 0, harmonyBonus: 0, finalScore: 0, tier: "Common", reason: "" },
+    harmonyExplanation: { bonus: 0, weakestAttribute: "mastery", weakestScore: 0, spread: 0, reason: "" },
+    heroAttribute: { attribute: "execution", label: "Execution", score: 0, rank: "Novice" },
+    heroAttributeExplanation: { attribute: "execution", score: 0, rank: "Novice", tieBreakingApplied: false, reason: "" },
+    signatureMove: { name: "", description: "", icon: "" },
+    signatureMoveExplanation: {
+      move: { name: "", description: "", icon: "" },
+      topAttribute: "execution", secondAttribute: "impact",
+      topScore: 0, secondScore: 0, thresholdMet: false, reason: "",
+    },
+    achievements: [],
+    primaryClass: "Stack Guardian",
+    secondaryClass: null,
+    className: "Stack Guardian",
+    classExplanation: {
+      primaryClass: "Stack Guardian", secondaryClass: null,
+      archetype: "Builder", scores: {} as Record<ClassName, number>,
+      reason: "",
+    },
+    engineVersions: ENGINE_VERSIONS,
+    engineFlags: ENGINE_FLAGS,
+  };
 }
 
-function clamp(v: number): number {
-  return Math.min(100, Math.max(0, Math.round(v)));
-}
+export function generateCard(
+  raw: RawGitHubStats,
+  tone?: FlavorTone,
+  rarityOverride?: Rarity
+): CardData {
+  const ctx = createEngineContext(raw);
 
-export function computeStats(raw: RawGitHubStats): CardStats {
-  const prTotal = raw.mergedPRs + raw.closedIssues;
-  const prCloseRate = prTotal > 0 ? raw.closedIssues / prTotal : 0;
+  const normalized = normalizeAll(raw, ctx);
+  const { attributes } = computeAttributes(normalized, ctx);
+  const { archetype, attributeRanks } = computeArchetype(attributes, ctx);
+  const { rarity, score } = computeRarityFromAttributes(attributes, ctx);
+  const { bonus } = computeHarmony(attributes, ctx);
+  const heroStat = selectHeroStat(attributes);
+  const { move } = generateSignatureMove(attributes, ctx);
+  const achievements = generateAchievements(attributes);
+  const { primary, secondary } = assignClasses(raw, attributes, archetype, ctx);
 
-  const mergeForce = clamp(
-    logScale(raw.mergedPRs, 10) * 0.5 +
-    logScale(raw.closedIssues, 10) * 0.3 +
-    Math.min(100, raw.mergedPRs * 0.8) * 0.2
-  );
+  ctx.behaviouralAttributes = attributes;
+  ctx.rarityScore = score;
+  ctx.rarity = rarityOverride || rarity;
+  ctx.heroAttribute = heroStat;
+  ctx.signatureMove = move;
+  ctx.achievements = achievements;
+  ctx.primaryClass = primary;
+  ctx.secondaryClass = secondary;
+  ctx.className = primary;
 
-  const streakComponent = Math.min(100, raw.currentStreak * 6);
-  const recentComponent = logScale(raw.recentCommits, 18);
-  const codeVelocity = clamp(
-    recentComponent * 0.6 +
-    streakComponent * 0.3 +
-    logScale(raw.totalCommits, 8) * 0.1
-  );
-
-  const closeRateScore = clamp(prCloseRate * 120);
-  const volumeScore = logScale(prTotal, 10);
-  const issueDepth = raw.closedIssues > 0 ? Math.min(100, raw.closedIssues * 1.5) : 0;
-  const problemSolving = clamp(
-    closeRateScore * 0.4 +
-    volumeScore * 0.35 +
-    issueDepth * 0.25
-  );
-
-  const collabBase = raw.contributedTo * 6 + raw.orgCount * 12;
-  const forkEngagement = raw.forkedRepos > 0 ? Math.min(40, raw.forkedRepos * 4) : 0;
-  const communityPresence = Math.min(30, raw.followers * 0.5);
-  const openSource = clamp(collabBase + forkEngagement + communityPresence);
-
-  const longestStreakScore = Math.min(100, raw.longestStreak * 4);
-  const currentStreakBonus = Math.min(100, raw.currentStreak * 6);
-  const regularity = raw.totalRepos > 0
-    ? Math.min(100, (raw.totalCommits / raw.totalRepos) * 2)
-    : 0;
-  const consistency = clamp(
-    longestStreakScore * 0.4 +
-    currentStreakBonus * 0.35 +
-    regularity * 0.25
-  );
-
-  return { mergeForce, codeVelocity, problemSolving, openSource, consistency };
-}
-
-export function generateCard(raw: RawGitHubStats, tone?: FlavorTone, rarityOverride?: Rarity): CardData {
-  const stats = computeStats(raw);
-  const rarityScore = computeRarity(raw);
-  const rarity = rarityOverride || getRarityFromScore(rarityScore);
-  const { primary, secondary } = assignClasses(raw, stats);
-  const flavorText = generateFlavorText(raw, stats, rarity, primary, tone);
-  const signatureMove = generateSignatureMove(raw, stats);
-  const achievements = generateAchievements(raw, stats);
-  const verification = generateVerification(raw, stats, rarity, 0);
-  const heroStat = selectHeroStat(raw, stats);
+  const effectiveRarity = rarityOverride || rarity;
+  const flavorText = generateFlavorText(raw, attributes, archetype, effectiveRarity, primary, tone);
+  const verification = generateVerification(raw, effectiveRarity, 0);
 
   return {
     username: raw.login,
     displayName: raw.name || raw.login,
     avatarUrl: raw.avatarUrl,
     bio: raw.bio,
-    stats,
-    rarity,
-    rarityScore,
+    attributes,
+    attributeRanks,
+    rarity: effectiveRarity,
+    rarityScore: score,
+    harmonyBonus: bonus,
     primaryClass: primary,
     secondaryClass: secondary,
     flavorText,
-    signatureMove,
+    signatureMove: move,
     achievements,
-    verification,
     heroStat,
-    className: primary,
+    verification,
     generatedAt: new Date().toISOString(),
+  };
+}
+
+export function generateCardDebug(raw: RawGitHubStats, tone?: FlavorTone): CardDataDebug {
+  const card = generateCard(raw, tone);
+
+  const ctx = createEngineContext(raw);
+  normalizeAll(raw, ctx);
+  computeAttributes(ctx.normalizedMetrics, ctx);
+  computeArchetype(ctx.behaviouralAttributes, ctx);
+  computeRarityFromAttributes(ctx.behaviouralAttributes, ctx);
+  selectHeroStat(ctx.behaviouralAttributes);
+  generateSignatureMove(ctx.behaviouralAttributes, ctx);
+  generateAchievements(ctx.behaviouralAttributes);
+  assignClasses(raw, ctx.behaviouralAttributes, ctx.archetype, ctx);
+
+  const debug = buildDebugMetadata(ctx);
+
+  return {
+    ...card,
+    _debug: debug,
   };
 }
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateVerification } from "@/lib/verification";
-import type { RawGitHubStats, CardStats } from "@/types";
+import type { RawGitHubStats } from "@/types";
 
 const mockRaw: RawGitHubStats = {
   login: "testuser",
@@ -33,47 +33,45 @@ const mockRaw: RawGitHubStats = {
   repoPushedAts: [new Date().toISOString()],
 };
 
-const mockStats: CardStats = {
-  mergeForce: 72,
-  codeVelocity: 65,
-  problemSolving: 58,
-  openSource: 40,
-  consistency: 55,
-};
-
 describe("generateVerification", () => {
   it("generates valid card ID format (DM-XXXXXX)", () => {
-    const v = generateVerification(mockRaw, mockStats, "Rare", 0);
+    const v = generateVerification(mockRaw, "Rare", 0);
     expect(v.cardId).toMatch(/^DM-[A-Z0-9]{6}$/);
   });
 
   it("generates unique card IDs", () => {
     const ids = new Set<string>();
     for (let i = 0; i < 50; i++) {
-      const v = generateVerification(mockRaw, mockStats, "Common", 0);
+      const v = generateVerification(mockRaw, "Common", 0);
       ids.add(v.cardId);
     }
     expect(ids.size).toBe(50);
   });
 
   it("includes digital signature starting with hmac_", () => {
-    const v = generateVerification(mockRaw, mockStats, "Epic", 0);
+    const v = generateVerification(mockRaw, "Epic", 0);
     expect(v.digitalSignature).toMatch(/^hmac_[a-f0-9]{64}$/);
   });
 
   it("sets edition to provided value", () => {
-    const v = generateVerification(mockRaw, mockStats, "Legendary", 42);
+    const v = generateVerification(mockRaw, "Legendary", 42);
     expect(v.edition).toBe(42);
   });
 
-  it("sets version to 1.0.0", () => {
-    const v = generateVerification(mockRaw, mockStats, "Mythic", 0);
-    expect(v.version).toBe("1.0.0");
+  it("sets version to 2.0.0", () => {
+    const v = generateVerification(mockRaw, "Mythic", 0);
+    expect(v.version).toBe("2.0.0");
   });
 
   it("generates valid ISO timestamp", () => {
-    const v = generateVerification(mockRaw, mockStats, "Rare", 0);
+    const v = generateVerification(mockRaw, "Rare", 0);
     const parsed = new Date(v.generatedAt);
     expect(parsed.toISOString()).toBe(v.generatedAt);
+  });
+
+  it("includes balanceVersion", () => {
+    const v = generateVerification(mockRaw, "Rare", 0);
+    expect(v.balanceVersion).toBeDefined();
+    expect(typeof v.balanceVersion).toBe("string");
   });
 });

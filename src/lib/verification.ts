@@ -1,5 +1,6 @@
 import { createHmac, randomBytes } from "crypto";
-import type { RawGitHubStats, CardStats, Rarity, VerificationData } from "@/types";
+import type { RawGitHubStats, Rarity, VerificationData } from "@/types";
+import { ENGINE_VERSIONS } from "@/lib/config";
 
 const HMAC_SECRET = process.env.HMAC_SECRET || "devmon-dev-secret-change-in-production";
 
@@ -13,10 +14,9 @@ function generateCardId(): string {
   return id;
 }
 
-function computeHmac(raw: RawGitHubStats, stats: CardStats, rarity: Rarity, cardId: string): string {
+function computeHmac(raw: RawGitHubStats, rarity: Rarity, cardId: string): string {
   const payload = JSON.stringify({
     username: raw.login,
-    stats,
     rarity,
     cardId,
   });
@@ -25,19 +25,19 @@ function computeHmac(raw: RawGitHubStats, stats: CardStats, rarity: Rarity, card
 
 export function generateVerification(
   raw: RawGitHubStats,
-  stats: CardStats,
   rarity: Rarity,
   edition: number
 ): VerificationData {
   const cardId = generateCardId();
   const now = new Date().toISOString();
-  const hmacHex = computeHmac(raw, stats, rarity, cardId);
+  const hmacHex = computeHmac(raw, rarity, cardId);
 
   return {
     cardId,
     edition,
     generatedAt: now,
-    version: "1.0.0",
+    version: "2.0.0",
+    balanceVersion: ENGINE_VERSIONS.balance,
     digitalSignature: `hmac_${hmacHex}`,
     sha256Hash: hmacHex,
   };
@@ -45,19 +45,19 @@ export function generateVerification(
 
 export function reSignVerification(
   raw: RawGitHubStats,
-  stats: CardStats,
   rarity: Rarity,
   existingCardId: string,
   existingEdition: number
 ): VerificationData {
   const now = new Date().toISOString();
-  const hmacHex = computeHmac(raw, stats, rarity, existingCardId);
+  const hmacHex = computeHmac(raw, rarity, existingCardId);
 
   return {
     cardId: existingCardId,
     edition: existingEdition,
     generatedAt: now,
-    version: "1.0.0",
+    version: "2.0.0",
+    balanceVersion: ENGINE_VERSIONS.balance,
     digitalSignature: `hmac_${hmacHex}`,
     sha256Hash: hmacHex,
   };

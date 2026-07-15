@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       rarity: row.rarity,
       rarityScore: row.rarity_score,
       primaryClass: row.primary_class,
-      stats: row.stats,
+      attributes: row.stats,
       company: row.company,
       primaryLanguage: row.primary_language,
       generatedAt: row.updated_at,

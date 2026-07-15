@@ -29,12 +29,71 @@ export interface RawGitHubStats {
   repoPushedAts: string[];
 }
 
-export interface CardStats {
-  mergeForce: number;
-  codeVelocity: number;
-  problemSolving: number;
-  openSource: number;
+export type CurveType = "log" | "logistic" | "sqrt" | "power";
+
+export interface MetricConfig {
+  curve: CurveType;
+  target: number;
+  steepness: number;
+  maxScore: number;
+}
+
+export interface NormalizedMetrics {
+  followers: number;
+  stars: number;
+  commits: number;
+  recentCommits: number;
+  mergedPRs: number;
+  closedIssues: number;
+  repositories: number;
+  originalRepositories: number;
+  contributedTo: number;
+  organizations: number;
+  languages: number;
+  accountAge: number;
+  forks: number;
+  currentStreak: number;
+  longestStreak: number;
+}
+
+export interface BehaviouralAttributes {
+  execution: number;
+  impact: number;
+  synergy: number;
   consistency: number;
+  mastery: number;
+}
+
+export type AttributeRank = "Novice" | "Adept" | "Veteran" | "Expert" | "Master" | "Grandmaster";
+
+export interface ComponentConfig {
+  label: string;
+  weights: Record<string, number>;
+}
+
+export interface ComponentBreakdown {
+  name: string;
+  label: string;
+  score: number;
+  weight: number;
+  contribution: number;
+}
+
+export interface AttributeExplanation {
+  attribute: keyof BehaviouralAttributes;
+  score: number;
+  rank: AttributeRank;
+  components: ComponentBreakdown[];
+  summary: string;
+  confidence: number;
+  confidenceFactors?: ConfidenceFactors;
+}
+
+export interface ConfidenceFactors {
+  metricCompleteness: number;
+  dataCoverage: number;
+  profileReliability: number;
+  statisticalConfidence: number;
 }
 
 export type Rarity = "Common" | "Rare" | "Epic" | "Legendary" | "Mythic";
@@ -70,6 +129,7 @@ export interface VerificationData {
   edition: number;
   generatedAt: string;
   version: string;
+  balanceVersion: string;
   digitalSignature: string;
   sha256Hash: string;
 }
@@ -77,11 +137,131 @@ export interface VerificationData {
 export type FlavorTone = "roast" | "hype";
 
 export interface HeroStat {
-  key: keyof CardStats | "stars" | "contributions" | "streak" | "languages" | "repos" | "prs" | "followers" | "reposContributedTo";
+  attribute: keyof BehaviouralAttributes;
   label: string;
-  value: string;
-  unit: string;
-  qualifier: string;
+  score: number;
+  rank: AttributeRank;
+}
+
+export type Archetype = "Builder" | "Collaborator" | "Architect" | "Creator" | "Maintainer" | "Explorer";
+
+export interface RarityBreakdown {
+  weightedAverage: number;
+  harmonyBonus: number;
+  harmonyFactors: {
+    weakestAttribute: keyof BehaviouralAttributes;
+    weakestScore: number;
+    spread: number;
+  };
+  finalScore: number;
+  tier: Rarity;
+}
+
+export interface EngineVersions {
+  engine: string;
+  balance: string;
+  normalization: string;
+  configuration: string;
+}
+
+export interface EngineFlags {
+  enableHarmony: boolean;
+  enableConfidence: boolean;
+  enablePercentileNormalization: boolean;
+  enableExperimentalClasses: boolean;
+  enableExperimentalMoves: boolean;
+  enableArchetypeLayer: boolean;
+  enableScoringExplanation: boolean;
+}
+
+export interface EngineContext {
+  rawMetrics: RawGitHubStats;
+  normalizedMetrics: NormalizedMetrics;
+  attributeComponents: Record<string, Record<string, number>>;
+  behaviouralAttributes: BehaviouralAttributes;
+  attributeExplanations: AttributeExplanation[];
+  normalizationExplanations: Record<string, string>;
+  archetype: Archetype;
+  topAttribute: keyof BehaviouralAttributes;
+  secondAttribute: keyof BehaviouralAttributes;
+  weakestAttribute: keyof BehaviouralAttributes;
+  rarityScore: number;
+  rarity: Rarity;
+  rarityBreakdown: RarityBreakdown;
+  rarityExplanation: RarityExplanation;
+  harmonyExplanation: HarmonyExplanation;
+  heroAttribute: HeroStat;
+  heroAttributeExplanation: HeroAttributeExplanation;
+  signatureMove: SignatureMove;
+  signatureMoveExplanation: SignatureMoveExplanation;
+  achievements: Achievement[];
+  primaryClass: ClassName;
+  secondaryClass: ClassName | null;
+  className: ClassName;
+  classExplanation: ClassExplanation;
+  engineVersions: EngineVersions;
+  engineFlags: EngineFlags;
+}
+
+export interface HarmonyExplanation {
+  bonus: number;
+  weakestAttribute: keyof BehaviouralAttributes;
+  weakestScore: number;
+  spread: number;
+  reason: string;
+}
+
+export interface RarityExplanation {
+  weightedAverage: number;
+  harmonyBonus: number;
+  finalScore: number;
+  tier: Rarity;
+  reason: string;
+}
+
+export interface HeroAttributeExplanation {
+  attribute: keyof BehaviouralAttributes;
+  score: number;
+  rank: AttributeRank;
+  tieBreakingApplied: boolean;
+  reason: string;
+}
+
+export interface ClassExplanation {
+  primaryClass: ClassName;
+  secondaryClass: ClassName | null;
+  archetype: Archetype;
+  scores: Record<ClassName, number>;
+  reason: string;
+}
+
+export interface SignatureMoveExplanation {
+  move: SignatureMove;
+  topAttribute: keyof BehaviouralAttributes;
+  secondAttribute: keyof BehaviouralAttributes;
+  topScore: number;
+  secondScore: number;
+  thresholdMet: boolean;
+  reason: string;
+}
+
+export interface ScoringExplanation {
+  attributeExplanations: AttributeExplanation[];
+  harmonyExplanation: HarmonyExplanation;
+  rarityExplanation: RarityExplanation;
+  heroAttributeExplanation: HeroAttributeExplanation;
+  classExplanation: ClassExplanation;
+  signatureMoveExplanation: SignatureMoveExplanation;
+}
+
+export interface DebugMetadata {
+  rawMetrics: RawGitHubStats;
+  normalizedMetrics: NormalizedMetrics;
+  attributeExplanations: AttributeExplanation[];
+  rarityBreakdown: RarityBreakdown;
+  archetype: Archetype;
+  explanation: ScoringExplanation;
+  engineVersions: EngineVersions;
 }
 
 export interface CardData {
@@ -89,20 +269,25 @@ export interface CardData {
   displayName: string;
   avatarUrl: string;
   bio: string;
-  stats: CardStats;
+  attributes: BehaviouralAttributes;
+  attributeRanks: Record<keyof BehaviouralAttributes, AttributeRank>;
   rarity: Rarity;
   rarityScore: number;
+  harmonyBonus: number;
   primaryClass: ClassName;
   secondaryClass: ClassName | null;
   flavorText: string;
   signatureMove: SignatureMove;
   achievements: Achievement[];
-  verification: VerificationData;
   heroStat: HeroStat;
-  className: ClassName;
+  verification: VerificationData;
   generatedAt: string;
   rank?: number;
   totalCards?: number;
+}
+
+export interface CardDataDebug extends CardData {
+  _debug: DebugMetadata;
 }
 
 export interface LeaderboardEntry {
@@ -112,7 +297,7 @@ export interface LeaderboardEntry {
   rarity: Rarity;
   rarityScore: number;
   primaryClass: ClassName;
-  stats: CardStats;
+  attributes: BehaviouralAttributes;
   generatedAt: string;
 }
 
@@ -172,12 +357,12 @@ export const RARITY_COLORS: Record<Rarity, {
   },
 };
 
-export const STAT_LABELS: Record<keyof CardStats, string> = {
-  mergeForce: "Merge Force",
-  codeVelocity: "Code Velocity",
-  problemSolving: "Problem Solving",
-  openSource: "Open Source",
+export const ATTRIBUTE_LABELS: Record<keyof BehaviouralAttributes, string> = {
+  execution: "Execution",
+  impact: "Impact",
+  synergy: "Synergy",
   consistency: "Consistency",
+  mastery: "Mastery",
 };
 
 export const CLASS_SUBTITLES: Record<ClassName, string> = {
@@ -194,5 +379,3 @@ export const CLASS_SUBTITLES: Record<ClassName, string> = {
   "PR Titan": "The Review Commander",
   "Zen Coder": "The Code Purifier",
 };
-
-

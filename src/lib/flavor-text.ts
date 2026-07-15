@@ -1,10 +1,11 @@
-import type { RawGitHubStats, CardStats, Rarity, ClassName, FlavorTone } from "@/types";
+import type { RawGitHubStats, BehaviouralAttributes, Rarity, ClassName, FlavorTone, Archetype } from "@/types";
 
 interface TemplateContext {
   raw: RawGitHubStats;
-  stats: CardStats;
+  attributes: BehaviouralAttributes;
   rarity: Rarity;
   className: ClassName;
+  archetype: Archetype;
 }
 
 function pick<T>(arr: T[]): T {
@@ -17,7 +18,7 @@ function format(val: number): string {
 
 const hypeTemplates: string[] = [
   "{{stars}} stars across {{repos}} repos! The GitHub gods smile upon you.",
-  "A {{rarity}} tier {{className}} with {{stats.mergeForce}} Merge Force! Absolute legend in the making.",
+  "A {{rarity}} tier {{className}} with {{attributes.execution}} Execution! Absolute legend in the making.",
   "{{currentStreak}}-day streak and counting! Consistency is king.",
   "{{prsMerged}} PRs merged and counting. You're the merge hero we don't deserve.",
   "{{langCount}} languages in your arsenal. You're not a developer, you're a linguistic weapon.",
@@ -33,8 +34,8 @@ const hypeTemplates: string[] = [
   "{{recentCommits}} commits in the last 30 days — you're on fire!",
   "{{topLang}} developer of the highest order. Type-safe and classy.",
   "Account created in {{accountYear}} and still going strong. Veteran status: unlocked.",
-  "{{stats.codeVelocity}} Code Velocity? You're not fast, you're a quantum commit entity.",
-  "{{stats.consistency}} Consistency? That's not a stat, that's a lifestyle.",
+  "{{attributes.execution}} Execution? You're not fast, you're a quantum commit entity.",
+  "{{attributes.consistency}} Consistency? That's not a stat, that's a lifestyle.",
   "Every great codebase started with a single commit. Yours has {{totalCommits}} and counting.",
   "{{langCount}} languages explored. You're building breadth before depth — that's a power move.",
   "{{repos}} repos and growing. The best developers are the ones who keep building.",
@@ -62,7 +63,7 @@ const roastTemplates: string[] = [
 ];
 
 function fillTemplate(template: string, ctx: TemplateContext): string {
-  const { raw, stats, rarity, className } = ctx;
+  const { raw, attributes, rarity, className } = ctx;
   const topLang = raw.languages[0]?.name || "Unknown";
   const year = new Date().getFullYear();
   const accountYear = new Date(raw.createdAt).getFullYear();
@@ -90,11 +91,11 @@ function fillTemplate(template: string, ctx: TemplateContext): string {
     .replace(/{{recentCommits}}/g, format(raw.recentCommits))
     .replace(/{{rarity}}/g, rarity)
     .replace(/{{className}}/g, className)
-    .replace(/{{stats\.mergeForce}}/g, format(stats.mergeForce))
-    .replace(/{{stats\.codeVelocity}}/g, format(stats.codeVelocity))
-    .replace(/{{stats\.problemSolving}}/g, format(stats.problemSolving))
-    .replace(/{{stats\.openSource}}/g, format(stats.openSource))
-    .replace(/{{stats\.consistency}}/g, format(stats.consistency))
+    .replace(/{{attributes\.execution}}/g, format(attributes.execution))
+    .replace(/{{attributes\.impact}}/g, format(attributes.impact))
+    .replace(/{{attributes\.synergy}}/g, format(attributes.synergy))
+    .replace(/{{attributes\.consistency}}/g, format(attributes.consistency))
+    .replace(/{{attributes\.mastery}}/g, format(attributes.mastery))
     .replace(/{{forkedRepos}}/g, format(raw.forkedRepos))
     .replace(/{{originalRepos}}/g, format(raw.originalRepos))
     .replace(/{{currentStreak}}/g, format(raw.currentStreak))
@@ -105,16 +106,16 @@ function fillTemplate(template: string, ctx: TemplateContext): string {
 
 export function generateFlavorText(
   raw: RawGitHubStats,
-  stats: CardStats,
+  attributes: BehaviouralAttributes,
+  archetype: Archetype,
   rarity: Rarity,
   className: ClassName,
   tone?: FlavorTone
 ): string {
-  const ctx: TemplateContext = { raw, stats, rarity, className };
+  const ctx: TemplateContext = { raw, attributes, rarity, className, archetype };
 
   if (tone === "roast") {
     return fillTemplate(pick(roastTemplates), ctx);
   }
-  // Default is always hype
   return fillTemplate(pick(hypeTemplates), ctx);
 }

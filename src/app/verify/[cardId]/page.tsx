@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "motion/react";
-import { RARITY_COLORS, CLASS_SUBTITLES, STAT_LABELS } from "@/types";
+import { RARITY_COLORS, CLASS_SUBTITLES, ATTRIBUTE_LABELS } from "@/types";
 import type { CardData } from "@/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
@@ -285,12 +285,12 @@ export default function VerifyPage() {
             Attributes
           </p>
           <div className="space-y-3">
-            {(Object.keys(STAT_LABELS) as (keyof typeof STAT_LABELS)[]).map(
+            {(Object.keys(ATTRIBUTE_LABELS) as (keyof typeof ATTRIBUTE_LABELS)[]).map(
               (key, i) => (
                 <StatBar
                   key={key}
-                  label={STAT_LABELS[key]}
-                  value={card.stats[key]}
+                  label={ATTRIBUTE_LABELS[key]}
+                  value={card.attributes[key]}
                   color={rarityColor.hex}
                   delay={0.35 + i * 0.05}
                 />

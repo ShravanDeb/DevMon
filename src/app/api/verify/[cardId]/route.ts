@@ -53,7 +53,7 @@ export async function GET(
           rarityScore: card.rarity_score,
           primaryClass: card.primary_class,
           secondaryClass: card.secondary_class,
-          stats: card.stats,
+          attributes: card.stats,
           signatureMove: card.signature_move,
           flavorText: card.flavor_text,
           heroStat: card.hero_stat,

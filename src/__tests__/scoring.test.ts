@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeStats, getRarityFromScore, generateCard } from "@/lib/scoring";
+import { generateCard, getRarityFromScore } from "@/lib/scoring";
 import type { RawGitHubStats } from "@/types";
 
 const mockRaw: RawGitHubStats = {
@@ -64,30 +64,6 @@ const emptyRaw: RawGitHubStats = {
   repoPushedAts: [],
 };
 
-describe("computeStats", () => {
-  it("returns all stats between 0 and 100", () => {
-    const stats = computeStats(mockRaw);
-    for (const val of Object.values(stats)) {
-      expect(val).toBeGreaterThanOrEqual(0);
-      expect(val).toBeLessThanOrEqual(100);
-    }
-  });
-
-  it("returns zeros for empty user", () => {
-    const stats = computeStats(emptyRaw);
-    for (const val of Object.values(stats)) {
-      expect(val).toBe(0);
-    }
-  });
-
-  it("gives higher scores to active users", () => {
-    const active = computeStats(mockRaw);
-    const inactive = computeStats(emptyRaw);
-    expect(active.mergeForce).toBeGreaterThan(inactive.mergeForce);
-    expect(active.codeVelocity).toBeGreaterThan(inactive.codeVelocity);
-  });
-});
-
 describe("getRarityFromScore", () => {
   it("maps score ranges correctly", () => {
     expect(getRarityFromScore(100)).toBe("Mythic");
@@ -101,7 +77,7 @@ describe("getRarityFromScore", () => {
 });
 
 describe("generateCard", () => {
-  it("generates a complete card", () => {
+  it("generates a complete card with attributes", () => {
     const card = generateCard(mockRaw);
     expect(card.username).toBe("testuser");
     expect(card.rarity).toBeDefined();
@@ -112,6 +88,25 @@ describe("generateCard", () => {
     expect(card.achievements.length).toBeGreaterThan(0);
     expect(card.verification.cardId).toMatch(/^DM-[A-Z0-9]{6}$/);
     expect(card.heroStat).toBeDefined();
+
+    expect(card.attributes.execution).toBeGreaterThanOrEqual(0);
+    expect(card.attributes.execution).toBeLessThanOrEqual(100);
+    expect(card.attributes.impact).toBeGreaterThanOrEqual(0);
+    expect(card.attributes.impact).toBeLessThanOrEqual(100);
+    expect(card.attributes.synergy).toBeGreaterThanOrEqual(0);
+    expect(card.attributes.synergy).toBeLessThanOrEqual(100);
+    expect(card.attributes.consistency).toBeGreaterThanOrEqual(0);
+    expect(card.attributes.consistency).toBeLessThanOrEqual(100);
+    expect(card.attributes.mastery).toBeGreaterThanOrEqual(0);
+    expect(card.attributes.mastery).toBeLessThanOrEqual(100);
+  });
+
+  it("all attributes are between 0 and 100", () => {
+    const card = generateCard(mockRaw);
+    for (const val of Object.values(card.attributes)) {
+      expect(val).toBeGreaterThanOrEqual(0);
+      expect(val).toBeLessThanOrEqual(100);
+    }
   });
 
   it("respects rarity override", () => {
@@ -122,7 +117,27 @@ describe("generateCard", () => {
   it("produces consistent structure for empty user", () => {
     const card = generateCard(emptyRaw);
     expect(card.username).toBe("newuser");
-    expect(card.stats.mergeForce).toBe(0);
     expect(card.rarity).toBe("Common");
+    for (const val of Object.values(card.attributes)) {
+      expect(val).toBe(0);
+    }
+  });
+
+  it("assigns an archetype", () => {
+    const card = generateCard(mockRaw);
+    expect(card.attributeRanks).toBeDefined();
+    expect(card.attributeRanks.execution).toBeDefined();
+  });
+});
+
+describe("generateCard debug", () => {
+  it("generateCardDebug includes debug metadata", async () => {
+    const { generateCardDebug } = await import("@/lib/scoring");
+    const card = generateCardDebug(mockRaw);
+    expect(card._debug).toBeDefined();
+    expect(card._debug.engineVersions.engine).toBe("2.0.0");
+    expect(card._debug.rawMetrics).toBeDefined();
+    expect(card._debug.normalizedMetrics).toBeDefined();
+    expect(card._debug.explanation.attributeExplanations.length).toBe(5);
   });
 });

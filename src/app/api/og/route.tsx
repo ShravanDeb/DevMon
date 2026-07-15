@@ -31,7 +31,7 @@ export async function GET(req: Request) {
         .maybeSingle();
       if (data) {
         card = {
-          stats: data.stats,
+          attributes: data.stats,
           rarity: data.rarity,
           rarityScore: data.rarity_score,
           primaryClass: data.primary_class,
@@ -130,13 +130,13 @@ export async function GET(req: Request) {
             {card && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
                 {([
-                  { label: "MERGE FORCE", key: "mergeForce" },
-                  { label: "CODE VELOCITY", key: "codeVelocity" },
-                  { label: "PROBLEM SOLVING", key: "problemSolving" },
-                  { label: "OPEN SOURCE", key: "openSource" },
+                  { label: "EXECUTION", key: "execution" },
+                  { label: "IMPACT", key: "impact" },
+                  { label: "SYNERGY", key: "synergy" },
                   { label: "CONSISTENCY", key: "consistency" },
+                  { label: "MASTERY", key: "mastery" },
                 ] as const).map(({ label, key }) => {
-                  const value = (card.stats as Record<string, number>)?.[key] ?? 0;
+                  const value = (card.attributes as Record<string, number>)?.[key] ?? 0;
                   return (
                     <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ width: 100, fontSize: 13, fontWeight: 500, color: "#65635D", fontFamily: "Geist Mono, monospace", textTransform: "uppercase", letterSpacing: "0.08em" }}>

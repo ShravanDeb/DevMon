@@ -343,7 +343,7 @@ function CardContent() {
               </span>
               <span className="w-[1px] h-3 bg-[var(--overlay-8)]" />
               <span className="font-mono text-[10px] text-text-tertiary tracking-wide">
-                {heroStat.label} {heroStat.value}{heroStat.unit}
+                {heroStat.label} {heroStat.score}/100
               </span>
             </div>
             <h1 className="font-display text-[32px] sm:text-[36px] font-[700] tracking-[-0.03em] text-text-primary leading-[1.1]">

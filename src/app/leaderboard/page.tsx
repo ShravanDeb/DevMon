@@ -7,15 +7,15 @@ import { RARITY_COLORS } from "@/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 
-type SortKey = "rarity" | "mergeForce" | "codeVelocity" | "problemSolving" | "openSource" | "consistency";
+type SortKey = "rarity" | "execution" | "impact" | "synergy" | "consistency" | "mastery";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "rarity", label: "Rarity" },
-  { value: "mergeForce", label: "Merge Force" },
-  { value: "codeVelocity", label: "Code Velocity" },
-  { value: "problemSolving", label: "Problem Solving" },
-  { value: "openSource", label: "Open Source" },
+  { value: "execution", label: "Execution" },
+  { value: "impact", label: "Impact" },
+  { value: "synergy", label: "Synergy" },
   { value: "consistency", label: "Consistency" },
+  { value: "mastery", label: "Mastery" },
 ];
 
 function EmptyState() {
@@ -84,7 +84,7 @@ export default function LeaderboardPage() {
       if (rarityDiff !== 0) return rarityDiff;
       return b.rarityScore - a.rarityScore;
     }
-    return (b.stats?.[sortBy] ?? 0) - (a.stats?.[sortBy] ?? 0);
+    return (b.attributes?.[sortBy] ?? 0) - (a.attributes?.[sortBy] ?? 0);
   });
 
   return (
@@ -231,13 +231,13 @@ export default function LeaderboardPage() {
 
                     {/* Stats - desktop only */}
                     <div className="hidden md:flex items-center gap-6 shrink-0">
-                      {(["mergeForce", "codeVelocity", "problemSolving", "openSource", "consistency"] as const).map((key) => (
+                      {(["execution", "impact", "synergy", "consistency", "mastery"] as const).map((key) => (
                         <div key={key} className="text-center">
                           <span className="block font-mono text-[16px] font-semibold text-text-primary tabular-nums">
-                            {entry.stats?.[key] ?? "-"}
+                            {entry.attributes?.[key] ?? "-"}
                           </span>
                           <span className="block font-mono text-[9px] text-text-tertiary uppercase tracking-[0.06em]">
-                            {key === "mergeForce" ? "MRG" : key === "codeVelocity" ? "VLK" : key === "problemSolving" ? "PRB" : key === "openSource" ? "OST" : "CON"}
+                            {key === "execution" ? "EXE" : key === "impact" ? "IMP" : key === "synergy" ? "SYN" : key === "consistency" ? "CON" : "MAS"}
                           </span>
                         </div>
                       ))}

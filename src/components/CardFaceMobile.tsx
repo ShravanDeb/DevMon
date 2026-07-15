@@ -2,8 +2,8 @@
 
 import { useRef, useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
-import type { CardData, CardStats, Rarity } from "@/types";
-import { RARITY_COLORS, STAT_LABELS, CLASS_SUBTITLES } from "@/types";
+import type { CardData, BehaviouralAttributes, Rarity } from "@/types";
+import { RARITY_COLORS, ATTRIBUTE_LABELS, CLASS_SUBTITLES } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
 import React from "react";
 
@@ -135,17 +135,17 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
     const ro = new ResizeObserver(measure);
     ro.observe(container);
     return () => ro.disconnect();
-  }, [heroStat.value]);
+  }, [heroStat.score]);
 
-  const stats: { key: keyof CardStats; label: string }[] = useMemo(() => [
-    { key: "mergeForce", label: STAT_LABELS.mergeForce },
-    { key: "codeVelocity", label: STAT_LABELS.codeVelocity },
-    { key: "problemSolving", label: STAT_LABELS.problemSolving },
-    { key: "openSource", label: STAT_LABELS.openSource },
-    { key: "consistency", label: STAT_LABELS.consistency },
+  const stats: { key: keyof BehaviouralAttributes; label: string }[] = useMemo(() => [
+    { key: "execution", label: ATTRIBUTE_LABELS.execution },
+    { key: "impact", label: ATTRIBUTE_LABELS.impact },
+    { key: "synergy", label: ATTRIBUTE_LABELS.synergy },
+    { key: "consistency", label: ATTRIBUTE_LABELS.consistency },
+    { key: "mastery", label: ATTRIBUTE_LABELS.mastery },
   ], []);
 
-  const heroStatKey = heroStat.key as keyof CardStats | null;
+  const heroStatAttr = heroStat.attribute as keyof BehaviouralAttributes;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://devmon.dev";
   const verifyUrl = `${siteUrl}/verify/${card.verification.cardId}`;
@@ -337,13 +337,11 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                     data-hero-number
                     style={{ fontSize: `${heroFontSize}px` }}
                   >
-                    {heroStat.value}
+                    {heroStat.score}
                   </span>
-                  {heroStat.unit && (
-                    <span className="card-hero-stat-unit text-text-secondary shrink-0">
-                      {heroStat.unit}
-                    </span>
-                  )}
+                  <span className="card-hero-stat-unit text-text-secondary shrink-0">
+                    /100
+                  </span>
                 </div>
                 <span className="card-hero-stat-label text-text-secondary">
                   {heroStat.label}
@@ -390,7 +388,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                 </span>
                 <div className="space-y-1">
                   {stats.map((s, i) => {
-                    const isHero = heroStatKey === s.key;
+                    const isHero = heroStatAttr === s.key;
                     return (
                       <motion.div
                         key={s.key}
@@ -411,12 +409,12 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                               ["--rarity-color" as string]: rarityColor.hex,
                             } as React.CSSProperties}
                             initial={{ width: 0 }}
-                            animate={revealed ? { width: `${card.stats[s.key]}%` } : {}}
+                            animate={revealed ? { width: `${card.attributes[s.key]}%` } : {}}
                             transition={{ duration: 0.6, delay: 0.5 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
                           />
                         </div>
                         <span className={`font-mono text-right tabular-nums text-[8px] w-[19px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
-                          {card.stats[s.key]}
+                          {card.attributes[s.key]}
                         </span>
                       </motion.div>
                     );

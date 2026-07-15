@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       p_card_id: card.verification.cardId,
       p_edition: card.verification.edition,
       p_raw_stats: raw as unknown as Record<string, unknown>,
-      p_stats: card.stats as unknown as Record<string, unknown>,
+      p_stats: card.attributes as unknown as Record<string, unknown>,
       p_rarity: card.rarity,
       p_rarity_score: card.rarityScore,
       p_primary_class: card.primaryClass,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     // Re-sign using fresh card data (not DB row) for verification integrity
     const { reSignVerification } = await import("@/lib/verification");
-    const finalVerification = reSignVerification(raw, card.stats, card.rarity, row.card_id as string, row.edition as number);
+    const finalVerification = reSignVerification(raw, card.rarity, row.card_id as string, row.edition as number);
 
     // Write the re-signed hash/sig back to the same row
     const { error: signUpdateErr } = await admin
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
         username: row.username as string,
         displayName: row.display_name as string,
         avatarUrl: row.avatar_url as string,
-        stats: row.stats as Record<string, number>,
+        attributes: row.stats as Record<string, number>,
         rarity: row.rarity as string,
         rarityScore: row.rarity_score as number,
         primaryClass: row.primary_class as string,
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
           sha256Hash: finalVerification.sha256Hash,
           digitalSignature: finalVerification.digitalSignature,
         },
-        heroStat: row.hero_stat as { key: string; label: string; value: string; unit: string; qualifier: string },
+        heroStat: row.hero_stat as { attribute: string; label: string; score: number; rank: string },
         className: row.primary_class as string,
         generatedAt: finalVerification.generatedAt,
         rank,
