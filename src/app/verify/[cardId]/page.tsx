@@ -191,7 +191,7 @@ export default function VerifyPage() {
   const rarityColor = RARITY_COLORS[card.rarity];
   const verifyUrl = typeof window !== "undefined" ? window.location.href : "";
   const homepageUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const shareText = `🚀 Just leveled up my dev profile! My verified GitHub credentials are now a shareable trading card on DevMon.\n\nCheck out the receipts 👇\n${verifyUrl}\n\nWant your own? Generate yours free 👇\n${homepageUrl}\n\n#DevMon #BuildInPublic #GitHub #DevCommunity`;
+  const shareText = `🚀 Just leveled up my dev profile! My verified GitHub credentials are now a shareable credential on DevMon.\n\nCheck out the receipts 👇\n${verifyUrl}\n\nWant your own? Generate yours free 👇\n${homepageUrl}\n\n#DevMon #BuildInPublic #GitHub #DevCommunity`;
 
   return (
     <div className="min-h-screen bg-surface-0">

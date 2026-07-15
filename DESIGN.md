@@ -143,7 +143,7 @@ as a design decision, not an engineering afterthought:
   reads as crafted. When in doubt, cut duration before cutting frame rate.
 
 ## Navigation
-DevMon is a 4-page conversion-simple app (Landing, Card, Battle, Leaderboard), not
+DevMon is a single-page conversion-simple app (Landing → Card → Leaderboard, with public Verification pages), not
 an experience-led portfolio. Keep navigation conventional and always-visible — no
 radial menus, hidden drawers, or puzzle-to-explore patterns. Experimental
 navigation is a valid 2026 award-circuit trend, but it's a fit for storytelling

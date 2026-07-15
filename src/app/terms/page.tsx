@@ -104,7 +104,7 @@ export default function TermsPage() {
                 <SectionHeading>Service Description</SectionHeading>
                 <Paragraph>
                   DevMon is a web application that generates shareable developer
-                  trading cards based on your public GitHub activity. When you sign in
+                  credentials based on your public GitHub activity. When you sign in
                   with GitHub OAuth, DevMon fetches your public profile data and runs
                   it through a scoring pipeline that computes five stat categories:
                   Merge Force, Code Velocity, Problem Solving, Open Source, and

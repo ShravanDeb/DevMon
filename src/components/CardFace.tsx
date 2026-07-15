@@ -568,17 +568,13 @@ export const CardFace = React.memo(function CardFace({ card, rarityOverride }: C
                 </div>
 
                 <div className="flex flex-col items-center gap-1">
-                  <div
-                    className="w-8 h-8 rounded-[6px] flex items-center justify-center border"
-                    style={{
-                      background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
-                      borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    <span className="font-display text-[13px] font-[800] tracking-tight" style={{ color: isDark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.85)" }}>
-                      DM
-                    </span>
-                  </div>
+                  <img
+                    src="/favicon.svg"
+                    width={32}
+                    height={32}
+                    alt="DevMon"
+                    className="shrink-0"
+                  />
                   <span className="font-display text-[12px] font-[700] uppercase tracking-[0.18em] text-text-primary">
                     DevMon
                   </span>

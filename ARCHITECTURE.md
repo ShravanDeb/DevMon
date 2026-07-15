@@ -860,7 +860,7 @@ Generation: crypto.randomBytes(6) → each byte mod 32 → index into charset
 
 ```
 payload = JSON.stringify({ username, stats, rarity, cardId })
-signature = HMAC-SHA-256(payload, CARD_SECRET)
+signature = HMAC-SHA-256(payload, HMAC_SECRET)
 digital_signature = "hmac_" + signature_hex
 ```
 
@@ -963,7 +963,7 @@ frame-ancestors 'none'
 ### Cryptographic Verification
 
 - **Algorithm:** HMAC-SHA-256
-- **Secret:** `CARD_SECRET` environment variable
+- **Secret:** `HMAC_SECRET` environment variable
 - **Payload:** `JSON.stringify({ username, stats, rarity, cardId })`
 - **Storage:** `sha256_hash` (hex) and `digital_signature` (`hmac_` prefix + hex)
 - **Verification:** Any third party can re-compute the HMAC using the public card data and the known secret to verify authenticity
@@ -978,7 +978,7 @@ frame-ancestors 'none'
 | `GITHUB_TOKEN` | No | GitHub personal access token for API calls |
 | `UPSTASH_REDIS_REST_URL` | No | Upstash Redis endpoint |
 | `UPSTASH_REDIS_REST_TOKEN` | No | Upstash Redis auth token |
-| `CARD_SECRET` | No | HMAC signing secret |
+| `HMAC_SECRET` | No | HMAC signing secret |
 | `NEXT_PUBLIC_SITE_URL` | Yes | Site URL for OG images and redirects |
 
 ---
@@ -1188,7 +1188,7 @@ Health check endpoint.
 | `GITHUB_TOKEN` | Yes | Personal access token for GitHub API |
 | `UPSTASH_REDIS_REST_URL` | Yes | From Upstash dashboard |
 | `UPSTASH_REDIS_REST_TOKEN` | Yes | From Upstash dashboard |
-| `CARD_SECRET` | Yes | Random string for HMAC signing |
+| `HMAC_SECRET` | Yes | Random string for HMAC signing |
 | `NEXT_PUBLIC_SITE_URL` | Yes | `https://dev-mon.netlify.app/` |
 
 ### Build & Deploy

@@ -11,8 +11,6 @@ export const dynamic = "force-dynamic";
 const NO_STORE = { "Cache-Control": "no-store" } as const;
 
 export async function POST(req: NextRequest) {
-  const start = Date.now();
-
   try {
     const session = await getSessionUser();
     if (!session?.accessToken) {
@@ -119,17 +117,6 @@ export async function POST(req: NextRequest) {
       .gt("rarity_score", (row.rarity_score as number))
       .order("rarity_score", { ascending: false });
     const rank = (rankData?.length ?? 0) + 1;
-
-    const duration = Date.now() - start;
-    console.log(
-      JSON.stringify({
-        method: "POST",
-        route: "/api/card",
-        userId: session.userId,
-        cardId: row.card_id,
-        duration,
-      })
-    );
 
     return NextResponse.json({
       card: {

@@ -165,115 +165,116 @@ export default function LeaderboardPage() {
 
         {/* Leaderboard entries */}
         {!loading && !error && sortedEntries.length > 0 && (
-          <div className="space-y-3">
-            {sortedEntries.map((entry, i) => {
-              const rarityColor = RARITY_COLORS[entry.rarity];
-              return (
-                <motion.div
-                  key={entry.username}
-                  className="rounded-[12px] surface-card p-4 sm:p-5 flex items-center gap-3 sm:gap-6 group hover:scale-[1.005] transition-transform"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.15 + Math.min(i, 8) * 0.04 }}
-                >
-                  {/* Rank */}
-                  <div className="shrink-0 w-10 text-center">
-                    <span
-                      className="font-display text-[24px] font-[800] tracking-[-0.02em] leading-none"
-                      style={{ color: i < 3 ? rarityColor.hex : "var(--text-tertiary)" }}
-                    >
-                      {i + 1}
-                    </span>
-                  </div>
-
-                  {/* Avatar */}
-                  <div className="shrink-0">
-                    <div
-                      className="w-12 h-12 rounded-full overflow-hidden"
-                      style={{ border: `2px solid ${rarityColor.hex}40` }}
-                    >
-                      <img
-                        src={entry.avatarUrl}
-                        alt={entry.username}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h3 className="text-[15px] font-semibold text-text-primary truncate">
-                        {entry.displayName}
-                      </h3>
+          <>
+            <div className="space-y-3">
+              {sortedEntries.map((entry, i) => {
+                const rarityColor = RARITY_COLORS[entry.rarity];
+                return (
+                  <motion.div
+                    key={entry.username}
+                    className="rounded-[12px] surface-card p-4 sm:p-5 flex items-center gap-3 sm:gap-6 group hover:scale-[1.005] transition-transform"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.15 + Math.min(i, 8) * 0.04 }}
+                  >
+                    {/* Rank */}
+                    <div className="shrink-0 w-10 text-center">
                       <span
-                        className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] px-2 py-[2px] rounded-full shrink-0"
-                        style={{
-                          color: rarityColor.hex,
-                          background: `${rarityColor.hex}12`,
-                          border: `1px solid ${rarityColor.hex}20`,
-                        }}
+                        className="font-display text-[24px] font-[800] tracking-[-0.02em] leading-none"
+                        style={{ color: i < 3 ? rarityColor.hex : "var(--text-tertiary)" }}
                       >
-                        {entry.rarity}
+                        {i + 1}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 min-w-0 overflow-hidden">
-                      <span className="text-[13px] font-mono text-text-tertiary truncate min-w-0">
-                        @{entry.username}
-                      </span>
-                      <span className="w-[1px] h-3 bg-[var(--overlay-8)]" />
-                      <span className="text-[12px] text-text-tertiary truncate">
-                        {entry.primaryClass}
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Stats - desktop only */}
-                  <div className="hidden md:flex items-center gap-6 shrink-0">
-                    {(["mergeForce", "codeVelocity", "problemSolving", "openSource", "consistency"] as const).map((key) => (
-                      <div key={key} className="text-center">
-                        <span className="block font-mono text-[16px] font-semibold text-text-primary tabular-nums">
-                          {entry.stats?.[key] ?? "-"}
-                        </span>
-                        <span className="block font-mono text-[9px] text-text-tertiary uppercase tracking-[0.06em]">
-                          {key === "mergeForce" ? "MRG" : key === "codeVelocity" ? "VLK" : key === "problemSolving" ? "PRB" : key === "openSource" ? "OST" : "CON"}
+                    {/* Avatar */}
+                    <div className="shrink-0">
+                      <div
+                        className="w-12 h-12 rounded-full overflow-hidden"
+                        style={{ border: `2px solid ${rarityColor.hex}40` }}
+                      >
+                        <img
+                          src={entry.avatarUrl}
+                          alt={entry.username}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="text-[15px] font-semibold text-text-primary truncate">
+                          {entry.displayName}
+                        </h3>
+                        <span
+                          className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] px-2 py-[2px] rounded-full shrink-0"
+                          style={{
+                            color: rarityColor.hex,
+                            background: `${rarityColor.hex}12`,
+                            border: `1px solid ${rarityColor.hex}20`,
+                          }}
+                        >
+                          {entry.rarity}
                         </span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                        <span className="text-[13px] font-mono text-text-tertiary truncate min-w-0">
+                          @{entry.username}
+                        </span>
+                        <span className="w-[1px] h-3 bg-[var(--overlay-8)]" />
+                        <span className="text-[12px] text-text-tertiary truncate">
+                          {entry.primaryClass}
+                        </span>
+                      </div>
+                    </div>
 
-                  {/* Rarity score */}
-                  <div className="shrink-0 text-right">
-                    <span
-                      className="font-display text-[18px] sm:text-[22px] font-[700] tracking-[-0.01em] leading-none"
-                      style={{ color: rarityColor.hex }}
-                    >
-                      {entry.rarityScore}
-                    </span>
-                    <span className="block font-mono text-[9px] text-text-tertiary uppercase tracking-[0.06em] mt-1">
-                      Score
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                    {/* Stats - desktop only */}
+                    <div className="hidden md:flex items-center gap-6 shrink-0">
+                      {(["mergeForce", "codeVelocity", "problemSolving", "openSource", "consistency"] as const).map((key) => (
+                        <div key={key} className="text-center">
+                          <span className="block font-mono text-[16px] font-semibold text-text-primary tabular-nums">
+                            {entry.stats?.[key] ?? "-"}
+                          </span>
+                          <span className="block font-mono text-[9px] text-text-tertiary uppercase tracking-[0.06em]">
+                            {key === "mergeForce" ? "MRG" : key === "codeVelocity" ? "VLK" : key === "problemSolving" ? "PRB" : key === "openSource" ? "OST" : "CON"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Rarity score */}
+                    <div className="shrink-0 text-right">
+                      <span
+                        className="font-display text-[18px] sm:text-[22px] font-[700] tracking-[-0.01em] leading-none"
+                        style={{ color: rarityColor.hex }}
+                      >
+                        {entry.rarityScore}
+                      </span>
+                      <span className="block font-mono text-[9px] text-text-tertiary uppercase tracking-[0.06em] mt-1">
+                        Score
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <motion.div
+              className="mt-10 text-center"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <a
+                href="/card"
+                className="inline-flex items-center gap-2 rounded-[10px] surface-btn-accent px-6 py-3 text-[13px] font-semibold"
+              >
+                Generate Your Credential
+              </a>
+            </motion.div>
+          </>
         )}
-
-        {/* CTA */}
-        <motion.div
-          className="mt-10 text-center"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-        >
-          <a
-            href="/card"
-            className="inline-flex items-center gap-2 rounded-[10px] surface-btn-accent px-6 py-3 text-[13px] font-semibold"
-          >
-            Generate Your Credential
-          </a>
-        </motion.div>
       </div>
 
       <Footer />

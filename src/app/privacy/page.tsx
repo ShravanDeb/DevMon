@@ -287,8 +287,8 @@ export default function PrivacyPage() {
                     security policies. Hosted on Amazon Web Services (AWS) infrastructure.
                   </li>
                   <li>
-                    <strong className="text-text-primary">Vercel, Inc.:</strong> Application
-                    hosting and edge network. Vercel may collect standard server logs (IP
+                    <strong className="text-text-primary">Netlify, Inc.:</strong> Application
+                    hosting and edge network. Netlify may collect standard server logs (IP
                     addresses, request timestamps) for operational purposes.
                   </li>
                   <li>
@@ -351,7 +351,7 @@ export default function PrivacyPage() {
                     <strong className="text-text-primary">Server logs:</strong> Standard
                     operational logs (IP addresses, request timestamps) are retained for a
                     reasonable period for security and operational purposes, as per standard
-                    Vercel practices.
+                    Netlify practices.
                   </li>
                 </BulletList>
                 <Paragraph>

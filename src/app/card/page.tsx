@@ -224,7 +224,7 @@ function CardContent() {
   const heroStat = card.heroStat;
   const verifyUrl = typeof window !== "undefined" ? `${window.location.origin}/verify/${card.verification.cardId}` : "";
   const homepageUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const shareText = `🚀 Just leveled up my dev profile! My verified GitHub credentials are now a shareable trading card on DevMon.\n\nCheck out the receipts 👇\n${verifyUrl}\n\nWant your own? Generate yours free 👇\n${homepageUrl}\n\n#DevMon #BuildInPublic #GitHub #DevCommunity`;
+  const shareText = `🚀 Just leveled up my dev profile! My verified GitHub credentials are now a shareable credential on DevMon.\n\nCheck out the receipts 👇\n${verifyUrl}\n\nWant your own? Generate yours free 👇\n${homepageUrl}\n\n#DevMon #BuildInPublic #GitHub #DevCommunity`;
 
   return (
     <main className="min-h-screen bg-surface-0 relative overflow-hidden">

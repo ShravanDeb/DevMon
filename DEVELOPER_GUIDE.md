@@ -283,8 +283,8 @@ DevMon/
 ├── package.json                        # Dependencies and scripts (39 lines)
 ├── .env.example                        # Environment variable template (20 lines)
 ├── .gitignore                          # Git ignore rules
-├── README.md                           # Project documentation (677 lines)
-├── ARCHITECTURE.md                     # Technical specification (1048 lines)
+├── README.md                           # Project documentation (681 lines)
+├── ARCHITECTURE.md                     # Technical specification (1309 lines)
 ├── DEVELOPER_GUIDE.md                  # This file
 ├── DESIGN.md                           # Locked design system (179 lines)
 ├── PLAN.md                             # Historical migration plan (228 lines)

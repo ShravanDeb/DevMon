@@ -500,17 +500,13 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                 </div>
 
                 <div className="flex flex-col items-center gap-0.5">
-                  <div
-                    className="w-[19px] h-[19px] rounded-[4px] flex items-center justify-center border"
-                    style={{
-                      background: "rgba(255,255,255,0.06)",
-                      borderColor: "rgba(255,255,255,0.1)",
-                    }}
-                  >
-                    <span className="font-display text-[8px] font-[800] tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
-                      DM
-                    </span>
-                  </div>
+                  <img
+                    src="/favicon.svg"
+                    width={19}
+                    height={19}
+                    alt="DevMon"
+                    className="shrink-0"
+                  />
                   <span className="font-display text-[7px] font-[700] uppercase tracking-[0.18em] text-text-primary">
                     DevMon
                   </span>

@@ -1,4 +1,6 @@
-# DevMon Production Migration Plan
+# DevMon Production Migration Plan — HISTORICAL
+
+> **Status:** This plan documents the completed migration from the prototype/pre-release architecture to the current production architecture. All phases have been implemented. This file is kept for historical reference only.
 
 ## Decisions (Locked)
 - **Leaderboard POST + Count POST**: Keep, auth-protected
@@ -206,9 +208,9 @@
 - `npm run build` — clean production build
 - `npx vitest run` — all unit tests pass
 
-### Deploy (Vercel)
-- Set all env vars from `.env.example` in Vercel dashboard
-- Apply Supabase migrations (`supabase db push` or SQL editor)
+### Deploy (Netlify)
+- Set all env vars from `.env.example` in Netlify dashboard
+- Apply Supabase migrations (SQL Editor in Supabase Dashboard)
 - Connect repo, auto-deploy from main, preview for PRs
 - Configure custom domain if applicable
 

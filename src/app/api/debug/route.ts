@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin, getSupabaseAnon } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/auth-helpers";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -11,6 +12,11 @@ interface ClientResult {
 }
 
 export async function GET() {
+  const session = await getSessionUser();
+  if (!session?.accessToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   let anon: ClientResult = { count: 0, rows: [], error: null };
   let admin: ClientResult = { count: 0, rows: [], error: null };
 
@@ -41,12 +47,6 @@ export async function GET() {
       anon,
       admin,
       match: anon.count === admin.count,
-      env: {
-        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "not set",
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "not set",
-        anonKeyPrefix: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "not set").substring(0, 12) + "...",
-        serviceRoleKeyPrefix: (process.env.SUPABASE_SERVICE_ROLE_KEY || "not set").substring(0, 12) + "...",
-      },
     },
     { headers: { "Cache-Control": "no-store" } },
   );

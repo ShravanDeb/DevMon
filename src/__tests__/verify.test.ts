@@ -1,20 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/supabase", () => ({
-  getSupabaseAdmin: vi.fn(),
+  getSupabaseAnon: vi.fn(),
 }));
 
 import { GET } from "@/app/api/verify/[cardId]/route";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAnon } from "@/lib/supabase";
 import { NextRequest } from "next/server";
 
-const mockGetSupabaseAdmin = vi.mocked(getSupabaseAdmin);
+const mockGetSupabaseAnon = vi.mocked(getSupabaseAnon);
 
 function makeRequest(cardId: string) {
   return new NextRequest(`http://localhost/api/verify/${cardId}`);
 }
 
-function mockAdmin(cardData: Record<string, unknown> | null, error?: { message: string }) {
+function mockAnon(cardData: Record<string, unknown> | null, error?: { message: string }) {
   const query = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
@@ -62,8 +62,8 @@ describe("GET /api/verify/[cardId]", () => {
       sha256_hash: "abc123hash",
     };
 
-    const admin = mockAdmin(cardRow);
-    mockGetSupabaseAdmin.mockReturnValue(admin as never);
+    const anon = mockAnon(cardRow);
+    mockGetSupabaseAnon.mockReturnValue(anon as never);
 
     const req = makeRequest("DM-ABC123");
     const res = await GET(req, { params: Promise.resolve({ cardId: "DM-ABC123" }) });
@@ -77,8 +77,8 @@ describe("GET /api/verify/[cardId]", () => {
   });
 
   it("returns 404 for nonexistent card ID", async () => {
-    const admin = mockAdmin(null);
-    mockGetSupabaseAdmin.mockReturnValue(admin as never);
+    const anon = mockAnon(null);
+    mockGetSupabaseAnon.mockReturnValue(anon as never);
 
     const req = makeRequest("DM-XXXXXX");
     const res = await GET(req, { params: Promise.resolve({ cardId: "DM-XXXXXX" }) });
@@ -89,8 +89,8 @@ describe("GET /api/verify/[cardId]", () => {
   });
 
   it("returns 500 on database error", async () => {
-    const admin = mockAdmin(null, { message: "Connection refused" });
-    mockGetSupabaseAdmin.mockReturnValue(admin as never);
+    const anon = mockAnon(null, { message: "Connection refused" });
+    mockGetSupabaseAnon.mockReturnValue(anon as never);
 
     const req = makeRequest("DM-ABC123");
     const res = await GET(req, { params: Promise.resolve({ cardId: "DM-ABC123" }) });

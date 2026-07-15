@@ -77,6 +77,10 @@ function mockAdmin(overrides?: { upsertResult?: unknown; upsertError?: unknown }
   });
 
   // For the rank/count queries
+  const queryMethods = {
+    eq: vi.fn().mockResolvedValue({ error: null, data: null }),
+  };
+
   const fromFn = vi.fn().mockReturnValue({
     select: vi.fn().mockImplementation((_cols: string, opts?: { count?: string; head?: boolean }) => {
       if (opts?.head) {
@@ -88,6 +92,7 @@ function mockAdmin(overrides?: { upsertResult?: unknown; upsertError?: unknown }
         then: (resolve: (val: { data: unknown[] }) => void) => resolve({ data: [] }),
       };
     }),
+    update: vi.fn().mockReturnValue(queryMethods),
   });
 
   return {

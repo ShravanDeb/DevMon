@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./public/favicon.svg" alt="DevMon logo" width="80" />
+
 # DevMon
 
 **Verified developer credentials from your public GitHub activity.**
@@ -578,7 +580,7 @@ All API inputs are validated with Zod schemas:
 
 | Document | Description |
 |----------|-------------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Legal compliance report (DPDP Act 2023) |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Complete technical specification, algorithms, API reference |
 | [DESIGN.md](./DESIGN.md) | Terminal Collectible design system |
 | [PLAN.md](./PLAN.md) | Production migration plan (9 phases) |
 | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | Developer setup and contribution guide |
