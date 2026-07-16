@@ -6,7 +6,7 @@ const footerColumns = [
     links: [
       { label: "FAQ", href: "/faq" },
       { label: "Leaderboard", href: "/leaderboard" },
-      { label: "Support", href: "/support" },
+      { label: "Support the Developer", href: "/support" },
       { label: "Star on GitHub", href: "https://github.com/ShravanDeb/DevMon" },
     ],
   },
