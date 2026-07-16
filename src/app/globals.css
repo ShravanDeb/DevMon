@@ -766,6 +766,59 @@
   }
 }
 
+/* === SUPPORT PAGE: Premium QR & Tab === */
+
+/* QR radial glow — breathing radiance behind QR card */
+.support-qr-glow {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--overlay-5) 0%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: support-qr-breathe 4s ease-in-out infinite;
+}
+
+@keyframes support-qr-breathe {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+/* QR gradient border frame */
+.support-qr-frame {
+  position: relative;
+  padding: 2px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    var(--overlay-8) 0%,
+    var(--overlay-12) 50%,
+    var(--overlay-8) 100%
+  );
+}
+
+/* QR inner white card */
+.support-qr-card {
+  background: #ffffff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tab sliding pill indicator */
+.support-tab-pill {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  border-radius: 7px;
+  background: var(--surface-2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  z-index: 0;
+}
+
 /* Hide cursor blob during html-to-image export */
 [data-exporting] [data-cursor] {
   display: none !important;

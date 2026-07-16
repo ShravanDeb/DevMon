@@ -477,10 +477,10 @@ function MiniStatBars() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   const stats = [
-    { label: "MERGE FORCE", value: 82, color: "var(--text-primary)" },
-    { label: "CODE VEL", value: 67, color: "var(--text-primary)" },
-    { label: "PROBLEM SOLV", value: 91, color: "var(--text-primary)" },
-    { label: "OPEN SOURCE", value: 45, color: "var(--text-primary)" },
+    { label: "EXECUTION", value: 82, color: "var(--text-primary)" },
+    { label: "IMPACT", value: 67, color: "var(--text-primary)" },
+    { label: "SYNERGY", value: 91, color: "var(--text-primary)" },
+    { label: "MASTERY", value: 45, color: "var(--text-primary)" },
     { label: "CONSISTENCY", value: 58, color: "var(--text-primary)" },
   ];
 
@@ -772,14 +772,14 @@ export default function LandingPage() {
         {/* Feature 1 — Stats Engine */}
         <FeatureSplit
           eyebrow="Scoring Engine"
-          headline="Five metrics. One developer profile."
-          description="Merge Force, Code Velocity, Problem Solving, Open Source, and Consistency. Five metrics derived from your public GitHub activity, each measuring a different aspect of how you build software."
+          headline="Five attributes. One developer profile."
+          description="Execution, Impact, Synergy, Mastery, and Consistency. Five behavioural attributes computed from 15 normalized metrics, each measuring a different dimension of how you build software."
           bullets={[
-            "Merge Force tracks PR merges and issue closures",
-            "Code Velocity measures commit frequency and streak patterns",
-            "Problem Solving scores issue close rates and volume",
-            "Open Source evaluates contributions and community activity",
-            "Consistency measures longevity and regularity",
+            "Execution tracks commit output, repository building, and delivery cadence",
+            "Impact measures star power, community reach, and adoption",
+            "Synergy evaluates PR collaboration, issue engagement, and organisational presence",
+            "Mastery covers language breadth, project diversity, and quality signal",
+            "Consistency captures streak strength, activity regularity, and longevity",
           ]}
           visual={<MiniStatBars />}
         />

@@ -106,9 +106,8 @@ export default function TermsPage() {
                   DevMon is a web application that generates shareable developer
                   credentials based on your public GitHub activity. When you sign in
                   with GitHub OAuth, DevMon fetches your public profile data and runs
-                  it through a scoring pipeline that computes five stat categories:
-                  Merge Force, Code Velocity, Problem Solving, Open Source, and
-                  Consistency.
+                  it through a scoring pipeline that computes five behavioural
+                  attributes: Execution, Impact, Synergy, Mastery, and Consistency.
                 </Paragraph>
                 <Paragraph>
                   Based on these stats, DevMon assigns a rarity tier (Common, Rare,

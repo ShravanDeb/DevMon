@@ -170,8 +170,8 @@ export default function PrivacyPage() {
                 </Paragraph>
                 <BulletList>
                   <li>
-                    Computing the five stat categories (Merge Force, Code Velocity, Problem
-                    Solving, Open Source, Consistency) that appear on your card.
+                    Computing five behavioural attributes (Execution, Impact, Synergy,
+                    Mastery, Consistency) that appear on your card.
                   </li>
                   <li>
                     Determining your rarity tier, developer class, flavor text, achievements,

@@ -64,8 +64,10 @@ Everything needed to develop, maintain, debug, and deploy DevMon:
 |----------|---------|
 | `README.md` | Project overview, quick start, features |
 | `ARCHITECTURE.md` | Complete technical specification, algorithms, API reference |
+| `CONTRIBUTING.md` | Contribution guidelines and PR process |
 | `DESIGN.md` | Locked design system (colors, typography, motion, tokens) |
-| `PLAN.md` | Historical migration plan (NextAuth to Supabase) |
+| `SECURITY.md` | Security policy and vulnerability reporting |
+| `CHANGELOG.md` | Release history |
 | `LICENSE` | AGPL-3.0 license |
 
 ---
@@ -189,9 +191,9 @@ VS Code is recommended. No `.vscode/settings.json` or `.vscode/extensions.json` 
 DevMon/
 ├── src/
 │   ├── app/                              # Next.js App Router
-│   │   ├── layout.tsx                    # Root layout, fonts, metadata, theme provider (82 lines)
-│   │   ├── page.tsx                      # Landing page (890 lines)
-│   │   ├── globals.css                   # Design system tokens, Tailwind config (716 lines)
+│   │   ├── layout.tsx                    # Root layout, fonts, metadata, theme provider
+│   │   ├── page.tsx                      # Landing page
+│   │   ├── globals.css                   # Design system tokens, Tailwind config
 │   │   ├── loading.tsx                   # Root loading skeleton
 │   │   ├── error.tsx                     # Root error boundary
 │   │   ├── not-found.tsx                 # 404 page
@@ -200,94 +202,132 @@ DevMon/
 │   │   ├── robots.ts                     # Robots.txt generation
 │   │   ├── card/
 │   │   │   ├── layout.tsx                # Card page SEO metadata
-│   │   │   ├── page.tsx                  # Card generation UI (478 lines)
+│   │   │   ├── page.tsx                  # Card generation UI
 │   │   │   └── error.tsx                 # Card-specific error boundary
 │   │   ├── leaderboard/
 │   │   │   ├── layout.tsx                # Leaderboard SEO metadata
-│   │   │   ├── page.tsx                  # Leaderboard display (261 lines)
+│   │   │   ├── page.tsx                  # Leaderboard display
 │   │   │   └── error.tsx                 # Leaderboard error boundary
 │   │   ├── verify/
 │   │   │   └── [cardId]/
-│   │   │       ├── page.tsx              # Public verification page (392 lines)
+│   │   │       ├── page.tsx              # Public verification page
 │   │   │       └── error.tsx             # Verification error boundary
 │   │   ├── faq/
 │   │   │   ├── layout.tsx                # FAQ SEO metadata
-│   │   │   └── page.tsx                  # FAQ accordion (152 lines)
+│   │   │   └── page.tsx                  # FAQ accordion
 │   │   ├── terms/page.tsx                # Terms of Service
 │   │   ├── privacy/page.tsx              # Privacy Policy
 │   │   ├── contact/page.tsx              # Contact page
+│   │   ├── support/page.tsx              # Support / UPI donations
 │   │   └── api/
-│   │       ├── card/route.ts             # POST: generate card, GET: card count (178 lines)
-│   │       ├── leaderboard/route.ts      # GET: paginated leaderboard (51 lines)
-│   │       ├── verify/[cardId]/route.ts  # GET: verify card by ID (81 lines)
-│   │       ├── og/route.tsx              # GET: OG image generation (174 lines)
-│   │       ├── health/route.ts           # GET: health check (7 lines)
+│   │       ├── card/route.ts             # POST: generate card, GET: card count
+│   │       ├── leaderboard/route.ts      # GET: paginated leaderboard
+│   │       ├── verify/[cardId]/route.ts  # GET: verify card by ID
+│   │       ├── og/route.tsx              # GET: OG image generation
+│   │       ├── health/route.ts           # GET: health check
+│   │       ├── debug/route.ts            # GET: debug endpoint
 │   │       └── auth/
 │   │           ├── callback/route.ts     # GET: OAuth callback
 │   │           └── signout/route.ts      # POST: sign out
 │   ├── components/
-│   │   ├── CardFace.tsx                  # Desktop card renderer (566 lines)
-│   │   ├── CardFaceMobile.tsx            # Mobile card renderer (498 lines)
-│   │   ├── DownloadButton.tsx            # PNG export + download (402 lines)
-│   │   ├── CustomCursor.tsx              # GSAP-powered cursor (145 lines)
-│   │   ├── LinkedInShareModal.tsx        # LinkedIn share flow (253 lines)
-│   │   ├── MagneticButton.tsx            # Magnetic hover button (52 lines)
-│   │   ├── PageTransition.tsx            # AnimatePresence wrapper (19 lines)
+│   │   ├── CardFace.tsx                  # Desktop card renderer
+│   │   ├── CardFaceMobile.tsx            # Mobile card renderer
+│   │   ├── DownloadButton.tsx            # PNG export + download
+│   │   ├── CustomCursor.tsx              # GSAP-powered cursor
+│   │   ├── LinkedInShareModal.tsx        # LinkedIn share flow
+│   │   ├── MagneticButton.tsx            # Magnetic hover button
+│   │   ├── PageTransition.tsx            # AnimatePresence wrapper
 │   │   ├── RarityCrown.tsx               # Rarity crown icon
 │   │   ├── ThemeToggle.tsx               # Dark/light theme toggle
-│   │   ├── Footer.tsx                    # Site footer (55 lines)
+│   │   ├── Footer.tsx                    # Site footer
+│   │   ├── Toast.tsx                     # Toast notifications
 │   │   └── legal/
 │   │       ├── LegalPageKit.tsx          # Reusable legal page layout
 │   │       └── ContactForm.tsx           # Contact form component
 │   ├── lib/
-│   │   ├── scoring.ts                    # Scoring pipeline orchestrator (90 lines)
-│   │   ├── rarity.ts                     # 8-factor rarity composite (36 lines)
-│   │   ├── classes.ts                    # 12 developer class rules (113 lines)
-│   │   ├── flavor-text.ts               # 40 flavor text templates (111 lines)
-│   │   ├── achievements.ts              # 8 achievement types (73 lines)
-│   │   ├── signature-move.ts            # 14 signature moves (131 lines)
-│   │   ├── hero-stat.ts                 # Hero stat selection (108 lines)
-│   │   ├── verification.ts              # HMAC-SHA-256 signing (57 lines)
-│   │   ├── github.ts                    # GitHub GraphQL fetcher (301 lines)
-│   │   ├── validation.ts               # Zod schemas (6 lines)
-│   │   ├── rate-limit.ts               # Upstash rate limiter (37 lines)
-│   │   ├── auth-helpers.ts             # Session extraction (13 lines)
+│   │   ├── scoring.ts                    # Scoring pipeline orchestrator
+│   │   ├── normalization.ts              # Metric normalization curves
+│   │   ├── attributes.ts                 # Component + attribute aggregation
+│   │   ├── rarity.ts                     # Weighted attribute rarity
+│   │   ├── harmony.ts                    # Harmony bonus
+│   │   ├── archetypes.ts                 # Archetype from attribute pair
+│   │   ├── classes.ts                    # 12 developer class rules
+│   │   ├── flavor-text.ts               # 40 flavor text templates
+│   │   ├── achievements.ts              # Achievement tier unlock
+│   │   ├── signature-move.ts            # 10 signature moves
+│   │   ├── hero-stat.ts                 # Hero stat selection
+│   │   ├── ranks.ts                      # Attribute rank lookup
+│   │   ├── verification.ts              # HMAC-SHA-256 signing
+│   │   ├── explainability.ts            # Debug metadata builder
+│   │   ├── github.ts                    # GitHub GraphQL fetcher
+│   │   ├── validation.ts               # Zod schemas
+│   │   ├── rate-limit.ts               # Upstash rate limiter
+│   │   ├── auth-helpers.ts             # Session extraction
 │   │   ├── motion.ts                   # Framer Motion variants
 │   │   ├── theme.tsx                   # Theme context + provider
-│   │   └── supabase/
-│   │       ├── server.ts               # Server-side Supabase client (25 lines)
-│   │       └── client.ts               # Browser-side Supabase client (7 lines)
+│   │   ├── upi.ts                      # UPI payment helpers
+│   │   ├── supabase/
+│   │   │   ├── server.ts               # Server-side Supabase client
+│   │   │   └── client.ts               # Browser-side Supabase client
+│   │   └── config/
+│   │       ├── normalization.ts        # Normalization curve configs
+│   │       ├── attributes.ts           # Component and attribute weight configs
+│   │       ├── rarity.ts              # Rarity weights and thresholds
+│   │       ├── harmony.ts             # Harmony parameters
+│   │       ├── engine.ts              # Engine version constants
+│   │       ├── classes.ts             # Class definitions
+│   │       ├── signatureMoves.ts      # Signature move configs
+│   │       ├── achievements.ts        # Achievement tier configs
+│   │       ├── archetypes.ts          # Archetype rules
+│   │       ├── ranks.ts               # Rank thresholds
+│   │       └── index.ts               # Config barrel export
 │   ├── types/
-│   │   └── index.ts                    # All types, interfaces, constants (183 lines)
-│   ├── middleware.ts                   # Auth middleware, public path allowlist (52 lines)
+│   │   └── index.ts                    # All types, interfaces, constants
+│   ├── middleware.ts                   # Auth middleware, public path allowlist
 │   └── __tests__/
-│       ├── scoring.test.ts             # Scoring algorithm tests (128 lines)
-│       ├── verification.test.ts        # Verification tests (79 lines)
-│       ├── validation.test.ts          # Zod schema tests (40 lines)
-│       ├── card.test.ts                # Card API route tests (198 lines)
-│       ├── verify.test.ts              # Verify API route tests (102 lines)
-│       └── auth-helpers.test.ts        # Auth helper tests (89 lines)
+│       ├── scoring.test.ts             # Scoring algorithm tests
+│       ├── verification.test.ts        # Verification tests
+│       ├── validation.test.ts          # Zod schema tests
+│       ├── card.test.ts                # Card API route tests
+│       ├── verify.test.ts              # Verify API route tests
+│       └── auth-helpers.test.ts        # Auth helper tests
 ├── supabase/
-│   └── full_migration.sql              # Authoritative DB schema (149 lines)
+│   └── full_migration.sql              # Authoritative DB schema
 ├── archive/
 │   └── migrations/
 │       ├── 001_init.sql                # Historical initial migration
 │       ├── 002_upsert_fix.sql          # Historical upsert fix
 │       └── 002_reset_and_fix_edition.sql
-├── next.config.mjs                     # Security headers, CSP, image config (53 lines)
-├── tailwind.config.ts                  # Tailwind theme (57 lines)
-├── tsconfig.json                       # TypeScript config (20 lines)
-├── postcss.config.js                   # PostCSS plugins (5 lines)
-├── .eslintrc.json                      # ESLint config (6 lines)
-├── vitest.config.ts                    # Vitest config (13 lines)
-├── package.json                        # Dependencies and scripts (39 lines)
-├── .env.example                        # Environment variable template (20 lines)
+├── public/
+│   ├── favicon.svg                     # Canonical application icon
+│   ├── site.webmanifest                # PWA manifest
+│   ├── Bronze_Crown.png                # Rarity crown asset
+│   ├── Silver_Crown.png                # Rarity crown asset
+│   └── Golden_Crown.png                # Rarity crown asset
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   └── PULL_REQUEST_TEMPLATE.md
+├── next.config.mjs                     # Security headers, CSP, image config
+├── tailwind.config.ts                  # Tailwind theme
+├── tsconfig.json                       # TypeScript config
+├── postcss.config.js                   # PostCSS plugins
+├── .eslintrc.json                      # ESLint config
+├── vitest.config.ts                    # Vitest config
+├── package.json                        # Dependencies and scripts
+├── .env.example                        # Environment variable template
 ├── .gitignore                          # Git ignore rules
-├── README.md                           # Project documentation (681 lines)
-├── ARCHITECTURE.md                     # Technical specification (1309 lines)
+├── README.md                           # Project documentation
+├── ARCHITECTURE.md                     # Technical specification
 ├── DEVELOPER_GUIDE.md                  # This file
-├── DESIGN.md                           # Locked design system (179 lines)
-├── PLAN.md                             # Historical migration plan (228 lines)
+├── CONTRIBUTING.md                     # Contribution guide
+├── DESIGN.md                           # Locked design system
+├── SECURITY.md                         # Security policy
+├── CHANGELOG.md                        # Release history
+├── SUPPORT.md                          # Support information
+├── CODE_OF_CONDUCT.md                  # Community standards
+├── TRADEMARKS.md                       # Trademark policy
 └── LICENSE                             # AGPL-3.0 license
 ```
 
@@ -475,9 +515,9 @@ Before submitting a PR, verify:
 | Pages | `page.tsx` inside kebab-case directory | `src/app/card/page.tsx` |
 | API routes | `route.ts` or `route.tsx` | `src/app/api/card/route.ts` |
 | Lib modules | kebab-case | `scoring.ts`, `rate-limit.ts`, `hero-stat.ts` |
-| Types | PascalCase | `RawGitHubStats`, `CardStats`, `ClassName` |
+| Types | PascalCase | `RawGitHubStats`, `BehaviouralAttributes`, `ClassName` |
 | CSS classes | Tailwind utilities | `text-text-primary`, `bg-surface-1` |
-| Constants | PascalCase for type constants | `RARITY_COLORS`, `STAT_LABELS` |
+| Constants | PascalCase for type constants | `RARITY_COLORS`, `ATTRIBUTE_LABELS` |
 | Env vars | UPPER_SNAKE_CASE | `SUPABASE_SERVICE_ROLE_KEY` |
 
 ### Folder conventions
@@ -714,19 +754,17 @@ SELECT * FROM pg_proc WHERE proname = 'upsert_card_v2';
 
 **Adding a new scoring metric:**
 
-1. Add the metric function in `src/lib/scoring.ts`
-2. Add the metric to `CardStats` interface in `src/types/index.ts`
-3. Add the metric to `computeStats()` return value
-4. Add the metric to `STAT_LABELS` in `src/types/index.ts`
-5. Update `CardFace.tsx` and `CardFaceMobile.tsx` to display it
-6. Add tests in `src/__tests__/scoring.test.ts`
+1. Add the metric curve config in `src/lib/config/normalization.ts`
+2. Add the metric to the `RawGitHubStats` interface in `src/types/index.ts`
+3. Add the metric to the appropriate component in `src/lib/config/attributes.ts`
+4. Update `CardFace.tsx` and `CardFaceMobile.tsx` to display it
+5. Add tests in `src/__tests__/scoring.test.ts`
 
 **Adding a new developer class:**
 
 1. Add the class name to `ClassName` union in `src/types/index.ts`
-2. Add the class subtitle to `CLASS_SUBTITLES` in `src/types/index.ts`
-3. Add a new rule to the `rules` array in `src/lib/classes.ts`
-4. Add flavor text templates for the class in `src/lib/flavor-text.ts`
+2. Add a new `ClassDefinition` to the `CLASS_DEFINITIONS` array in `src/lib/config/classes.ts`
+3. Add flavor text templates for the class in `src/lib/flavor-text.ts`
 
 **Adding a new API route:**
 
@@ -1116,7 +1154,7 @@ npm run test:watch # Run in watch mode
 
 | Test file | Coverage |
 |-----------|----------|
-| `scoring.test.ts` | `computeStats`, `getRarityFromScore`, `generateCard` |
+| `scoring.test.ts` | `generateCard`, `normalizeAll`, `computeAttributes` |
 | `verification.test.ts` | Card ID format, HMAC signing, uniqueness, edition |
 | `validation.test.ts` | Zod schemas: valid/invalid inputs |
 | `card.test.ts` | POST `/api/card` and GET `/api/card` routes |
@@ -1194,6 +1232,7 @@ beforeEach(() => {
 - [ ] Leaderboard displays correctly
 - [ ] OG image generation works
 - [ ] Security headers present: `curl -I https://dev-mon.netlify.app`
+- [ ] **Raster icons** (if required): Generate from `public/favicon.svg` using a tool like RealFaviconGenerator or sharp. Needed for: Apple Touch Icon (180×180), Android Chrome (192×192, 512×512), Windows tile (150×150), and legacy `favicon.ico` (16×16, 32×32). SVG is used for all modern browsers.
 
 ---
 
@@ -1249,8 +1288,13 @@ No custom backup scripts are configured.
 | `README.md` | Project overview, quick start | Everyone |
 | `ARCHITECTURE.md` | Technical specification, algorithms | Engineers |
 | `DEVELOPER_GUIDE.md` | Contributor handbook (this file) | Contributors, maintainers |
+| `CONTRIBUTING.md` | Contribution guidelines and PR process | Contributors |
 | `DESIGN.md` | Locked design system | Designers, frontend engineers |
-| `PLAN.md` | Historical migration plan | Maintainers (reference) |
+| `SECURITY.md` | Security policy and vulnerability reporting | Everyone |
+| `CHANGELOG.md` | Release history | Everyone |
+| `SUPPORT.md` | Support channels and contact info | Everyone |
+| `CODE_OF_CONDUCT.md` | Community standards | Everyone |
+| `TRADEMARKS.md` | Trademark policy | Everyone |
 | `LICENSE` | AGPL-3.0 license | Everyone |
 
 ### Inline comments
@@ -1350,13 +1394,13 @@ git diff                 # See unstaged changes
 
 ### Scoring thresholds
 
-| Stat | Range | Formula summary |
-|------|-------|----------------|
-| Merge Force | 0-100 | `logScale(mergedPRs) * 0.5 + logScale(closedIssues) * 0.3 + min(100, mergedPRs * 0.8) * 0.2` |
-| Code Velocity | 0-100 | `logScale(recentCommits, 18) * 0.6 + streakComponent * 0.3 + logScale(totalCommits, 8) * 0.1` |
-| Problem Solving | 0-100 | `closeRateScore * 0.4 + volumeScore * 0.35 + issueDepth * 0.25` |
-| Open Source | 0-100 | `contributedTo * 6 + orgCount * 12 + forkEngagement + communityPresence` |
-| Consistency | 0-100 | `longestStreakScore * 0.4 + currentStreakBonus * 0.35 + regularity * 0.25` |
+| Attribute | Range | Aggregation |
+|-----------|-------|-------------|
+| Execution | 0-100 | commitOutput (0.35) + repositoryBuilding (0.30) + delivery (0.35) |
+| Impact | 0-100 | starPower (0.40) + communityReach (0.30) + adoption (0.30) |
+| Synergy | 0-100 | prCollaboration (0.40) + issueEngagement (0.35) + organisationalPresence (0.25) |
+| Consistency | 0-100 | streakPower (0.40) + activityRegularity (0.35) + longevity (0.25) |
+| Mastery | 0-100 | languageBreadth (0.35) + projectDiversity (0.35) + qualitySignal (0.30) |
 
 ### Rarity tiers
 
@@ -1373,13 +1417,13 @@ git diff                 # See unstaged changes
 | Class | Primary trigger |
 |-------|----------------|
 | PR Titan | High `mergedPRs` count |
-| Bug Hunter | High `closedIssues` count and close rate |
+| Bug Hunter | High `closedIssues` count |
 | Night Owl | >30% of commits between 00:00-05:00 |
 | Fork Warden | High `forkedRepos` / `originalRepos` ratio |
 | Commit Phantom | Necro-commit (repo pushed >1yr after creation) |
 | Open Source Sentinel | High `contributedTo` + `orgCount` |
-| Merge Griffin | High `mergedPRs` + high `codeVelocity` |
-| Stack Guardian | Broad `originalRepos` + `languages` coverage |
+| Merge Griffin | High `mergedPRs` + high `recentCommits` |
+| Stack Guardian | Broad `originalRepos` + `languages` coverage (default fallback) |
 | Polyglot Artisan | Many `languages` |
 | Code Archivist | Many `archivedRepos` |
 | Green Sprout | Account age < 2 years + activity |
@@ -1423,21 +1467,31 @@ git diff                 # See unstaged changes
 
 | File | Purpose | Key exports | Env vars |
 |------|---------|-------------|----------|
-| `src/lib/scoring.ts` | Scoring pipeline orchestrator | `computeStats`, `generateCard`, `getRarityFromScore` | — |
-| `src/lib/rarity.ts` | 8-factor rarity composite | `computeRarity` | — |
+| `src/lib/scoring.ts` | Scoring pipeline orchestrator | `generateCard`, `generateRawCard` | — |
+| `src/lib/normalization.ts` | Metric normalization curves | `normalizeAll`, `normalizeMetric` | — |
+| `src/lib/attributes.ts` | Component + attribute aggregation | `computeComponents`, `computeAttributes` | — |
+| `src/lib/rarity.ts` | Weighted attribute rarity | `computeRarityFromAttributes` | — |
+| `src/lib/harmony.ts` | Harmony bonus | `computeHarmony` | — |
+| `src/lib/archetypes.ts` | Archetype from attribute pair | `computeArchetype` | — |
 | `src/lib/classes.ts` | 12 developer class rules | `assignClasses` | — |
 | `src/lib/flavor-text.ts` | 40 flavor text templates | `generateFlavorText` | — |
-| `src/lib/achievements.ts` | 8 achievement types | `generateAchievements` | — |
-| `src/lib/signature-move.ts` | 14 signature moves | `generateSignatureMove` | — |
+| `src/lib/achievements.ts` | Achievement tier unlock | `generateAchievements` | — |
+| `src/lib/signature-move.ts` | 10 signature moves | `generateSignatureMove` | — |
 | `src/lib/hero-stat.ts` | Hero stat selection | `selectHeroStat` | — |
+| `src/lib/ranks.ts` | Attribute rank lookup | `getAttributeRank` | — |
 | `src/lib/verification.ts` | HMAC-SHA-256 signing | `generateVerification`, `reSignVerification` | `HMAC_SECRET` |
+| `src/lib/explainability.ts` | Debug metadata builder | `buildDebugMetadata` | — |
 | `src/lib/github.ts` | GitHub GraphQL fetcher | `fetchGitHubStats` | `GITHUB_TOKEN` (via route) |
 | `src/lib/validation.ts` | Zod schemas | `CardPostSchema`, `CardIdSchema` | — |
 | `src/lib/rate-limit.ts` | Upstash rate limiter | `rateLimit`, `RATE_LIMITS` | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
 | `src/lib/auth-helpers.ts` | Session extraction | `getSessionUser` | — |
+| `src/lib/motion.ts` | Framer Motion variants | `variants` | — |
+| `src/lib/theme.tsx` | Theme context + provider | `ThemeProvider`, `useTheme` | — |
+| `src/lib/upi.ts` | UPI payment helpers | `UPI_PRIMARY`, `UPI_FALLBACK`, `buildUpiUri`, `copyToClipboard` | — |
+| `src/lib/config/` | Scoring configuration | `CLASS_DEFINITIONS`, `SIGNATURE_MOVE_CONFIG`, `ACHIEVEMENT_TIERS`, etc. | — |
 | `src/lib/supabase/server.ts` | Server-side Supabase client | `createClient` | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
 | `src/lib/supabase/client.ts` | Browser-side Supabase client | `createClient` | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
-| `src/types/index.ts` | Types and constants | `RawGitHubStats`, `CardStats`, `RARITY_COLORS`, `STAT_LABELS`, `CLASS_SUBTITLES` | — |
+| `src/types/index.ts` | Types and constants | `RawGitHubStats`, `BehaviouralAttributes`, `RARITY_COLORS`, `ATTRIBUTE_LABELS`, `CLASS_SUBTITLES` | — |
 | `src/middleware.ts` | Auth middleware | `middleware`, `config` | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
 | `src/app/api/card/route.ts` | Card generation API | `POST`, `GET` | `GITHUB_TOKEN` (via github.ts) |
 | `src/app/api/leaderboard/route.ts` | Leaderboard API | `GET` | — |

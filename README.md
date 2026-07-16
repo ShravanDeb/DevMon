@@ -6,7 +6,7 @@
 
 **Verified developer credentials from your public GitHub activity.**
 
-DevMon reads your public GitHub data through the GraphQL API, scores it across five metrics, assigns a developer class and rarity tier, and produces a cryptographically signed credential. Each credential has a public verification URL and a unique verification hash.
+DevMon reads your public GitHub data through the GraphQL API, normalizes it into 15 metrics, aggregates those into five behavioural attributes (Execution, Impact, Synergy, Mastery, Consistency), assigns a developer class and rarity tier, and produces a cryptographically signed credential. Each credential has a public verification URL and a unique verification hash.
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript)](https://www.typescriptlang.org)
@@ -50,7 +50,7 @@ DevMon reads your public GitHub data through the GraphQL API, scores it across f
 
 DevMon is an open-source developer credential platform licensed under [AGPL-3.0](./LICENSE). It takes your public GitHub activity and produces a verified, scored credential with a class, rarity tier, signature move, and unique flavor text.
 
-The scoring engine uses five metrics (Merge Force, Code Velocity, Problem Solving, Open Source, Consistency) derived from repositories, commits, pull requests, issues, languages, and community activity. Every credential is signed with HMAC-SHA256 and has a public verification URL.
+The scoring engine normalizes raw GitHub data into 15 metrics, groups those into 15 intermediate components, and aggregates them into five behavioural attributes — Execution, Impact, Synergy, Mastery, and Consistency. A weighted rarity score is computed from those attributes, and a bonus is applied when attributes are balanced. Every credential is signed with HMAC-SHA256 and has a public verification URL.
 
 There are no LLM API calls, no paid tiers, and no tracking. The entire scoring pipeline runs on AGPL-3.0 licensed code with template-based text generation.
 
@@ -66,28 +66,33 @@ Existing developer metrics platforms either require opt-in installation, use van
 
 ## Solution
 
-DevMon reads public GitHub data via the GitHub GraphQL API, processes it through a multi-factor scoring engine, and produces a cryptographically signed credential. The process has three steps:
+DevMon reads public GitHub data via the GitHub GraphQL API, processes it through a multi-layer scoring engine, and produces a cryptographically signed credential. The process has three steps:
 
 1. **Authenticate** via GitHub OAuth (read-only scope)
-2. **Score** public activity across five metrics using log-scaled, weighted algorithms
+2. **Normalize** raw data into 15 metrics, aggregate into 5 behavioural attributes, compute rarity, classes, signature move, achievements, hero stat, and flavor text
 3. **Generate** a credential with class, rarity, signature move, flavor text, and verification hash
 
-Every credential includes an HMAC-SHA256 digital signature computed from the developer's stats, rarity, and a unique card ID. The signature can be independently verified through the public `/verify/[cardId]` endpoint.
+Every credential includes an HMAC-SHA256 digital signature computed over the username, rarity, and card ID. The signature can be independently verified through the public `/verify/[cardId]` endpoint.
 
 ```mermaid
 flowchart LR
     A[GitHub OAuth] -->|provider_token| B[GraphQL API]
-    B -->|raw stats| C[Scoring Engine]
-    C -->|5 metrics| D[Rarity Composite]
-    C -->|stats + rarity| E[Class Assignment]
-    C -->|stats + rarity| F[Flavor Text]
-    C -->|stats + rarity| G[Signature Move]
-    D --> H[Credential Generation]
-    E --> H
-    F --> H
-    G --> H
-    H -->|HMAC-SHA256| I[Supabase]
-    I -->|cardId| J[Public Verification URL]
+    B -->|raw stats| C[15 Normalized Metrics]
+    C -->|components| D[15 Intermediate Components]
+    D -->|weighted aggregation| E[5 Behavioural Attributes]
+    E -->|weighted sum + harmony bonus| F[Rarity Tier]
+    E -->|attribute pair match| G[Developer Classes]
+    E -->|top 2 attributes| H[Signature Move]
+    E -->|highest attribute| I[Hero Stat]
+    E -->|per-attribute tiers| J[Achievements]
+    K[Flavor Templates] -->|interpolation| L[Credential]
+    F --> L
+    G --> L
+    H --> L
+    I --> L
+    J --> L
+    L -->|HMAC-SHA256| M[Supabase]
+    M -->|cardId| N[Public Verification URL]
 ```
 
 ---
@@ -96,13 +101,13 @@ flowchart LR
 
 | Area | Description |
 |------|-------------|
-| **Credential Generation** | Fetches GitHub data, computes 5 metrics, assigns class and rarity, generates flavor text and signature move, signs with HMAC-SHA256 |
-| **Scoring Engine** | Five log-scaled metrics: Merge Force, Code Velocity, Problem Solving, Open Source, Consistency. Each 0-100, computed from weighted combinations of raw GitHub data |
-| **Rarity System** | 5 tiers (Common, Rare, Epic, Legendary, Mythic) assigned from an 8-factor composite score. Distribution is intentional: most developers land in Common |
+| **Credential Generation** | Fetches GitHub data, normalizes 15 metrics, aggregates into 5 attributes, assigns class/rarity/signature move/achievements/hero stat, signs with HMAC-SHA256 |
+| **Scoring Engine** | 15 normalized metrics → 15 intermediate components → 5 behavioural attributes (Execution, Impact, Synergy, Mastery, Consistency), each 0-100 |
+| **Rarity System** | 5 tiers (Common, Rare, Epic, Legendary, Mythic) assigned from a weighted sum of the 5 attributes with a harmony bonus. Distribution is intentional: most developers land in Common |
 | **Developer Classes** | 12 rule-based classes scored and ranked. Each credential gets a primary and optional secondary class |
 | **Flavor Text** | 40 template strings (30 hype, 10 roast) with interpolation. No LLM, no API calls |
-| **Signature Moves** | 14 rule-based moves scored against the developer's stats. Highest-scoring move is selected |
-| **Leaderboard** | Ranked credential entries, filterable by company, sortable by any of the 5 metrics |
+| **Signature Moves** | 10 rule-based moves selected by top+second attribute pair. Default "Novice Punch" when threshold not met |
+| **Leaderboard** | Ranked credential entries, filterable by company |
 | **Verification** | HMAC-SHA256 signed credentials with public verification URLs (`/verify/DM-XXXXXX`) |
 | **PNG Export** | Client-side card download at 2x resolution using html-to-image |
 | **OG Images** | Dynamic social preview images generated via next/og with GitHub API fallback |
@@ -114,13 +119,13 @@ flowchart LR
 
 | Feature | Description | Technical Detail |
 |---------|-------------|-----------------|
-| Scoring Engine | 5 metrics from GitHub data | Log-scaled, weighted, clamped 0-100 |
-| Rarity Tiers | 5 tiers from Common to Mythic | 8-factor composite with percentile distribution |
-| Developer Classes | 12 rule-based classes | Primary + secondary assignment via scored rules |
+| Scoring Engine | 5 attributes from 15 normalized metrics | Log/sqrt curves, weighted component aggregation, 0-100 |
+| Rarity Tiers | 5 tiers from Common to Mythic | Weighted attribute sum + harmony bonus, threshold-based |
+| Developer Classes | 12 rule-based classes | Primary + secondary via required/preferred attribute scoring |
 | Flavor Text | Unique text per credential | 40 templates with interpolation, no LLM |
-| Signature Moves | 14 moves per credential | Highest-scoring move from weighted candidates |
+| Signature Moves | 10 moves per credential | Top+second attribute pair lookup, threshold-gated |
 | Cryptographic Verification | HMAC-SHA256 signed credentials | DM-XXXXXX card IDs, public verify URL |
-| Leaderboard | Ranked developer credentials | Supabase query, company filter, 5 sort keys |
+| Leaderboard | Ranked developer credentials | Supabase query, company filter |
 | PNG Export | Client-side card download | html-to-image at 2x resolution |
 | OG Image Generation | Dynamic social preview images | next/og ImageResponse, GitHub API fallback |
 | Rate Limiting | Per-user request throttling | Upstash Redis sliding window |
@@ -193,19 +198,25 @@ flowchart TD
         D -->|provider_token| G[fetchGitHubStats]
         G -->|GraphQL| H[GitHub API]
         G -->|RawGitHubStats| I[generateCard]
-        I -->|computeStats| J[5 Metrics]
-        I -->|computeRarity| K[Rarity Score]
-        I -->|assignClasses| L[Class Assignment]
-        I -->|generateFlavorText| M[Flavor Text]
-        I -->|generateSignatureMove| N[Signature Move]
-        I -->|generateVerification| O[HMAC Signing]
-        D -->|upsert_card_v2| P[Supabase DB]
-        O -->|sha256 + signature| P
+        I -->|normalizeAll| J[15 Normalized Metrics]
+        J -->|computeComponents| K[15 Intermediate Components]
+        K -->|computeAttributes| L[5 Behavioural Attributes]
+        L -->|computeArchetype| M[Archetype]
+        L -->|computeRarityFromAttributes| N[Rarity Tier]
+        L -->|computeHarmony| O[Harmony Bonus]
+        L -->|selectHeroStat| P[Hero Stat]
+        L -->|generateSignatureMove| Q[Signature Move]
+        L -->|generateAchievements| R[Achievements]
+        L -->|assignClasses| S[Class Assignment]
+        I -->|generateFlavorText| T[Flavor Text]
+        I -->|generateVerification| U[HMAC Signing]
+        D -->|upsert_card_v2| V[Supabase DB]
+        U -->|sha256 + signature| V
     end
 
-    P -->|card data| C
-    P -->|ranked entries| E
-    P -->|verification data| F
+    V -->|card data| C
+    V -->|ranked entries| E
+    V -->|verification data| F
 ```
 
 ### Authentication Flow
@@ -266,13 +277,12 @@ src/
 ├── app/                            # Next.js App Router
 │   ├── api/                        # API endpoints
 │   │   ├── auth/                   # OAuth callback and signout
-│   │   │   ├── callback/route.ts   # Exchanges code for session
-│   │   │   └── signout/route.ts    # Signs out user
-│   │   ├── card/route.ts           # POST: generate, GET: count
-│   │   ├── leaderboard/route.ts    # Ranked credential entries
-│   │   ├── verify/[cardId]/        # Public credential verification
+│   │   ├── card/route.ts           # POST: generate card
+│   │   ├── leaderboard/route.ts    # Ranked card entries
+│   │   ├── verify/[cardId]/        # Public card verification
 │   │   ├── og/route.tsx            # Dynamic OG image generation
-│   │   └── health/route.ts         # Health check
+│   │   ├── health/route.ts         # Health check
+│   │   └── debug/route.ts          # Debug endpoint
 │   ├── card/                       # Card generation page
 │   ├── leaderboard/                # Leaderboard page
 │   ├── verify/                     # Verification page
@@ -280,53 +290,94 @@ src/
 │   ├── privacy/                    # Privacy policy (DPDP Act)
 │   ├── terms/                      # Terms of service
 │   ├── contact/                    # Contact form + Grievance Officer
+│   ├── support/                    # Support / UPI donations
 │   ├── layout.tsx                  # Root layout (fonts, metadata)
 │   ├── page.tsx                    # Landing page
 │   ├── globals.css                 # Design system tokens
-│   ├── providers.tsx               # ThemeProvider wrapper
-│   ├── sitemap.ts                  # Dynamic sitemap
-│   └── robots.ts                   # Robots.txt
+│   ├── providers.tsx               # Theme and context providers
+│   ├── loading.tsx                 # Root loading state
+│   ├── error.tsx                   # Root error boundary
+│   ├── not-found.tsx               # 404 page
+│   ├── sitemap.ts                  # Dynamic sitemap generation
+│   └── robots.ts                   # Robots.txt generation
 ├── components/                     # Shared UI components
 │   ├── CardFace.tsx                # Desktop card (540x840)
 │   ├── CardFaceMobile.tsx          # Mobile card (320x500)
 │   ├── DownloadButton.tsx          # PNG export via html-to-image
 │   ├── LinkedInShareModal.tsx      # LinkedIn share workflow
-│   ├── MagneticButton.tsx          # Mouse-following button
 │   ├── CustomCursor.tsx            # GSAP-powered cursor
-│   ├── PageTransition.tsx          # Route transition animations
-│   ├── RarityCrown.tsx             # Leaderboard crown images
-│   ├── ThemeToggle.tsx             # Dark/light toggle
+│   ├── MagneticButton.tsx          # Magnetic hover button
+│   ├── PageTransition.tsx          # AnimatePresence wrapper
+│   ├── RarityCrown.tsx             # Rarity crown icon
+│   ├── ThemeToggle.tsx             # Dark/light theme toggle
 │   ├── Footer.tsx                  # Site footer
-│   └── legal/                      # Legal page primitives
-│       ├── ContactForm.tsx         # Mailto-based contact form
-│       └── LegalPageKit.tsx        # TOC, headings, paragraphs
+│   ├── Toast.tsx                   # Toast notifications
+│   └── legal/                      # Legal page components
+│       ├── LegalPageKit.tsx        # Reusable legal page layout
+│       └── ContactForm.tsx         # Contact form component
 ├── lib/                            # Business logic
-│   ├── scoring.ts                  # Core orchestrator
-│   ├── github.ts                   # GraphQL data fetcher
+│   ├── scoring.ts                  # Pipeline orchestrator
+│   ├── normalization.ts            # Metric normalization (log, sqrt, logistic, power)
+│   ├── attributes.ts               # Component + attribute aggregation
+│   ├── rarity.ts                   # Rarity tier from weighted attributes
+│   ├── harmony.ts                  # Harmony bonus for balanced attributes
+│   ├── archetypes.ts               # Archetype from top attribute pair
 │   ├── classes.ts                  # 12 developer class rules
-│   ├── rarity.ts                   # 8-factor rarity composite
-│   ├── flavor-text.ts              # 40 template strings
-│   ├── signature-move.ts           # 14 signature moves
-│   ├── achievements.ts             # 8 achievement types
+│   ├── signature-move.ts           # 10 signature moves
+│   ├── achievements.ts             # Achievement tier unlock
 │   ├── hero-stat.ts                # Hero stat selection
+│   ├── flavor-text.ts              # 40 flavor text templates
+│   ├── ranks.ts                    # Attribute rank lookup
 │   ├── verification.ts             # HMAC-SHA256 signing
+│   ├── explainability.ts           # Debug metadata builder
+│   ├── github.ts                   # GraphQL data fetcher
 │   ├── validation.ts               # Zod schemas
-│   ├── rate-limit.ts               # Upstash Redis limiter
-│   ├── auth-helpers.ts             # Session helper
+│   ├── rate-limit.ts               # Upstash rate limiter
+│   ├── auth-helpers.ts             # Session extraction
 │   ├── motion.ts                   # Framer Motion variants
 │   ├── theme.tsx                   # Theme context + provider
-│   └── supabase/                   # Supabase client variants
-│       ├── server.ts               # Server-side client
-│       └── client.ts               # Browser client
+│   ├── upi.ts                      # UPI payment helpers
+│   ├── supabase/                   # Supabase clients
+│   │   ├── server.ts               # Server-side client
+│   │   └── client.ts               # Browser-side client
+│   └── config/                     # Scoring configuration
+│       ├── normalization.ts        # Normalization curve configs
+│       ├── attributes.ts           # Component + attribute weight configs
+│       ├── rarity.ts               # Rarity weights and thresholds
+│       ├── harmony.ts              # Harmony parameters
+│       ├── engine.ts               # Engine version constants
+│       ├── classes.ts              # Class definitions
+│       ├── signatureMoves.ts       # Signature move configs
+│       ├── achievements.ts         # Achievement tier configs
+│       ├── archetypes.ts           # Archetype rules
+│       ├── ranks.ts                # Rank thresholds
+│       └── index.ts                # Config barrel export
 ├── types/
 │   └── index.ts                    # TypeScript types + constants
+├── middleware.ts                    # Auth middleware, public path allowlist
 └── __tests__/                      # Unit tests
-    ├── scoring.test.ts
-    ├── verification.test.ts
-    ├── validation.test.ts
-    ├── card.test.ts
-    ├── verify.test.ts
-    └── auth-helpers.test.ts
+    └── ...
+├── supabase/
+│   └── full_migration.sql          # Authoritative DB schema
+├── archive/
+│   └── migrations/                 # Historical migration snapshots
+├── public/
+│   ├── favicon.svg                 # Canonical application icon
+│   ├── site.webmanifest            # PWA manifest
+│   ├── Bronze_Crown.png            # Rarity crown asset
+│   ├── Silver_Crown.png            # Rarity crown asset
+│   └── Golden_Crown.png            # Rarity crown asset
+├── .github/                        # GitHub templates
+│   ├── ISSUE_TEMPLATE/
+│   └── PULL_REQUEST_TEMPLATE.md
+├── next.config.mjs                 # Security headers, CSP, image config
+├── tailwind.config.ts              # Tailwind theme
+├── tsconfig.json                   # TypeScript config
+├── postcss.config.js               # PostCSS plugins
+├── vitest.config.ts                # Vitest config
+├── package.json                    # Dependencies and scripts
+├── .env.example                    # Environment variable template
+└── .gitignore                      # Git ignore rules
 ```
 
 ---
@@ -523,7 +574,6 @@ Every credential is signed using HMAC-SHA256 with a server-side secret. The sign
 ```json
 {
   "username": "github-username",
-  "stats": { "mergeForce": 82, "codeVelocity": 67, "problemSolving": 91, "openSource": 45, "consistency": 58 },
   "rarity": "Rare",
   "cardId": "DM-ABC123"
 }
@@ -582,7 +632,6 @@ All API inputs are validated with Zod schemas:
 |----------|-------------|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Complete technical specification, algorithms, API reference |
 | [DESIGN.md](./DESIGN.md) | Terminal Collectible design system |
-| [PLAN.md](./PLAN.md) | Production migration plan (9 phases) |
 | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | Developer setup and contribution guide |
 
 ---
@@ -592,9 +641,11 @@ All API inputs are validated with Zod schemas:
 ### Completed
 
 - [x] GitHub OAuth via Supabase
-- [x] 5-metric scoring engine
+- [x] 5-metric scoring engine (v1 legacy)
+- [x] 15-metric normalization pipeline (v2)
+- [x] 5 behavioural attributes (Execution, Impact, Synergy, Mastery, Consistency)
 - [x] 12 developer classes
-- [x] 5 rarity tiers with percentile distribution
+- [x] 5 rarity tiers with weighted attribute scoring
 - [x] HMAC-SHA256 credential verification
 - [x] Public verification URLs
 - [x] Leaderboard with sorting and filtering

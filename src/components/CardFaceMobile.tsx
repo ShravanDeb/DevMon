@@ -143,8 +143,6 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
     { key: "mastery", label: ATTRIBUTE_LABELS.mastery },
   ], []);
 
-  const heroStatAttr = heroStat.attribute as keyof BehaviouralAttributes;
-
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://devmon.dev";
   const verifyUrl = `${siteUrl}/verify/${card.verification.cardId}`;
 
@@ -332,15 +330,9 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                     data-hero-number
                     style={{ fontSize: `${heroFontSize}px` }}
                   >
-                    {heroStat.score}
-                  </span>
-                  <span className="card-hero-stat-unit text-text-secondary shrink-0">
-                    /100
+                    {card.rarityScore}
                   </span>
                 </div>
-                <span className="card-hero-stat-label text-text-secondary">
-                  {heroStat.label}
-                </span>
               </motion.div>
 
               {/* SCROLLABLE CONTENT */}
@@ -385,7 +377,6 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                   </span>
                   <div className="space-y-1">
                     {stats.map((s, i) => {
-                      const isHero = heroStatAttr === s.key;
                       return (
                         <motion.div
                           key={s.key}
@@ -394,12 +385,12 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                           animate={revealed ? { opacity: 1, x: 0 } : {}}
                           transition={{ duration: 0.3, delay: 0.45 + i * 0.03, ease: [0.16, 1, 0.3, 1] }}
                         >
-                          <span className={`font-mono shrink-0 tracking-[0.02em] text-[8px] w-[65px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
+                          <span className="font-mono shrink-0 tracking-[0.02em] text-[8px] w-[65px] font-medium text-text-secondary">
                             {s.label}
                           </span>
                           <div className="flex-1 card-stat-bar-track">
                             <motion.div
-                              className={isHero ? "card-stat-bar-fill-hero" : "card-stat-bar-fill"}
+                              className="card-stat-bar-fill"
                               style={{
                                 ["--bar-start" as string]: barColors.start,
                                 ["--bar-end" as string]: barColors.end,
@@ -410,7 +401,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                               transition={{ duration: 0.6, delay: 0.5 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
                             />
                           </div>
-                          <span className={`font-mono text-right tabular-nums text-[8px] w-[19px] ${isHero ? "font-semibold text-text-primary" : "font-medium text-text-secondary"}`}>
+                          <span className="font-mono text-right tabular-nums text-[8px] w-[19px] font-medium text-text-secondary">
                             {card.attributes[s.key]}
                           </span>
                         </motion.div>
@@ -433,7 +424,6 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                       {card.achievements.map((a, i) => (
                         <span key={`${a.label}-${i}`} className="card-achievement-badge">
                           <span className="card-achievement-badge-icon">{a.icon}</span>
-                          <span className="card-achievement-badge-value">{a.value}</span>
                           <span className="card-achievement-badge-label">{a.label}</span>
                         </span>
                       ))}
@@ -464,47 +454,47 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
               </div>
 
               <motion.div
-                className="mt-auto flex items-end justify-between gap-2 pt-1.5 shrink-0"
+                className="mt-auto flex items-end justify-between gap-3 pt-2 shrink-0"
                 initial={{ opacity: 0, y: 2 }}
                 animate={revealed ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.3, delay: 0.7 }}
               >
-                <div className="flex flex-col gap-[2px]">
-                  <div className="flex items-center gap-1">
-                    <span className="font-mono text-[6px] text-text-tertiary uppercase tracking-[0.1em]">Edition</span>
-                    <span className="font-mono text-[7px] font-semibold tabular-nums text-text-secondary">
+                <div className="flex flex-col gap-[3px]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-[8px] text-text-tertiary uppercase tracking-[0.1em]">Edition</span>
+                    <span className="font-mono text-[9px] font-semibold tabular-nums text-text-secondary">
                       #{String(card.verification.edition).padStart(4, "0")}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="font-mono text-[6px] text-text-tertiary uppercase tracking-[0.1em]">Generated</span>
-                    <span className="font-mono text-[6px] text-text-tertiary">{formattedDate}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-[8px] text-text-tertiary uppercase tracking-[0.1em]">Generated</span>
+                    <span className="font-mono text-[8px] text-text-tertiary">{formattedDate}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="font-mono text-[6px] text-text-tertiary uppercase tracking-[0.1em]">Card</span>
-                    <span className="font-mono text-[6px] text-text-tertiary">{card.verification.cardId}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-[8px] text-text-tertiary uppercase tracking-[0.1em]">Card</span>
+                    <span className="font-mono text-[8px] text-text-tertiary">{card.verification.cardId}</span>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center gap-0.5">
+                <div className="flex flex-col items-center gap-1">
                   <img
                     src="/favicon.svg"
-                    width={17}
-                    height={17}
+                    width={22}
+                    height={22}
                     alt="DevMon"
                     className="shrink-0"
                   />
-                  <span className="font-display text-[7px] font-[700] uppercase tracking-[0.18em] text-text-primary">
+                  <span className="font-display text-[9px] font-[700] uppercase tracking-[0.18em] text-text-primary">
                     DevMon
                   </span>
                 </div>
 
                 <div className="flex flex-col items-end">
                   <div className="card-qr-seal" style={{ ["--rarity-color" as string]: rarityColor.hex } as React.CSSProperties}>
-                    <div className="p-[2px] rounded-[2px] bg-white">
+                    <div className="p-[3px] rounded-[3px] bg-white">
                       <QRCodeSVG
                         value={verifyUrl}
-                        size={36}
+                        size={44}
                         bgColor="#ffffff"
                         fgColor="#1A1A1E"
                         level="H"
@@ -512,7 +502,7 @@ export const CardFaceMobile = React.memo(function CardFaceMobile({ card, rarityO
                       />
                     </div>
                   </div>
-                  <span className="font-mono text-[6px] text-text-tertiary mt-px tracking-wide">Verified Credential</span>
+                  <span className="font-mono text-[8px] text-text-tertiary mt-0.5 tracking-wide">Verified Credential</span>
                 </div>
               </motion.div>
             </div>

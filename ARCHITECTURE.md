@@ -28,8 +28,8 @@ C4Context
 
 1. User authenticates via GitHub OAuth (read-only scope).
 2. Server fetches public profile, repositories, contributions, PRs, and issues via the GitHub GraphQL API.
-3. The scoring pipeline computes five stat categories, a rarity composite, a developer class, a signature move, six achievements, a hero stat, and flavor text.
-4. A unique card ID (`DM-XXXXXX`) is generated and an HMAC-SHA-256 signature is computed over the card payload.
+3. The scoring pipeline normalizes raw data into 15 metrics, groups them into 15 intermediate components, aggregates into 5 behavioural attributes, computes a rarity tier, developer classes, signature move, achievements, hero stat, archetype, harmony bonus, and flavor text.
+4. A unique card ID (`DM-XXXXXX`) is generated and an HMAC-SHA-256 signature is computed over the username, rarity, and card ID.
 5. The full card row is upserted into the `cards` table via the `upsert_card_v2` RPC function.
 6. The signed card is returned to the client for rendering, download, and sharing.
 
@@ -72,9 +72,9 @@ flowchart TD
 
 | Feature | Description |
 |---------|-------------|
-| Card Generation | Fetches GitHub data, computes stats/rarity/class, signs the card, stores it in Supabase |
-| Cryptographic Verification | HMAC-SHA-256 signature over username + stats + rarity + card ID; verifiable by any third party |
-| Rarity System | 8-factor composite score mapped to 5 tiers: Common, Rare, Epic, Legendary, Mythic |
+| Card Generation | Fetches GitHub data, normalizes 15 metrics, computes 5 attributes, assigns rarity/class, signs the card, stores it in Supabase |
+| Cryptographic Verification | HMAC-SHA-256 signature over username + rarity + card ID; verifiable by any third party |
+| Rarity System | Weighted sum of 5 behavioural attributes + harmony bonus, mapped to 5 tiers: Common, Rare, Epic, Legendary, Mythic |
 | Leaderboard | Public listing of all cards sorted by rarity score, filterable by company |
 | Public Verification Pages | `/verify/DM-XXXXXX` shows the full card and signature without requiring login |
 
@@ -108,9 +108,9 @@ flowchart TD
 DevMon/
 ├── src/
 │   ├── app/                          # Next.js App Router pages
-│   │   ├── layout.tsx                # Root layout, global metadata, theme provider (82 lines)
-│   │   ├── page.tsx                  # Landing page (890 lines)
-│   │   ├── globals.css               # Design system tokens, Tailwind config (716 lines)
+│   │   ├── layout.tsx                # Root layout, global metadata, theme provider
+│   │   ├── page.tsx                  # Landing page
+│   │   ├── globals.css               # Design system tokens, Tailwind config
 │   │   ├── loading.tsx               # Root loading state
 │   │   ├── error.tsx                 # Root error boundary
 │   │   ├── not-found.tsx             # 404 page
@@ -119,80 +119,126 @@ DevMon/
 │   │   ├── robots.ts                 # Robots.txt generation
 │   │   ├── card/
 │   │   │   ├── layout.tsx            # Card page SEO metadata
-│   │   │   ├── page.tsx              # Card generation UI (478 lines)
+│   │   │   ├── page.tsx              # Card generation UI
 │   │   │   └── error.tsx             # Card page error boundary
 │   │   ├── leaderboard/
 │   │   │   ├── layout.tsx            # Leaderboard SEO metadata
-│   │   │   ├── page.tsx              # Leaderboard display (261 lines)
+│   │   │   ├── page.tsx              # Leaderboard display
 │   │   │   └── error.tsx             # Leaderboard error boundary
 │   │   ├── verify/
 │   │   │   └── [cardId]/
-│   │   │       ├── page.tsx          # Public verification page (392 lines)
+│   │   │       ├── page.tsx          # Public verification page
 │   │   │       └── error.tsx         # Verification error boundary
 │   │   ├── faq/
 │   │   │   ├── layout.tsx            # FAQ SEO metadata
-│   │   │   └── page.tsx              # FAQ accordion (152 lines)
+│   │   │   └── page.tsx              # FAQ accordion
 │   │   ├── terms/page.tsx            # Terms of Service
 │   │   ├── privacy/page.tsx          # Privacy Policy
 │   │   ├── contact/page.tsx          # Contact page
+│   │   ├── support/page.tsx          # Support / UPI donations
 │   │   └── api/
 │   │       ├── card/route.ts         # POST: generate card, GET: card count
 │   │       ├── leaderboard/route.ts  # GET: paginated leaderboard
 │   │       ├── verify/[cardId]/route.ts # GET: verify card by ID
 │   │       ├── og/route.tsx          # GET: generate OG image
 │   │       ├── health/route.ts       # GET: health check
+│   │       ├── debug/route.ts        # GET: debug endpoint
 │   │       └── auth/
 │   │           ├── callback/route.ts # GET: OAuth callback
 │   │           └── signout/route.ts  # POST: sign out
 │   ├── components/
-│   │   ├── CardFace.tsx              # Desktop card renderer (566 lines)
-│   │   ├── CardFaceMobile.tsx        # Mobile card renderer (498 lines)
-│   │   ├── DownloadButton.tsx        # PNG export + download (402 lines)
-│   │   ├── CustomCursor.tsx          # GSAP-powered cursor (145 lines)
-│   │   ├── LinkedInShareModal.tsx    # LinkedIn share flow (253 lines)
-│   │   ├── MagneticButton.tsx        # Magnetic hover button (52 lines)
-│   │   ├── PageTransition.tsx        # AnimatePresence wrapper (19 lines)
+│   │   ├── CardFace.tsx              # Desktop card renderer
+│   │   ├── CardFaceMobile.tsx        # Mobile card renderer
+│   │   ├── DownloadButton.tsx        # PNG export + download
+│   │   ├── CustomCursor.tsx          # GSAP-powered cursor
+│   │   ├── LinkedInShareModal.tsx    # LinkedIn share flow
+│   │   ├── MagneticButton.tsx        # Magnetic hover button
+│   │   ├── PageTransition.tsx        # AnimatePresence wrapper
 │   │   ├── RarityCrown.tsx           # Rarity crown icon
 │   │   ├── ThemeToggle.tsx           # Dark/light theme toggle
-│   │   ├── Footer.tsx                # Site footer (55 lines)
+│   │   ├── Footer.tsx                # Site footer
+│   │   ├── Toast.tsx                 # Toast notifications
 │   │   └── legal/
 │   │       ├── LegalPageKit.tsx      # Reusable legal page layout
 │   │       └── ContactForm.tsx       # Contact form component
 │   ├── lib/
-│   │   ├── scoring.ts                # Scoring pipeline orchestrator (90 lines)
-│   │   ├── rarity.ts                 # 8-factor rarity composite (36 lines)
-│   │   ├── classes.ts                # 12 developer class rules (113 lines)
-│   │   ├── flavor-text.ts            # 40 flavor text templates (111 lines)
-│   │   ├── achievements.ts           # 8 achievement types (73 lines)
-│   │   ├── signature-move.ts         # 14 signature moves (131 lines)
-│   │   ├── hero-stat.ts              # Hero stat selection (108 lines)
-│   │   ├── verification.ts           # HMAC-SHA-256 signing (57 lines)
-│   │   ├── github.ts                 # GitHub GraphQL fetcher (301 lines)
-│   │   ├── validation.ts             # Zod schemas (6 lines)
-│   │   ├── rate-limit.ts             # Upstash rate limiter (37 lines)
-│   │   ├── auth-helpers.ts           # Session extraction (13 lines)
+│   │   ├── scoring.ts                # Scoring pipeline orchestrator
+│   │   ├── normalization.ts          # Metric normalization curves
+│   │   ├── attributes.ts             # Component and attribute aggregation
+│   │   ├── rarity.ts                 # Weighted attribute rarity
+│   │   ├── harmony.ts                # Harmony bonus calculation
+│   │   ├── archetypes.ts             # Archetype from attribute pair
+│   │   ├── classes.ts                # 12 developer class rules
+│   │   ├── signature-move.ts         # 10 signature moves
+│   │   ├── achievements.ts           # Achievement tier unlock
+│   │   ├── hero-stat.ts              # Hero stat selection
+│   │   ├── flavor-text.ts            # 40 flavor text templates
+│   │   ├── ranks.ts                  # Attribute rank lookup
+│   │   ├── verification.ts           # HMAC-SHA-256 signing
+│   │   ├── explainability.ts         # Debug metadata builder
+│   │   ├── github.ts                 # GitHub GraphQL fetcher
+│   │   ├── validation.ts             # Zod schemas
+│   │   ├── rate-limit.ts             # Upstash rate limiter
+│   │   ├── auth-helpers.ts           # Session extraction
 │   │   ├── motion.ts                 # Framer Motion variants
 │   │   ├── theme.tsx                 # Theme context + provider
-│   │   └── supabase/
-│   │       ├── server.ts             # Server-side Supabase client (25 lines)
-│   │       └── client.ts             # Browser-side Supabase client (7 lines)
+│   │   ├── upi.ts                    # UPI payment helpers
+│   │   ├── supabase/
+│   │   │   ├── server.ts             # Server-side Supabase client
+│   │   │   └── client.ts             # Browser-side Supabase client
+│   │   └── config/
+│   │       ├── normalization.ts      # Normalization curve configs
+│   │       ├── attributes.ts         # Component and attribute weight configs
+│   │       ├── rarity.ts             # Rarity weights and thresholds
+│   │       ├── harmony.ts            # Harmony parameters
+│   │       ├── engine.ts             # Engine version constants
+│   │       ├── classes.ts            # Class definitions
+│   │       ├── signatureMoves.ts     # Signature move configs
+│   │       ├── achievements.ts       # Achievement tier configs
+│   │       ├── archetypes.ts         # Archetype rules
+│   │       ├── ranks.ts              # Rank thresholds
+│   │       └── index.ts              # Config barrel export
 │   ├── types/
-│   │   └── index.ts                  # All types, interfaces, constants (183 lines)
-│   └── middleware.ts                 # Auth middleware, public path allowlist (52 lines)
+│   │   └── index.ts                  # All types, interfaces, constants
+│   ├── middleware.ts                 # Auth middleware, public path allowlist
+│   └── __tests__/                    # Unit tests
+│       └── *.test.ts
 ├── supabase/
-│   └── full_migration.sql            # Authoritative DB schema (149 lines)
+│   └── full_migration.sql            # Authoritative DB schema
 ├── archive/
 │   └── migrations/
 │       ├── 001_init.sql              # Historical initial migration
 │       ├── 002_upsert_fix.sql        # Historical upsert fix
 │       └── 002_reset_and_fix_edition.sql
+├── public/
+│   ├── favicon.svg                   # Canonical application icon
+│   ├── site.webmanifest              # PWA manifest
+│   ├── Bronze_Crown.png              # Rarity crown asset
+│   ├── Silver_Crown.png              # Rarity crown asset
+│   └── Golden_Crown.png              # Rarity crown asset
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   └── PULL_REQUEST_TEMPLATE.md
 ├── next.config.mjs                   # Security headers, CSP, image config
 ├── tailwind.config.ts                # Tailwind theme
 ├── tsconfig.json                     # TypeScript config
+├── postcss.config.js                 # PostCSS plugins
+├── vitest.config.ts                  # Vitest config
 ├── package.json                      # Dependencies and scripts
+├── .env.example                      # Environment variable template
+├── .gitignore                        # Git ignore rules
 ├── README.md                         # Project documentation
 ├── ARCHITECTURE.md                   # This file
 ├── DEVELOPER_GUIDE.md                # Setup guide
+├── CONTRIBUTING.md                   # Contribution guide
+├── DESIGN.md                         # Locked design system
+├── SECURITY.md                       # Security policy
+├── CHANGELOG.md                      # Release history
+├── SUPPORT.md                        # Support information
+├── CODE_OF_CONDUCT.md                # Community standards
+├── TRADEMARKS.md                     # Trademark policy
 └── LICENSE                           # AGPL-3.0 license
 ```
 
@@ -337,9 +383,9 @@ The middleware runs on every request (except static assets) and:
 1. Creates a Supabase server client with cookie-based session management.
 2. Checks if the user is authenticated via `supabase.auth.getUser()`.
 3. Compares the pathname against a public path allowlist:
-   - Pages: `/`, `/leaderboard`, `/verify/*`, `/faq`, `/terms`, `/privacy`, `/contact`
+   - Pages: `/`, `/leaderboard`, `/verify/*`, `/faq`, `/terms`, `/privacy`, `/contact`, `/support`
    - API routes: `/api/auth/*`, `/api/leaderboard/*`, `/api/verify/*`, `/api/og/*`
-   - Static: `/_next/*`, `/favicon*`, `*.ico`, `*.svg`, `*.png`
+   - Static: `/_next/*`, `/favicon.svg`, `*.svg`, `*.png`
 4. If the user is not authenticated and the path is not public, redirects to `/`.
 
 ### Rate Limiting
@@ -387,7 +433,7 @@ erDiagram
         TEXT card_id UK "DM-XXXXXX format"
         INTEGER edition UK "UNIQUE DEFAULT nextval('card_edition_seq')"
         JSONB raw_stats "Raw GitHub data"
-        JSONB stats "Computed CardStats"
+        JSONB stats "Computed BehaviouralAttributes"
         TEXT rarity "Common|Rare|Epic|Legendary|Mythic"
         INTEGER rarity_score "0-100"
         TEXT primary_class "ClassName"
@@ -399,8 +445,8 @@ erDiagram
         TEXT flavor_tone "hype|roast"
         TEXT sha256_hash "HMAC-SHA-256 hex"
         TEXT digital_signature "hmac_ prefix + hex"
-        TEXT verification_version "v1"
-        TEXT version "1.0.0"
+        TEXT verification_version "defaults to 'v1' in migration; code writes '2.0.0'"
+        TEXT version "nullable; code writes '2.0.0'"
         INTEGER rank "Computed on read"
         INTEGER total_cards "Computed on read"
         TIMESTAMPTZ created_at "DEFAULT now()"
@@ -514,12 +560,13 @@ The middleware allows unauthenticated access to:
 | `/terms` | Terms of Service |
 | `/privacy` | Privacy Policy |
 | `/contact` | Contact page |
+| `/support` | Support page |
 | `/api/auth/*` | OAuth callback and signout |
 | `/api/leaderboard/*` | Public leaderboard API |
 | `/api/verify/*` | Public verification API |
 | `/api/og/*` | OG image generation |
 | `/_next/*` | Next.js static assets |
-| `/favicon*`, `*.ico`, `*.svg`, `*.png` | Static assets |
+| `/favicon.svg`, `*.svg`, `*.png` | Static assets |
 
 ---
 
@@ -534,161 +581,169 @@ Input:  RawGitHubStats (fetched from GitHub GraphQL API)
 Output: CardData (complete card with all computed fields)
 
 Pipeline:
-  1. computeStats(raw)        → CardStats (5 categories, 0-100 each)
-  2. computeRarity(raw)       → rarityScore (0-100)
-  3. getRarityFromScore(score) → Rarity tier
-  4. assignClasses(raw, stats) → primary + secondary class
-  5. generateFlavorText(...)  → flavor text string
-  6. generateSignatureMove(raw, stats) → SignatureMove
-  7. generateAchievements(raw, stats)  → Achievement[] (top 6)
-  8. selectHeroStat(raw, stats) → HeroStat
-  9. generateVerification(raw, stats, rarity, edition) → VerificationData
+  1. normalizeAll(raw, config)           → NormalizedMetrics (15 metrics, 0-100)
+  2. computeComponents(metrics, config)   → Record<string, number> (15 components, 0-100)
+  3. computeAttributes(components, config)→ BehaviouralAttributes (5 attributes, 0-100)
+  4. computeArchetype(attributes, config) → Archetype
+  5. computeRarityFromAttributes(attributes, harmony, config) → { rarity, rarityScore }
+  6. computeHarmony(attributes, config)   → harmony bonus (0-3)
+  7. selectHeroStat(attributes, metrics, ranks) → HeroStat
+  8. generateSignatureMove(attributes, config) → SignatureMove
+  9. generateAchievements(attributes, metrics, config) → Achievement[] (max 6)
+  10. assignClasses(attributes, raw, config) → { primaryClass, secondaryClass }
+  11. generateFlavorText(raw, attributes, archetype, rarity, tone) → string
+  12. generateVerification(username, rarity, cardId, edition) → VerificationData
+  13. buildDebugMetadata(...)              → DebugMetadata (if debug mode)
 ```
 
 **Helper functions:**
 
 ```typescript
-logScale(value, factor=10, max=100):
-    return min(max, round(log2(value + 1) * factor))
-
-clamp(v):
-    return min(100, max(0, round(v)))
+clamp(value, min, max):
+    return Math.min(max, Math.max(min, value))
 ```
 
-#### Merge Force
+#### Normalization Curves
 
-```
-mergeForce = clamp(
-    logScale(mergedPRs, 10) * 0.5 +
-    logScale(closedIssues, 10) * 0.3 +
-    min(100, mergedPRs * 0.8) * 0.2
-)
-```
+Each of the 15 metrics uses a normalization curve to map raw values to 0-100:
 
-**Example:** Developer with 50 merged PRs and 30 closed issues:
-- `logScale(50, 10) = min(100, round(log2(51) * 10)) = round(5.672 * 10) = 57`
-- `logScale(30, 10) = min(100, round(log2(31) * 10)) = round(4.954 * 10) = 50`
-- `min(100, 50 * 0.8) = 40`
-- `mergeForce = clamp(57 * 0.5 + 50 * 0.3 + 40 * 0.2) = clamp(28.5 + 15 + 8) = clamp(51.5) = 52`
+| Curve | Formula | Usage |
+|-------|---------|-------|
+| `log` | `ln(1 + raw) / ln(1 + target) × maxScore` | 14 metrics (followers, stars, commits, etc.) |
+| `sqrt` | `√raw / √target × maxScore` | 1 metric (organizations) |
+| `logistic` | `(1 / (1 + exp(-k × (raw - target)))) - 0.5) × 2 × maxScore` | Available but not used |
+| `power` | `(raw / target)^steepness × maxScore` | Available but not used |
 
-#### Code Velocity
+**Configuration:** Each metric has `{ curve, target, steepness, maxScore }` in `config/normalization.ts`. The `log` curve uses natural log (ln), not log2. The `steepness` parameter controls curve sensitivity; `target` is the value that maps to ~100. Example:
 
-```
-streakComponent = min(100, currentStreak * 6)
-recentComponent = logScale(recentCommits, 18)
-codeVelocity = clamp(
-    recentComponent * 0.6 +
-    streakComponent * 0.3 +
-    logScale(totalCommits, 8) * 0.1
-)
+```typescript
+commits:       { curve: "log",  target: 1000, steepness: 1.0, maxScore: 100 }
+organizations: { curve: "sqrt", target: 5,    steepness: 1.0, maxScore: 100 }
+languages:     { curve: "log",  target: 8,    steepness: 0.8, maxScore: 100 }
+accountAge:    { curve: "log",  target: 5,    steepness: 0.6, maxScore: 100 }
 ```
 
-**Example:** 45 recent commits, 14-day streak, 2000 total commits:
-- `recentComponent = logScale(45, 18) = min(100, round(log2(46) * 18)) = round(5.524 * 18) = 99`
-- `streakComponent = min(100, 14 * 6) = 84`
-- `logScale(2000, 8) = min(100, round(log2(2001) * 8)) = round(10.97 * 8) = 88`
-- `codeVelocity = clamp(99 * 0.6 + 84 * 0.3 + 88 * 0.1) = clamp(59.4 + 25.2 + 8.8) = clamp(93.4) = 93`
+#### Component Computation
 
-#### Problem Solving
+Each of the 15 intermediate components aggregates one or more normalized metrics with configurable weights:
 
-```
-prTotal = mergedPRs + closedIssues
-prCloseRate = prTotal > 0 ? closedIssues / prTotal : 0
-closeRateScore = clamp(prCloseRate * 120)
-volumeScore = logScale(prTotal, 10)
-issueDepth = closedIssues > 0 ? min(100, closedIssues * 1.5) : 0
-problemSolving = clamp(
-    closeRateScore * 0.4 +
-    volumeScore * 0.35 +
-    issueDepth * 0.25
-)
+```typescript
+component.value = sum(normalizedMetric * metricWeight) for each metric in component.metrics
 ```
 
-#### Open Source
+Component definitions (from `config/attributes.ts`):
 
-```
-collabBase = contributedTo * 6 + orgCount * 12
-forkEngagement = forkedRepos > 0 ? min(40, forkedRepos * 4) : 0
-communityPresence = min(30, followers * 0.5)
-openSource = clamp(collabBase + forkEngagement + communityPresence)
+| Component | Normalized Metrics (weight) |
+|-----------|----------------------------|
+| `commitOutput` | commits (0.6), recentCommits (0.4) |
+| `repositoryBuilding` | originalRepositories (0.7), repositories (0.3) |
+| `delivery` | mergedPRs (1.0) |
+| `starPower` | stars (1.0) |
+| `communityReach` | followers (0.7), forks (0.3) |
+| `adoption` | forks (0.5), organizations (0.5) |
+| `prCollaboration` | mergedPRs (0.5), contributedTo (0.5) |
+| `issueEngagement` | closedIssues (1.0) |
+| `organizationalPresence` | organizations (1.0) |
+| `streakPower` | currentStreak (0.6), longestStreak (0.4) |
+| `activityRegularity` | recentCommits (0.5), commits (0.5) |
+| `longevity` | accountAge (1.0) |
+| `languageBreadth` | languages (1.0) |
+| `projectDiversity` | originalRepositories (0.6), repositories (0.4) |
+| `qualitySignal` | stars (0.6), contributedTo (0.4) |
+
+#### Behavioural Attributes
+
+Each of the 5 behavioural attributes aggregates weighted components:
+
+| Attribute | Components (weighted) |
+|-----------|----------------------|
+| **Execution** | commitOutput (0.35), repositoryBuilding (0.30), delivery (0.35) |
+| **Impact** | starPower (0.40), communityReach (0.30), adoption (0.30) |
+| **Synergy** | prCollaboration (0.40), issueEngagement (0.35), organizationalPresence (0.25) |
+| **Consistency** | streakPower (0.40), activityRegularity (0.35), longevity (0.25) |
+| **Mastery** | languageBreadth (0.35), projectDiversity (0.35), qualitySignal (0.30) |
+
+```typescript
+attribute.value = sum(componentValue * componentWeight) for each component in attribute.aggregation
 ```
 
-#### Consistency
+#### Rarity Score
 
+The rarity score is a weighted sum of the 5 behavioural attributes plus a harmony bonus:
+
+```typescript
+rarityWeights = { execution: 0.28, impact: 0.24, synergy: 0.18, consistency: 0.15, mastery: 0.15 }
+rarityScore = sum(attribute.value * weight) + harmonyBonus
 ```
-longestStreakScore = min(100, longestStreak * 4)
-currentStreakBonus = min(100, currentStreak * 6)
-regularity = totalRepos > 0 ? min(100, (totalCommits / totalRepos) * 2) : 0
-consistency = clamp(
-    longestStreakScore * 0.4 +
-    currentStreakBonus * 0.35 +
-    regularity * 0.25
-)
-```
+
+**Thresholds:**
+
+| Tier | Score Range |
+|------|-------------|
+| Common | 0–45 |
+| Rare | 46–70 |
+| Epic | 71–88 |
+| Legendary | 89–96 |
+| Mythic | 97–100 |
 
 ---
 
 ### 10.2 Rarity System (`src/lib/rarity.ts`)
 
-The rarity score is an 8-factor composite using logarithmic percentile scoring:
+The rarity score is computed from a weighted sum of the 5 behavioural attributes, plus a harmony bonus:
 
-```typescript
-logCentile(value, target, strictness=1):
-    ratio = value / target
-    score = log10(ratio + 1) * 50 * strictness
-    return min(100, round(score))
-```
+**Attribute weights:**
 
-**Factor weights:**
-
-| Factor | Weight | Target | Strictness | Formula |
-|--------|--------|--------|------------|---------|
-| Followers | 0.15 | 100 | 2 | `logCentile(followers, 100, 2)` |
-| Total Stars | 0.20 | 500 | 2 | `logCentile(totalStars, 500, 2)` |
-| Total Commits | 0.15 | 1000 | 2 | `logCentile(totalCommits, 1000, 2)` |
-| Recent Commits | 0.10 | 200 | 2 | `logCentile(recentCommits, 200, 2)` |
-| Merged PRs | 0.10 | 100 | 2 | `logCentile(mergedPRs, 100, 2)` |
-| Closed Issues | 0.10 | 100 | 2 | `logCentile(closedIssues, 100, 2)` |
-| Account Age | 0.10 | — | — | `ageScore(createdAt)` |
-| Organizations | 0.10 | — | — | `min(100, orgCount * 20)` |
+| Attribute | Weight |
+|-----------|--------|
+| Execution | 0.28 |
+| Impact | 0.24 |
+| Synergy | 0.18 |
+| Consistency | 0.15 |
+| Mastery | 0.15 |
 
 **Composite formula:**
 
 ```
-composite = (
-    followerScore * 0.15 +
-    starScore * 0.20 +
-    commitScore * 0.15 +
-    contribScore * 0.10 +
-    prScore * 0.10 +
-    issueScore * 0.10 +
-    age * 0.10 +
-    orgScore * 0.10
+weightedSum = (
+    execution * 0.28 +
+    impact * 0.24 +
+    synergy * 0.18 +
+    consistency * 0.15 +
+    mastery * 0.15
 )
-rarityScore = round(min(100, composite))
+rarityScore = round(min(100, weightedSum + harmonyBonus))
 ```
 
-**Account age scoring:**
+**Rarity tier thresholds:**
 
-| Age | Score |
-|-----|-------|
-| >= 10 years | 100 |
-| >= 5 years | 80 |
-| >= 3 years | 60 |
-| >= 1 year | 30 |
-| < 1 year | 10 |
+| Tier | Score Range | Approximate % of Developers |
+|------|-------------|---------------------------|
+| Common | 0–45 | ~60% |
+| Rare | 46–70 | ~25% |
+| Epic | 71–88 | ~10% |
+| Legendary | 89–96 | ~4% |
+| Mythic | 97–100 | ~1% |
 
-**Example:** Developer with 200 followers, 1000 stars, 3000 commits, 100 recent commits, 50 merged PRs, 30 closed issues, 5-year account age, 3 organizations:
-- `followerScore = logCentile(200, 100, 2) = min(100, round(log10(3) * 100)) = round(47.7) = 48`
-- `starScore = logCentile(1000, 500, 2) = min(100, round(log10(3) * 100)) = round(47.7) = 48`
-- `commitScore = logCentile(3000, 1000, 2) = min(100, round(log10(4) * 100)) = round(60.2) = 60`
-- `contribScore = logCentile(100, 200, 2) = min(100, round(log10(1.5) * 100)) = round(17.6) = 18`
-- `prScore = logCentile(50, 100, 2) = min(100, round(log10(1.5) * 100)) = round(17.6) = 18`
-- `issueScore = logCentile(30, 100, 2) = min(100, round(log10(1.3) * 100)) = round(11.4) = 11`
-- `age = 80` (5-year account)
-- `orgScore = min(100, 3 * 20) = 60`
-- `composite = 48*0.15 + 48*0.20 + 60*0.15 + 18*0.10 + 18*0.10 + 11*0.10 + 80*0.10 + 60*0.10 = 7.2 + 9.6 + 9.0 + 1.8 + 1.8 + 1.1 + 8.0 + 6.0 = 44.5`
-- `rarityScore = 45` → **Rare** tier
+**Harmony bonus** (`src/lib/harmony.ts`):
+
+When attributes are balanced (low spread), a bonus of up to +3 is applied:
+
+```
+weakest = min(execution, impact, synergy, consistency, mastery)
+highest = max(execution, impact, synergy, consistency, mastery)
+spread = highest - weakest
+weakestFactor = min(1, weakest / 40)
+spreadFactor = max(0, 1 - spread / 50)
+harmonyBonus = min(3, round(weakestFactor * spreadFactor * 3))
+```
+
+**Example:** Developer with attributes Execution=72, Impact=65, Synergy=58, Consistency=60, Mastery=55:
+- `weightedSum = 72*0.28 + 65*0.24 + 58*0.18 + 60*0.15 + 55*0.15 = 20.16 + 15.6 + 10.44 + 9.0 + 8.25 = 63.45`
+- `weakest = 55`, `highest = 72`, `spread = 17`
+- `weakestFactor = min(1, 55/40) = 1`, `spreadFactor = max(0, 1 - 17/50) = 0.66`
+- `harmonyBonus = min(3, round(1 * 0.66 * 3)) = min(3, 2) = 2`
+- `rarityScore = round(min(100, 63.45 + 2)) = 65` → **Rare** tier
 
 ---
 
@@ -715,102 +770,93 @@ getRarityFromScore(score):
 
 ### 10.4 Developer Classes (`src/lib/classes.ts`)
 
-12 classes, each with a scoring function applied to the developer's raw stats and computed card stats:
+12 classes, each defined by required and preferred attribute thresholds in `config/classes.ts`:
 
-| Class | Scoring Formula | Trigger Condition |
-|-------|----------------|-------------------|
-| **PR Titan** | `min(100, mergedPRs * 1.8)` | High PR merge count |
-| **Bug Hunter** | `min(100, closedIssues * 1.5 + ratio * 40)` where `ratio = closedIssues / (mergedPRs + closedIssues)` | High issue close rate |
-| **Night Owl** | `85` if >30% of commits are between 00:00–05:00, else `0` | Night-time commit pattern |
-| **Fork Warden** | `min(100, forkedRepos / originalRepos * 30)` | High fork-to-original ratio |
-| **Commit Phantom** | `90` if any repo was pushed to >1 year after creation and <90 days ago, else `0` | Necro-commit pattern |
-| **Open Source Sentinel** | `min(100, contributedTo * 5 + orgCount * 15)` | High external contributions |
-| **Merge Griffin** | `min(100, mergedPRs * 1.2 + velocityBonus)` where `velocityBonus = 20 if codeVelocity > 70 else 0` | PR merges + high velocity |
-| **Stack Guardian** | `min(100, min(60, originalRepos * 3) + min(40, languages.length * 8))` | Broad repo + language coverage |
-| **Polyglot Artisan** | `min(100, languages.length * 12)` | Many programming languages |
-| **Code Archivist** | `min(100, archivedRepos * 15 + originalRepos * 2)` | Many archived repos |
-| **Green Sprout** | `min(100, originalRepos * 5 + activityBonus)` if account age < 2 years, else `0` | New developer with activity |
-| **Zen Coder** | `min(100, cleanRatio * 80 + originalRepos * 2)` where `cleanRatio = zeroStarRepos / originalRepos` if >5 repos, else `0` | Many zero-star repos (clean code) |
+| Class | Archetype | Required Attributes | Preferred Attributes |
+|-------|-----------|-------------------|---------------------|
+| **PR Titan** | Collaborator | synergy ≥ 40 | execution ≥ 50, synergy ≥ 60 |
+| **Bug Hunter** | Maintainer | synergy ≥ 40 | synergy ≥ 60, impact ≥ 40 |
+| **Night Owl** | Creator | (none) | (none) — raw metric: >30% commits 00:00–05:00 |
+| **Fork Warden** | Explorer | impact ≥ 30 | impact ≥ 50, synergy ≥ 40 |
+| **Commit Phantom** | Creator | (none) | (none) — raw metric: repo pushed >1yr after creation |
+| **Open Source Sentinel** | Collaborator | synergy ≥ 30 | synergy ≥ 50, impact ≥ 40 |
+| **Merge Griffin** | Builder | execution ≥ 40 | execution ≥ 60, consistency ≥ 50 |
+| **Stack Guardian** | Architect | mastery ≥ 30 | mastery ≥ 50, execution ≥ 40 |
+| **Polyglot Artisan** | Explorer | mastery ≥ 40 | mastery ≥ 60, execution ≥ 40 |
+| **Code Archivist** | Maintainer | mastery ≥ 30, consistency ≥ 30 | mastery ≥ 50, consistency ≥ 50 |
+| **Green Sprout** | Builder | (none) | execution ≥ 30, consistency ≥ 30 — raw metric: account age < 2 years |
+| **Zen Coder** | Maintainer | consistency ≥ 40 | consistency ≥ 60, mastery ≥ 50 |
 
 **Classification logic:**
 
-1. Score all 12 rules against the developer's stats.
-2. Sort by score descending, filter out zeros.
-3. Highest-scoring class becomes `primary`.
-4. Second-highest becomes `secondary` (if score > 0).
+1. For each class definition, check if all `required` attribute thresholds are met. If not, score = 0.
+2. If a `rawMetricOverride` is defined and returns 0, score = 0. If it returns a value, that's the score.
+3. Otherwise, score = sum of `min(1, attribute / preferredValue) * preferredWeight` for each preferred attribute.
+4. Highest-scoring class becomes `primary`. Second-highest becomes `secondary` (if score > 0).
 5. If no class scores above 0, default to `Stack Guardian`.
-
-**Example:** Developer with 80 merged PRs, 15 closed issues, 5 languages, 20 original repos:
-- PR Titan: `min(100, 80 * 1.8) = 100`
-- Bug Hunter: `min(100, 15 * 1.5 + (15/95) * 40) = min(100, 22.5 + 6.3) = 29`
-- Stack Guardian: `min(100, min(60, 20*3) + min(40, 5*8)) = min(100, 60 + 40) = 100`
-- Polyglot Artisan: `min(100, 5 * 12) = 60`
-
-→ **Primary: PR Titan** (100, ties broken by order), **Secondary: Stack Guardian** (100)
 
 ---
 
 ### 10.5 Signature Moves (`src/lib/signature-move.ts`)
 
-14 moves, each with a scoring function. The highest-scoring move wins:
+10 moves defined in `config/signatureMoves.ts`, each associated with a primary+secondary attribute pair:
 
-| Move | Scoring Formula | Icon |
-|------|----------------|------|
-| PR Storm | `min(100, mergedPRs * 2)` | M |
-| Recursive Refactor | `min(100, totalCommits * 0.1 + (originalRepos > 10 ? 30 : 0))` | R |
-| Production Shield | `min(100, closedIssues * 2)` | P |
-| Commit Barrage | `min(100, recentCommits * 1.5)` | C |
-| Infinite Merge | `min(100, currentStreak * 6 + longestStreak * 2)` | I |
-| Cherry Pick Strike | `min(100, contributedTo * 8)` | S |
-| Dependency Crusher | `min(100, forkedRepos * 4)` | D |
-| Star Forge | `min(100, totalStars * 0.5)` | ★ |
-| Branch Collapse | `min(100, originalRepos * 3)` | B |
-| Language Weaver | `min(100, languages.length * 14)` | L |
-| Night Shift | `80` if >30% commits 00:00–05:00, else `0` | N |
-| Community Pulse | `min(100, followers * 1.5)` | ♥ |
-| Necro Commit | `85` if any repo pushed >1yr after creation and <90 days ago, else `0` | Z |
-| Stack Sovereign | `min(100, originalRepos * 2 + languages.length * 10)` | K |
+| Move | Primary Attribute | Secondary Attribute | Icon |
+|------|------------------|--------------------|----|
+| Release Avalanche | execution | impact | A |
+| Infinite Merge | execution | consistency | I |
+| Merge Tempest | execution | synergy | T |
+| Precision Architect | execution | mastery | P |
+| Community Catalyst | impact | synergy | C |
+| Framework Forge | impact | mastery | F |
+| Evergreen Legacy | impact | consistency | E |
+| Open Source Nexus | synergy | mastery | N |
+| Alliance Protocol | synergy | consistency | L |
+| Eternal Craftsman | mastery | consistency | K |
 
-**Description interpolation:** Variables like `{{prs}}`, `{{commits}}`, `{{issues}}`, etc. are replaced with actual values from the developer's stats.
+**Selection logic:**
+
+1. Sort the 5 behavioural attributes by score descending.
+2. Take the top and second attribute.
+3. Look up a move matching that primary+secondary pair.
+4. If both attributes meet the minimum threshold (25) and a match exists, use that move.
+5. Otherwise, default to "Novice Punch" (`DEFAULT_SIGNATURE_MOVE`).
 
 ---
 
 ### 10.6 Achievements (`src/lib/achievements.ts`)
 
-8 achievement types, top 6 by priority score:
+20 achievement tier configs (4 tiers × 5 attributes) defined in `config/achievements.ts`, plus 3 special achievements:
 
-| Achievement | Value | Priority Formula | Icon |
-|-------------|-------|-----------------|------|
-| Stars | `totalStars` (formatted) | `min(100, totalStars * 0.3)` | ★ |
-| Day Streak | `longestStreak` | `min(100, longestStreak * 3)` | F |
-| Repositories | `originalRepos` | `min(100, originalRepos * 2.5)` | R |
-| Languages | `languages.length` | `min(100, languages.length * 12)` | L |
-| Contributions | `totalCommits` (formatted) | `min(100, totalCommits * 0.08)` | C |
-| PRs Merged | `mergedPRs` (formatted) | `min(100, mergedPRs * 1.2)` | M |
-| Followers | `followers` (formatted) | `min(100, followers * 1.5)` | ♥ |
-| Issues Closed | `closedIssues` (formatted) | `min(100, closedIssues * 1.2)` | X |
+**Per-attribute tiers:** For each of the 5 attributes (execution, impact, synergy, consistency, mastery), there are 4 tiers (bronze/silver/gold/platinum) with ascending thresholds. The highest unlocked tier for each attribute is included.
 
-Numbers >= 1000 are formatted as `1.2K`.
+**Special achievements:**
+- **Grandmaster (Mastery):** Unlocked when mastery ≥ 95
+- **Grandmaster (Execution):** Unlocked when execution ≥ 95
+- **Balanced Elite:** Unlocked when all 5 attributes ≥ 70
+
+Achievements are sorted (special first) and capped at 6 total.
 
 ---
 
 ### 10.7 Hero Stat (`src/lib/hero-stat.ts`)
 
-Selects the single most impressive stat to display prominently on the card:
+Selects the single most impressive attribute to display prominently on the card:
 
-| Candidate | Weight Formula | Unit | Qualifier |
-|-----------|---------------|------|-----------|
-| Stars | `totalStars * 3` | ★ | earned |
-| Contributions | `totalCommits * 0.5` | — | all time |
-| Day Streak | `longestStreak * 8` | days | maintained |
-| PRs Shipped | `mergedPRs * 4` | — | shipped |
-| Repos Built | `originalRepos * 5` | — | built |
-| Languages | `languages.length * 10` | — | mastered |
-| Followers | `followers * 2` | — | watching |
-| Repos Contributed To | `contributedTo * 6` | — | supported |
-| Consistency Score | `stats.consistency * 2` | /100 | earned |
+1. Sort the 5 behavioural attributes by score descending.
+2. The highest attribute becomes the hero stat.
+3. Include the attribute label and rank (Novice/Adept/Veteran/Expert/Master/Grandmaster).
 
-**Logic:** Filter out candidates with value 0, sort by weight descending, return the top candidate.
+**Ranks** (`config/ranks.ts`):
+
+| Rank | Score Range |
+|------|-------------|
+| Novice | 0–19 |
+| Adept | 20–39 |
+| Veteran | 40–59 |
+| Expert | 60–79 |
+| Master | 80–94 |
+| Grandmaster | 95–100 |
 
 ---
 
@@ -827,6 +873,9 @@ Selects the single most impressive stat to display prominently on the card:
 |----------|--------|
 | `{{stars}}` | `raw.totalStars` |
 | `{{repos}}` | `raw.totalRepos` |
+| `{{starsPerRepo}}` | `raw.totalStars / raw.totalRepos` |
+| `{{zeroStars}}` | `raw.zeroStarRepos` |
+| `{{allCaps}}` | `raw.allCapsRepos.slice(0, 3)` |
 | `{{totalCommits}}` | `raw.totalCommits` |
 | `{{recentCommits}}` | `raw.recentCommits` |
 | `{{langCount}}` | `raw.languages.length` |
@@ -837,12 +886,19 @@ Selects the single most impressive stat to display prominently on the card:
 | `{{closedIssues}}` | `raw.closedIssues` |
 | `{{orgCount}}` | `raw.orgCount` |
 | `{{contributedTo}}` | `raw.contributedTo` |
+| `{{year}}` | `new Date().getFullYear()` |
+| `{{accountYear}}` | `new Date(raw.createdAt).getFullYear()` |
 | `{{rarity}}` | Assigned rarity tier |
 | `{{className}}` | Assigned class name |
-| `{{stats.mergeForce}}` | Computed merge force |
-| `{{stats.codeVelocity}}` | Computed code velocity |
+| `{{attributes.execution}}` | Computed execution attribute |
+| `{{attributes.impact}}` | Computed impact attribute |
+| `{{attributes.synergy}}` | Computed synergy attribute |
+| `{{attributes.consistency}}` | Computed consistency attribute |
+| `{{attributes.mastery}}` | Computed mastery attribute |
+| `{{forkedRepos}}` | `raw.forkedRepos` |
+| `{{originalRepos}}` | `raw.originalRepos` |
 
-**Selection:** Random template from the chosen tone's pool, interpolated with the developer's stats.
+**Selection:** Random template from the chosen tone's pool, interpolated with the developer's stats and attributes.
 
 ---
 
@@ -859,10 +915,12 @@ Generation: crypto.randomBytes(6) → each byte mod 32 → index into charset
 **HMAC-SHA-256 signature:**
 
 ```
-payload = JSON.stringify({ username, stats, rarity, cardId })
+payload = JSON.stringify({ username, rarity, cardId })
 signature = HMAC-SHA-256(payload, HMAC_SECRET)
 digital_signature = "hmac_" + signature_hex
 ```
+
+Note: The payload includes `username`, `rarity`, and `cardId` — not the stats object. This ensures the signature remains valid even if scoring weights are rebalanced.
 
 ---
 
@@ -870,24 +928,25 @@ digital_signature = "hmac_" + signature_hex
 
 ### Logarithmic Scaling
 
-Used across scoring and rarity calculations to compress wide value ranges:
+Used across normalization to compress wide value ranges:
 
 ```
-logScale(value, factor=10, max=100) = min(max, round(log2(value + 1) * factor))
-logCentile(value, target, strictness=1) = min(100, round(log10(value/target + 1) * 50 * strictness))
+logScore(raw, target, steepness, maxScore) = ln(1 + raw) / ln(1 + target) × maxScore
 ```
 
-### Normalization
-
-All stats are normalized to 0–100 range via the `clamp()` function:
+### Square Root Scaling
 
 ```
-clamp(v) = min(100, max(0, round(v)))
+sqrtScore(raw, target, steepness, maxScore) = √raw / √target × maxScore
 ```
 
-### Percentile Rank
+### Clamping
 
-The `logCentile` function approximates percentile ranking against a target value. For example, a developer with 500 stars against a target of 500 scores ~48/100, meaning they are roughly at the 48th percentile relative to that target.
+All normalized metrics and components are clamped to 0-100:
+
+```
+clamp(value, min, max) = Math.min(max, Math.max(min, value))
+```
 
 ### Card ID Entropy
 
@@ -952,7 +1011,7 @@ flowchart TD
 
 ```
 default-src 'self'
-script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com
+script-src 'self' 'unsafe-eval' 'unsafe-inline'
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com
 font-src 'self' https://fonts.gstatic.com
 img-src 'self' data: blob: https://avatars.githubusercontent.com https://*.githubusercontent.com
@@ -964,7 +1023,7 @@ frame-ancestors 'none'
 
 - **Algorithm:** HMAC-SHA-256
 - **Secret:** `HMAC_SECRET` environment variable
-- **Payload:** `JSON.stringify({ username, stats, rarity, cardId })`
+- **Payload:** `JSON.stringify({ username, rarity, cardId })`
 - **Storage:** `sha256_hash` (hex) and `digital_signature` (`hmac_` prefix + hex)
 - **Verification:** Any third party can re-compute the HMAC using the public card data and the known secret to verify authenticity
 
@@ -1007,7 +1066,7 @@ Generate or regenerate a developer card.
     "username": "octocat",
     "displayName": "The Octocat",
     "avatarUrl": "https://avatars.githubusercontent.com/u/1?v=4",
-    "stats": { "mergeForce": 72, "codeVelocity": 85, "problemSolving": 64, "openSource": 91, "consistency": 78 },
+    "attributes": { "execution": 72, "impact": 65, "synergy": 58, "consistency": 60, "mastery": 55 },
     "rarity": "Epic",
     "rarityScore": 75,
     "primaryClass": "Open Source Sentinel",
@@ -1019,11 +1078,12 @@ Generate or regenerate a developer card.
       "cardId": "DM-A3B7K9",
       "edition": 1,
       "generatedAt": "2026-07-15T12:00:00.000Z",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "sha256Hash": "a1b2c3...",
       "digitalSignature": "hmac_a1b2c3..."
     },
-    "heroStat": { "key": "openSource", "label": "Repos Contributed To", "value": "45", "unit": "", "qualifier": "supported" },
+    "heroStat": { "attribute": "mastery", "label": "Languages", "score": 85, "rank": "Expert" },
+    "archetype": "Builder",
     "className": "Open Source Sentinel",
     "generatedAt": "2026-07-15T12:00:00.000Z",
     "rank": 3,
@@ -1064,7 +1124,7 @@ Retrieve the public leaderboard.
       "rarity": "Legendary",
       "rarityScore": 92,
       "primaryClass": "PR Titan",
-      "stats": { "mergeForce": 95, "codeVelocity": 88, "problemSolving": 72, "openSource": 80, "consistency": 90 },
+      "attributes": { "execution": 85, "impact": 78, "synergy": 90, "consistency": 72, "mastery": 68 },
       "company": "GitHub",
       "primaryLanguage": "TypeScript",
       "generatedAt": "2026-07-15T12:00:00.000Z"
@@ -1098,12 +1158,12 @@ Verify a card by its unique ID.
     "rarity": "Epic",
     "rarityScore": 75,
     "primaryClass": "Open Source Sentinel",
-    "stats": { ... },
+    "attributes": { ... },
     "verification": {
       "cardId": "DM-A3B7K9",
       "edition": 1,
       "generatedAt": "2026-07-15T12:00:00.000Z",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "digitalSignature": "hmac_a1b2c3...",
       "sha256Hash": "a1b2c3..."
     }
@@ -1271,7 +1331,7 @@ No external error tracking (Sentry, Bugsnag), no analytics (Google Analytics, Pl
 |------|----------|--------|----------|
 | Archived migrations not version-controlled | `archive/migrations/` | Historical reference only, no active impact | Low |
 | `full_migration.sql` not managed by Supabase CLI | `supabase/full_migration.sql` | Manual schema management | Medium |
-| No test coverage for API routes | `src/app/api/*/route.ts` | Untested request handling, auth, error paths | High |
+| Limited API route test coverage | `src/app/api/*/route.ts` | card and verify routes tested; leaderboard, og, health untested | Medium |
 | No CI/CD pipeline | Repository root | No automated testing or deployment | High |
 | No error tracking service | — | Errors only visible in server logs | Medium |
 | No TypeScript strictNullChecks for all components | Various | Potential null reference bugs | Low |
