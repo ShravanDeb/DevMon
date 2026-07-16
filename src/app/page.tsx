@@ -6,6 +6,7 @@ import { MagneticButton } from "@/components/MagneticButton";
 import { RarityCrown } from "@/components/RarityCrown";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
+import { StickyCard002 } from "@/components/StickyCard002";
 import { variants } from "@/lib/motion";
 import { RARITY_COLORS } from "@/types";
 import type { ClassName, Rarity, LeaderboardEntry } from "@/types";
@@ -824,6 +825,29 @@ export default function LandingPage() {
               </div>
             </div>
           }
+        />
+      </section>
+
+      {/* ═══════ RARITY CARD SHOWCASE ═══════ */}
+      <section className="pt-20 md:pt-24">
+        <div className="max-w-2xl mx-auto mb-12 text-center px-6">
+          <h2 className="font-display text-[36px] md:text-[42px] leading-[1.1] font-[600] tracking-[-0.02em] text-text-primary">
+            Five tiers of developer rarity.
+          </h2>
+          <p className="text-[15px] text-text-secondary mt-4 leading-[1.6] max-w-md mx-auto">
+            From Common to Mythic — each credential reflects your unique developer profile.
+          </p>
+        </div>
+
+        <StickyCard002
+          cards={[
+            { id: "common", image: "/devmon-common-demo.png", alt: "Common rarity card", glow: RARITY_COLORS.Common.hex },
+            { id: "rare", image: "/devmon-rare-demo.png", alt: "Rare rarity card", glow: RARITY_COLORS.Rare.hex },
+            { id: "epic", image: "/devmon-epic-demo.png", alt: "Epic rarity card", glow: RARITY_COLORS.Epic.hex },
+            { id: "legendary", image: "/devmon-legendary-demo.png", alt: "Legendary rarity card", glow: RARITY_COLORS.Legendary.hex },
+            { id: "mythic", image: "/devmon-mythic-demo.png", alt: "Mythic rarity card", glow: RARITY_COLORS.Mythic.hex },
+          ]}
+          className="min-h-[80vh]"
         />
       </section>
 

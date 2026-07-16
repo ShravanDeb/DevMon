@@ -134,20 +134,23 @@ flowchart LR
 
 ## Screenshots
 
-<details>
-<summary>Click to expand screenshots</summary>
+<div align="center">
 
-Screenshots should be added here:
+### Demo Rarity Cards
 
-- **Landing page hero** - `screenshots/landing.png`
-- **Card generation result** - `screenshots/card.png`
-- **Leaderboard view** - `screenshots/leaderboard.png`
-- **Verification page** - `screenshots/verify.png`
-- **Dark and light themes** - `screenshots/themes.png`
+<img src="./public/devmon-common-demo.png" alt="Common rarity card" width="200" />
+<img src="./public/devmon-rare-demo.png" alt="Rare rarity card" width="200" />
+<img src="./public/devmon-epic-demo.png" alt="Epic rarity card" width="200" />
+<img src="./public/devmon-legendary-demo.png" alt="Legendary rarity card" width="200" />
+<img src="./public/devmon-mythic-demo.png" alt="Mythic rarity card" width="200" />
 
-To add screenshots, place them in a `screenshots/` directory and reference them with relative paths.
+### Verification Page
 
-</details>
+<img src="./public/devmon_verify_screenshot.png" alt="Verification page" width="360" />
+
+**Common · Rare · Epic · Legendary · Mythic** — five tiers of developer rarity.
+
+</div>
 
 ---
 
