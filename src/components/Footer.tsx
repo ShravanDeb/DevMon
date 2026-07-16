@@ -41,8 +41,8 @@ export function Footer() {
     <footer className="mt-auto">
       <div className="surface-divider" />
 
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="mb-14">
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="mb-6">
           <div className="flex items-center gap-2.5">
             <img
               src="/favicon.svg"
@@ -55,18 +55,18 @@ export function Footer() {
               DevMon
             </span>
           </div>
-          <p className="text-[13px] font-mono text-text-tertiary leading-relaxed mt-2 max-w-xs">
+          <p className="text-[13px] font-mono text-text-tertiary leading-relaxed mt-1 max-w-xs">
             Verified developer credentials from your public GitHub activity.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-6">
           {footerColumns.map((col) => (
             <div key={col.title}>
-              <h4 className="text-[11px] font-mono font-medium uppercase tracking-[0.1em] text-text-tertiary mb-5">
+              <h4 className="text-[11px] font-mono font-medium uppercase tracking-[0.1em] text-text-tertiary mb-3">
                 {col.title}
               </h4>
-              <ul className="space-y-3">
+              <ul className="space-y-2">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     {link.href.startsWith("http") ? (
@@ -94,12 +94,10 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="surface-divider" />
-
-      <div className="max-w-6xl mx-auto px-6 py-6">
+      <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-x-2 text-[12px] font-mono text-text-tertiary">
-            <span>&copy; 2026 Shravan Deb</span>
+            <span>&copy; 2026 DevMon</span>
             <span className="opacity-30">&middot;</span>
             <a
               href="https://github.com/ShravanDeb/DevMon/blob/master/LICENSE"
